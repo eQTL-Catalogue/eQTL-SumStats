@@ -135,7 +135,7 @@ def _add_gwas_catalog_href(info_array, study_accession):
     return info_array
 
 
-def _get_array_to_display(datasets, variant=None, chromosome=None, paginate=True, links=False):
+def _get_array_to_display(datasets, variant=None, chromosome=None, links=False):
     if datasets is None: return {}
     if len(datasets[REFERENCE_DSET]) <= 0: return {}
 
@@ -174,7 +174,7 @@ def _get_array_to_display(datasets, variant=None, chromosome=None, paginate=True
         element_info['gene_id'] = gene
         element_info['tissue'] = tissue
 
-        if paginate or links:
+        if links:
             element_info['_links'] = {'self': _create_href(method_name='api.get_chromosome_variants',
                                                        params={'variant_id': specific_variant, 'study_accession': datasets[STUDY_DSET][index],
                                                                'chromosome': specific_chromosome})}
@@ -324,6 +324,7 @@ def _get_basic_arguments(args):
     paginate = argu.str2bool(_retrieve_endpoint_arguments(args, "paginate", True))
     links = argu.str2bool(_retrieve_endpoint_arguments(args, "links", False))
     qtl_group = _retrieve_endpoint_arguments(args, "qtl_group", None)
+    links = False if not paginate else links # links must not be made if unpaginated for performance sake.
     
     return start, size, p_lower, p_upper, pval_interval, quant_method, snp, tissue, gene, study, trait, paginate, links, qtl_group
 
