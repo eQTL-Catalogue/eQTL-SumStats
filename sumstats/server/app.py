@@ -103,20 +103,6 @@ def get_assocs():
                      "molecular_trait_id": "ENSG00000011304",
                      "gene_id": "ENSG00000011304",
                      "tissue": "UBERON_0009834",
-                     "_links": {
-                       "self": {
-                         "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/19/associations/chr19_230130_GATC_G?study_accession=BrainSeq"
-                       },
-                       "tissue": {
-                         "href": "http://www.ebi.ac.uk/eqtl/api/tissues/UBERON_0009834"
-                       },
-                       "variant": {
-                         "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/19/associations/chr19_230130_GATC_G"
-                       },
-                       "study": {
-                         "href": "http://www.ebi.ac.uk/eqtl/api/studies/BrainSeq"
-                       }
-                     }
                    },
                    "1": {
                      "alt": "G",
@@ -141,20 +127,6 @@ def get_assocs():
                      "molecular_trait_id": "ENSG00000129951",
                      "gene_id": "ENSG00000129951",
                      "tissue": "UBERON_0009834",
-                     "_links": {
-                       "self": {
-                         "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/19/associations/chr19_230130_GATC_G?study_accession=BrainSeq"
-                       },
-                       "tissue": {
-                         "href": "http://www.ebi.ac.uk/eqtl/api/tissues/UBERON_0009834"
-                       },
-                       "variant": {
-                         "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/19/associations/chr19_230130_GATC_G"
-                       },
-                       "study": {
-                         "href": "http://www.ebi.ac.uk/eqtl/api/studies/BrainSeq"
-                       }
-                     }
                    }
                  }
                },
@@ -187,6 +159,7 @@ def get_assocs():
         :query start: offset number. default is 0
         :query size: number of items returned. default is 20, max is 1000.
         :query paginate: Flag whether the response should be paginated or not. Boolean `True` (default) or `False`
+        :query links: Flag whether the response should contain association level links or not. Boolean `True` or `False` (default)
         :statuscode 200: no error
         :statuscode 404: not found error
     """
@@ -256,20 +229,6 @@ def get_variant(variant_id=None, rsid=None):
                      "molecular_trait_id": "ENSG00000011304",
                      "gene_id": "ENSG00000011304",
                      "tissue": "UBERON_0009834",
-                     "_links": {
-                       "self": {
-                         "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/19/associations/chr19_230130_GATC_G?study_accession=BrainSeq"
-                       },
-                       "tissue": {
-                         "href": "http://www.ebi.ac.uk/eqtl/api/tissues/UBERON_0009834"
-                       },
-                       "variant": {
-                         "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/19/associations/chr19_230130_GATC_G"
-                       },
-                       "study": {
-                         "href": "http://www.ebi.ac.uk/eqtl/api/studies/BrainSeq"
-                       }
-                     }
                    },
                    "1": {
                      "alt": "G",
@@ -294,20 +253,6 @@ def get_variant(variant_id=None, rsid=None):
                      "molecular_trait_id": "ENSG00000129951",
                      "gene_id": "ENSG00000129951",
                      "tissue": "UBERON_0009834",
-                     "_links": {
-                       "self": {
-                         "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/19/associations/chr19_230130_GATC_G?study_accession=BrainSeq"
-                       },
-                       "tissue": {
-                         "href": "http://www.ebi.ac.uk/eqtl/api/tissues/UBERON_0009834"
-                       },
-                       "variant": {
-                         "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/19/associations/chr19_230130_GATC_G"
-                       },
-                       "study": {
-                         "href": "http://www.ebi.ac.uk/eqtl/api/studies/BrainSeq"
-                       }
-                     }
                    }
                  }
                },
@@ -338,6 +283,7 @@ def get_variant(variant_id=None, rsid=None):
         :query qtl_group: QTL group/context
         :query tissue: tissue ontology identifier; will return only associations from this tissue/cell type (CL_0000235)
         :query paginate: Flag whether the response should be paginated or not. Boolean `True` (default) or `False`
+        :query links: Flag whether the response should contain association level links or not. Boolean `True` or `False` (default)
 
 
         :statuscode 200: no error
@@ -516,20 +462,6 @@ def get_trait_assocs(molecular_trait_id):
                      "molecular_trait_id": "ENSG00000011304",
                      "gene_id": "ENSG00000011304",
                      "tissue": "UBERON_0009834",
-                     "_links": {
-                       "self": {
-                         "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/19/associations/chr19_230130_GATC_G?study_accession=BrainSeq"
-                       },
-                       "tissue": {
-                         "href": "http://www.ebi.ac.uk/eqtl/api/tissues/UBERON_0009834"
-                       },
-                       "variant": {
-                         "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/19/associations/chr19_230130_GATC_G"
-                       },
-                       "study": {
-                         "href": "http://www.ebi.ac.uk/eqtl/api/studies/BrainSeq"
-                       }
-                     }
                    },
                "_links": {
                 "self": {
@@ -556,6 +488,7 @@ def get_trait_assocs(molecular_trait_id):
         :query study: study identifer; will return only associations related to that study (Alasoo_2018)
         :query qtl_group: QTL group/context
         :query paginate: Flag whether the response should be paginated or not. Boolean `True` (default) or `False`
+        :query links: Flag whether the response should contain association level links or not. Boolean `True` or `False` (default)
         :query tissue: tissue ontology identifier; will return only associations from this tissue/cell type (CL_0000235)
         :query variant_id: variant identifier, either rsID (rs577290214) or in the form CHR_BP_REF_ALT (chr7_27916_T_C); will only return associations with this variant
 
@@ -840,20 +773,6 @@ def get_tissue_assocs(tissue):
                     "molecular_trait_id": "ENSG00000011304",
                     "gene_id": "ENSG00000011304",
                     "tissue": "CL_0000235",
-                    "_links": {
-                      "self": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/19/associations/chr19_229783_G_A?study_accession=Alasoo_2018"
-                      },
-                      "tissue": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/tissues/CL_0000235"
-                      },
-                      "variant": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/19/associations/chr19_229783_G_A"
-                      },
-                      "study": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/studies/Alasoo_2018"
-                      }
-                    }
                   },
                   "1": {
                     "condition_label": "IFNg_18h+Salmonella_5h",
@@ -878,20 +797,6 @@ def get_tissue_assocs(tissue):
                     "molecular_trait_id": "ENSG00000099817",
                     "gene_id": "ENSG00000099817",
                     "tissue": "CL_0000235",
-                    "_links": {
-                      "self": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/19/associations/chr19_229783_G_A?study_accession=Alasoo_2018"
-                      },
-                      "tissue": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/tissues/CL_0000235"
-                      },
-                      "variant": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/19/associations/chr19_229783_G_A"
-                      },
-                      "study": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/studies/Alasoo_2018"
-                      }
-                    }
                   }
                 }
               },
@@ -920,6 +825,7 @@ def get_tissue_assocs(tissue):
         :query study: study identifer; will return only associations related to that study (Alasoo_2018)
         :query qtl_group: QTL group/context
         :query paginate: Flag whether the response should be paginated or not. Boolean `True` (default) or `False`
+        :query links: Flag whether the response should contain association level links or not. Boolean `True` or `False` (default)
         :query molecular_trait_id: molecular phenotype identifier; will return only associations from this molecular phenotype (ENSG00000187583)
         :query variant_id: variant identifier, either rsID (rs577290214) or in the form CHR_BP_REF_ALT (chr7_27916_T_C); will only return associations with this variant
 
@@ -1029,20 +935,6 @@ def get_tissue_study_assocs(study, tissue=None):
                     "molecular_trait_id": "ENSG00000011304",
                     "gene_id": "ENSG00000011304",
                     "tissue": "CL_0000235",
-                    "_links": {
-                      "tissue": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/tissues/CL_0000235"
-                      },
-                      "self": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/19/associations/chr19_229783_G_A?study_accession=Alasoo_2018"
-                      },
-                      "study": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/studies/Alasoo_2018"
-                      },
-                      "variant": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/19/associations/chr19_229783_G_A"
-                      }
-                    }
                   },
                   "1": {
                     "study_id": "Alasoo_2018",
@@ -1067,20 +959,6 @@ def get_tissue_study_assocs(study, tissue=None):
                     "molecular_trait_id": "ENSG00000099817",
                     "gene_id": "ENSG00000099817",
                     "tissue": "CL_0000235",
-                    "_links": {
-                      "tissue": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/tissues/CL_0000235"
-                      },
-                      "self": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/19/associations/chr19_229783_G_A?study_accession=Alasoo_2018"
-                      },
-                      "study": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/studies/Alasoo_2018"
-                      },
-                      "variant": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/19/associations/chr19_229783_G_A"
-                      }
-                    }
                   }
                 }
               },
@@ -1109,6 +987,7 @@ def get_tissue_study_assocs(study, tissue=None):
         :query molecular_trait_id: molecular phenotype identifier; will return only associations from this molecular phenotype (ENSG00000187583)
         :query qtl_group: QTL group/context
         :query paginate: Flag whether the response should be paginated or not. Boolean `True` (default) or `False`
+        :query links: Flag whether the response should contain association level links or not. Boolean `True` or `False` (default)
         :query tissue: tissue ontology identifier; will return only associations from this tissue/cell type (CL_0000235)
         :query variant_id: variant identifier, either rsID (rs577290214) or in the form CHR_BP_REF_ALT (chr7_27916_T_C); will only return associations with this variant
 
@@ -1415,20 +1294,6 @@ def get_chromosome_assocs(chromosome):
                     "molecular_trait_id": "ENSG00000008128",
                     "gene_id": "ENSG00000008128",
                     "tissue": "UBERON_0009834",
-                    "_links": {
-                      "variant": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/1/associations/chr1_1053768_G_A"
-                      },
-                      "study": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/studies/BrainSeq"
-                      },
-                      "tissue": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/tissues/UBERON_0009834"
-                      },
-                      "self": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/1/associations/chr1_1053768_G_A?study_accession=BrainSeq"
-                      }
-                    }
                   },
                   "1": {
                     "an": 972,
@@ -1453,20 +1318,6 @@ def get_chromosome_assocs(chromosome):
                     "molecular_trait_id": "ENSG00000197530",
                     "gene_id": "ENSG00000197530",
                     "tissue": "UBERON_0009834",
-                    "_links": {
-                      "variant": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/1/associations/chr1_1053768_G_A"
-                      },
-                      "study": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/studies/BrainSeq"
-                      },
-                      "tissue": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/tissues/UBERON_0009834"
-                      },
-                      "self": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/1/associations/chr1_1053768_G_A?study_accession=BrainSeq"
-                      }
-                    }
                   }
                 }
               },
@@ -1499,6 +1350,7 @@ def get_chromosome_assocs(chromosome):
         :query qtl_group: QTL group/context
         :query tissue: tissue ontology identifier; will return only associations from this tissue/cell type (CL_0000235)
         :query paginate: Flag whether the response should be paginated or not. Boolean `True` (default) or `False`
+        :query links: Flag whether the response should contain association level links or not. Boolean `True` or `False` (default)
 
         :statuscode 200: no error
         :statuscode 404: not found error
@@ -1561,20 +1413,6 @@ def get_chromosome_variants(chromosome, variant_id):
                     "molecular_trait_id": "ENSG00000078808",
                     "gene_id": "ENSG00000078808",
                     "tissue": "CL_0000235",
-                    "_links": {
-                      "tissue": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/tissues/CL_0000235"
-                      },
-                      "self": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/1/associations/rs56197012?study_accession=Nedelec_2016"
-                      },
-                      "study": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/studies/Nedelec_2016"
-                      },
-                      "variant": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/1/associations/rs56197012"
-                      }
-                    }
                   },
                   "1": {
                     "study_id": "Nedelec_2016",
@@ -1599,20 +1437,6 @@ def get_chromosome_variants(chromosome, variant_id):
                     "molecular_trait_id": "ENSG00000008130",
                     "gene_id": "ENSG00000008130",
                     "tissue": "CL_0000235",
-                    "_links": {
-                      "tissue": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/tissues/CL_0000235"
-                      },
-                      "self": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/1/associations/rs56197012?study_accession=Nedelec_2016"
-                      },
-                      "study": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/studies/Nedelec_2016"
-                      },
-                      "variant": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/1/associations/rs56197012"
-                      }
-                    }
                   }
                 }
               },
@@ -1644,6 +1468,7 @@ def get_chromosome_variants(chromosome, variant_id):
         :query qtl_group: QTL group/context
         :query tissue: tissue ontology identifier; will return only associations from this tissue/cell type (CL_0000235)
         :query paginate: Flag whether the response should be paginated or not. Boolean `True` (default) or `False`
+        :query links: Flag whether the response should contain association level links or not. Boolean `True` or `False` (default)
 
         :statuscode 200: no error
         :statuscode 404: not found error
@@ -1948,20 +1773,6 @@ def get_gene_assocs(gene_id):
                     "molecular_trait_id": "ENSG00000070031",
                     "gene_id": "ENSG00000070031",
                     "tissue": "UBERON_0009834",
-                    "_links": {
-                      "variant": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/11/associations/chr11_192658_T_C"
-                      },
-                      "study": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/studies/BrainSeq"
-                      },
-                      "tissue": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/tissues/UBERON_0009834"
-                      },
-                      "self": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/11/associations/chr11_192658_T_C?study_accession=BrainSeq"
-                      }
-                    }
                   },
                   "1": {
                     "an": 972,
@@ -1986,21 +1797,9 @@ def get_gene_assocs(gene_id):
                     "molecular_trait_id": "ENSG00000070031",
                     "gene_id": "ENSG00000070031",
                     "tissue": "UBERON_0009834",
-                    "_links": {
-                      "variant": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/11/associations/chr11_193051_G_A"
-                      },
-                      "study": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/studies/BrainSeq"
-                      },
-                      "tissue": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/tissues/UBERON_0009834"
-                      },
-                      "self": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/11/associations/chr11_193051_G_A?study_accession=BrainSeq"
-                      }
-                    }
-                  },
+                   }
+                 }
+               },
                "_links": {
                 "self": {
                   "href": "http://www.ebi.ac.uk/eqtl/api/genes/ENSG00000070031/associations"
@@ -2024,6 +1823,7 @@ def get_gene_assocs(gene_id):
         :query study: study identifer; will return only associations related to that study (Alasoo_2018)
         :query qtl_group: QTL group/context
         :query paginate: Flag whether the response should be paginated or not. Boolean `True` (default) or `False`
+        :query links: Flag whether the response should contain association level links or not. Boolean `True` or `False` (default)
         :query tissue: tissue ontology identifier; will return only associations from this tissue/cell type (CL_0000235)
         :query variant_id: variant identifier, either rsID (rs577290214) or in the form CHR_BP_REF_ALT (chr7_27916_T_C); will only return associations with this variant
         :query molecular_trait_id: molecular phenotype identifier; will return only associations from this molecular phenotype (ENSG00000187583)

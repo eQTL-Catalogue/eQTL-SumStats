@@ -124,7 +124,7 @@ Note: base-pair location limit filtering will only work via the /chromosomes/(in
 
 Response format
 ---------------
-The paginate parameter, ``paginate``, allows you to flag whether the response should be paginated (using the ``size`` and ``start`` parameters) or not. By default it is set to 'True', but if set to 'False' the ``size`` and ``start`` parameters are ignored and the response will contain every hit. When using the un-paginated format none of the links seen in the paginated format will be present. Note that ``paginate=False`` can only be used on sufficiently filtered payloads (to avoid transmitting huge payloads). A sufficiently filtered request adheres to the following: ``study`` & ``qtl_group`` & (``gene_id`` or ``molecular_trait_id`` or ``variant_id``) i.e. requests for genes, molecular traits or variants for a specific study and QTL group can be returned as one single payload rather than paged responses.
+The links parameter, ``links``, switches toggles whether to return URLs for that specific association, tissue, variant and study. The links are by default deactivated to improve performance and cannot be combined with the ``paginate=False`` parameter. The paginate parameter, ``paginate``, allows you to flag whether the response should be paginated (using the ``size`` and ``start`` parameters) or not. By default it is set to 'True', but if set to 'False' the ``size`` and ``start`` parameters are ignored and the response will contain every hit. When using the un-paginated format none of the links seen in the paginated format will be present. Note that ``paginate=False`` can only be used on sufficiently filtered payloads (to avoid transmitting huge payloads). A sufficiently filtered request adheres to the following: ``study`` & ``qtl_group`` & (``gene_id`` or ``molecular_trait_id`` or ``variant_id``) i.e. requests for genes, molecular traits or variants for a specific study and QTL group can be returned as one single payload rather than paged responses.
 
 
 Requesting associations for variant
@@ -240,20 +240,6 @@ Links will be provided in the response to navigate the resources.
            "molecular_trait_id": "ENSG00000011304",
            "gene_id": "ENSG00000011304",
            "tissue": "UBERON_0009834",
-           "_links": {
-             "self": {
-               "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/19/associations/chr19_230130_GATC_G?study_accession=BrainSeq"
-             },
-             "tissue": {
-               "href": "http://www.ebi.ac.uk/eqtl/api/tissues/UBERON_0009834"
-             },
-             "variant": {
-               "href": "http://www.ebi.ac.uk/eqtl/api/chromosomes/19/associations/chr19_230130_GATC_G"
-             },
-             "study": {
-               "href": "http://www.ebi.ac.uk/eqtl/api/studies/BrainSeq"
-             }
-           }
          }
        }  
      },
