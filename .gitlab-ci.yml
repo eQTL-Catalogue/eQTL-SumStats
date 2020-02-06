@@ -27,7 +27,7 @@ sphinxdocs:
     paths:
     - docs/build/html
   only:
-   - eqtls
+   - master
   
 # always build an image tagged with the commit SHA from master
 build:
@@ -39,7 +39,7 @@ build:
    - docker build --cache-from $CI_REGISTRY_IMAGE:latest -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
   only:
-   - eqtls
+   - master
 
 
 build_docs:
@@ -53,7 +53,7 @@ build_docs:
   dependencies: 
     - sphinxdocs
   only:
-   - eqtls
+   - master
   
 
 # if a tag is created create an images with the tag and a latest
@@ -104,7 +104,7 @@ deploy_staging:
   environment:
     name: dev
   only:
-    - eqtls
+    - master
 
 
 deploy_fallback:
