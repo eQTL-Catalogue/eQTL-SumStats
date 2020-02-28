@@ -29,16 +29,26 @@ class H5Indexer():
             col.remove_index()
             col.create_csindex()
 
+    def reindex_trait_file(self):
+        with pd.HDFStore(self.h5file) as store:
+            group = store.keys()[0]
+            for i in TRAIT_FILE_INDEX:
+                self.create_index(i, group)
+
 
 def main():
     argparser = argparse.ArgumentParser()
     argparser.add_argument('-f', help='The path to the HDF5 file to be processed', required=True)
+    argparser.add_argument('-filetype', help='The type HDF5 file to be processed', default='sumstats', choices=['sumstats', 'trait_meta'], required=False)
     args = argparser.parse_args()
-    
+
     file = args.f
 
     indexer = H5Indexer(file)
-    indexer.reindex_file()
+    if args.filetype == 'sumstats':
+        indexer.reindex_file()
+    if args.filetype == 'trait_meta':
+        indexer.reindex_trait_file()
     
 
 if __name__ == "__main__":
