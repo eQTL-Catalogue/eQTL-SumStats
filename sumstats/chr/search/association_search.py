@@ -346,12 +346,12 @@ class AssociationSearch:
         statement = None
 
         if self.trait:
-            self.chrom_for_trait()
+            #self.chrom_for_trait()
             # single quotes here enable values with '.'s in them to be interpretted by pytables
             conditions.append("{trait} == '{id}'".format(trait=PHEN_DSET, id=str(self.trait)))
 
         if self.gene:
-            self.chrom_for_gene()
+            #self.chrom_for_gene()
             conditions.append("{gene} == {id}".format(gene=GENE_DSET, id=str(self.gene)))
 
         if self.bp_interval:
