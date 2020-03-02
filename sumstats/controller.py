@@ -42,7 +42,7 @@ def main():  # pragma: no cover
     search = Search(properties)  # pragma: no cover
 
     if find_all:  # pragma: no cover
-        result, index_marker = search.search(start=start, size=size, pval_interval=pval_interval)
+        result, index_marker, paginate = search.search(start=start, size=size, pval_interval=pval_interval)
 
     elif any([trait, gene, study, chromosome, bp_interval, snp, pval_interval, tissue, quant_method, qtl_group]):
         result, index_marker, paginate = search.search(start=start, size=size, pval_interval=pval_interval,
