@@ -46,7 +46,7 @@ class AssociationSearch:
         self.trait_dir = self.properties.trait_dir
         self.database = self.properties.sqlite_path
         self.snpdb = self.properties.snpdb
-        self.trait_file = "phen_meta"
+        self.trait_file = os.path.join(self.search_path, self.trait_dir, "file_phen_meta.sqlite")
         self.hdfs = []
         
 
@@ -78,8 +78,8 @@ class AssociationSearch:
             
 
     def chrom_for_trait(self):
-        h5file = fsutils.create_h5file_path(self.search_path, self.trait_dir, self.trait_file)
-        trait_service = ts.TraitService(h5file)
+        #h5file = fsutils.create_h5file_path(self.search_path, self.trait_dir, self.trait_file)
+        trait_service = ts.TraitService(self.trait_file)
         chroms = trait_service.chrom_from_trait(self.trait)
         if len(chroms) == 1:
             self.chromosome = chroms[0]
@@ -89,8 +89,8 @@ class AssociationSearch:
             logger.debug("No chrom for this trait?") # need to handle this error
 
     def chrom_for_gene(self):
-        h5file = fsutils.create_h5file_path(self.search_path, self.trait_dir, self.trait_file)
-        trait_service = ts.TraitService(h5file)
+        trait_service = ts.TraitService(self.trait_file)
+        #h5file = fsutils.create_h5file_path(self.search_path, self.trait_dir, self.trait_file)
         chroms = trait_service.chrom_from_gene(self.gene)
         if len(chroms) == 1:
             self.chromosome = chroms[0]
