@@ -290,19 +290,13 @@ class sqlClient():
         data = []
         for row in self.cur.execute("SELECT chromosome FROM trait_meta where phenotype_id =?", (trait,)):
             data.append(row[0])
-        if data:
-            return data
-        else:
-            return False
+        return data
 
     def get_chrom_from_gene(self, gene):
         data = []
         for row in self.cur.execute("SELECT chromosome FROM trait_meta where gene_id =?", (gene,)):
             data.append(row[0])
-        if data:
-            return data
-        else:
-            return False
+        return data
 
 
     """ OTHER STATEMENTS """
