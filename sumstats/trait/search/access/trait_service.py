@@ -50,12 +50,12 @@ class TraitService:
         #traits = []
         #for group in self.groups:
         #    traits.extend(get_data(hdf=self.file, key=group, fields=['phenotype_id'])['phenotype_id'].drop_duplicates().values.tolist())
-        return traits
+        return list(set(traits))
 
     def list_genes(self):
         sq = sql_client.sqlClient(self.file)
         genes = sq.get_genes()
-        return genes
+        return list(set(genes))
 
     def has_trait(self, trait):
         sq = sql_client.sqlClient(self.file)
