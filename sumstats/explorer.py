@@ -1,6 +1,7 @@
 import argparse
 import sys
 from os.path import isfile
+import os
 import sumstats.utils.filesystem_utils as fsutils
 import sumstats.trait.search.access.trait_service as trait_service
 import sumstats.study.search.access.study_service as study_service
@@ -21,7 +22,7 @@ class Explorer:
         self.study_dir = self.properties.study_dir
         self.trait_dir = self.properties.trait_dir
         self.sqlite_db = self.properties.sqlite_path
-        self.trait_file = "phen_meta"
+        self.trait_file = os.path.join(self.search_path, self.trait_dir, "file_phen_meta.sqlite")
 
     def get_list_of_studies(self):
         sq = sql_client.sqlClient(self.sqlite_db)
@@ -29,14 +30,12 @@ class Explorer:
         return sorted(list(set(studies)))
 
     def get_list_of_traits(self):
-        h5file = fsutils.create_h5file_path(self.search_path, self.trait_dir, self.trait_file)
-        service = trait_service.TraitService(h5file=h5file)
+        service = trait_service.TraitService(self.trait_file)
         traits = service.list_traits()
         return traits
 
     def get_list_of_genes(self):
-        h5file = fsutils.create_h5file_path(self.search_path, self.trait_dir, self.trait_file)
-        service = trait_service.TraitService(h5file=h5file)
+        service = trait_service.TraitService(self.trait_file)
         genes = service.list_genes()
         return genes
 
@@ -72,15 +71,22 @@ class Explorer:
 
 
     def has_trait(self, trait):
-        search = cr.search_all_assocs(trait=trait, start=0, size=0, properties=self.properties)
-        if search[-1] > 0:
+        service = trait_service.TraitService(self.trait_file)
+        #search = cr.search_all_assocs(trait=trait, start=0, size=0, properties=self.properties)
+        #if search[-1] > 0:
+        #    return True
+        if service.has_trait(trait):
             return True
         raise NotFoundError("Trait " + trait)
+        
 
 
     def has_gene(self, gene):
-        search = cr.search_all_assocs(gene=gene, start=0, size=0, properties=self.properties)
-        if search[-1] > 0:
+        service = trait_service.TraitService(self.trait_file)
+        #search = cr.search_all_assocs(gene=gene, start=0, size=0, properties=self.properties)
+        #if search[-1] > 0:
+        #    return True
+        if service.has_gene(gene):
             return True
         raise NotFoundError("Gene " + gene)
 

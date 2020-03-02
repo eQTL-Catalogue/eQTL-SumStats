@@ -250,6 +250,54 @@ class sqlClient():
         else:
             return False
 
+    def get_traits(self):
+        data = []
+        for row in self.cur.execute("SELECT phenotype_id FROM trait_meta"):
+            data.append(row[0])
+        if data:
+            return data
+        else:
+            return False
+
+    def get_genes(self):
+        data = []
+        for row in self.cur.execute("SELECT gene_id FROM trait_meta"):
+            data.append(row[0])
+        if data:
+            return data
+        else:
+            return False
+
+    def get_trait(self, trait):
+        data = []
+        for row in self.cur.execute("SELECT * FROM trait_meta where phenotype_id =?", (trait,)):
+            data.append(row[0])
+        if data:
+            return data
+        else:
+            return False
+
+    def get_gene(self, gene):
+        data = []
+        for row in self.cur.execute("SELECT * FROM trait_meta where gene_id =?", (gene,)):
+            data.append(row[0])
+        if data:
+            return data
+        else:
+            return False
+
+    def get_chrom_from_trait(self, trait):
+        data = []
+        for row in self.cur.execute("SELECT chromosome FROM trait_meta where phenotype_id =?", (trait,)):
+            data.append(row[0])
+        return data
+
+    def get_chrom_from_gene(self, gene):
+        data = []
+        for row in self.cur.execute("SELECT chromosome FROM trait_meta where gene_id =?", (gene,)):
+            data.append(row[0])
+        return data
+
 
     """ OTHER STATEMENTS """
 
