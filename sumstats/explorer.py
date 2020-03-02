@@ -1,6 +1,7 @@
 import argparse
 import sys
 from os.path import isfile
+import os
 import sumstats.utils.filesystem_utils as fsutils
 import sumstats.trait.search.access.trait_service as trait_service
 import sumstats.study.search.access.study_service as study_service
@@ -21,7 +22,7 @@ class Explorer:
         self.study_dir = self.properties.study_dir
         self.trait_dir = self.properties.trait_dir
         self.sqlite_db = self.properties.sqlite_path
-        self.trait_file = "phen_meta"
+        self.trait_file = os.path.join(self.search_path, self.trait_dir, "file_phen_meta.sqlite")
 
     def get_list_of_studies(self):
         sq = sql_client.sqlClient(self.sqlite_db)
@@ -29,8 +30,7 @@ class Explorer:
         return sorted(list(set(studies)))
 
     def get_list_of_traits(self):
-        h5file = fsutils.create_h5file_path(self.search_path, self.trait_dir, self.trait_file)
-        service = trait_service.TraitService(h5file=h5file)
+        service = trait_service.TraitService(self.trait_file)
         traits = service.list_traits()
         return traits
 

@@ -250,6 +250,14 @@ class sqlClient():
         else:
             return False
 
+    def get_traits(self):
+        data = []
+        for row in self.cur.execute("SELECT phenotype_id FROM trait_meta"):
+            data.append(row[0])
+        if data:
+            return data
+        else:
+            return False
 
     """ OTHER STATEMENTS """
 

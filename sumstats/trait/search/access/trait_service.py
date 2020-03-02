@@ -24,28 +24,32 @@ import sumstats.utils.restrictions as rst
 from sumstats.common_constants import *
 import logging
 from sumstats.utils import register_logger
+import sumstats.utils.sqlite_client as sql_client
 
 logger = logging.getLogger(__name__)
 register_logger.register(__name__)
 
 
 class TraitService:
-    def __init__(self, h5file):
+    def __init__(self, file):
         # Open the file with read permissions
-        self.file = pd.HDFStore(h5file, 'r')
+        #self.file = pd.HDFStore(h5file, 'r')
         self.datasets = {}
-        self.groups = self.file.keys()
+        #self.groups = self.file.keys()
         #for (path, subgroups, subkeys) in self.file.walk():
         #    for subkey in subkeys:
         #        self.groups.append('/'.join([path, subkey]))
         #self.groups = ['/'.join([path, subkey]) for subkey in subkeys for (path, subgroups, subkeys) in self.file.walk()]
+        self.file = file
 
 
 
     def list_traits(self):
-        traits = []
-        for group in self.groups:
-            traits.extend(get_data(hdf=self.file, key=group, fields=['phenotype_id'])['phenotype_id'].drop_duplicates().values.tolist())
+        sq = sql_client.sqlClient(self.file)
+        traits = sq.get_traits()
+        #traits = []
+        #for group in self.groups:
+        #    traits.extend(get_data(hdf=self.file, key=group, fields=['phenotype_id'])['phenotype_id'].drop_duplicates().values.tolist())
         return traits
 
     def list_genes(self):
