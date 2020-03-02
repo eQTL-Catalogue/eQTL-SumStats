@@ -73,7 +73,7 @@ class TraitService:
 
     def chrom_from_trait(self, trait):
         sq = sql_client.sqlClient(self.file)
-        chroms_found =  sq.get_chrom_from_trait(trait)
+        chroms_found = sq.get_chrom_from_trait(trait)
         #for group in self.groups:
         #    chroms_found.extend(self.file.select(group, where='phenotype_id == trait', columns=['chromosome'], index=False).drop_duplicates().values.tolist())
         chroms_found = [item for sublist in chroms_found for item in sublist] # flatten
@@ -82,7 +82,7 @@ class TraitService:
 
     def chrom_from_gene(self, gene):
         sq = sql_client.sqlClient(self.file)
-        chroms_found =  sq.get_chrom_from_gene(gene)
+        chroms_found = sq.get_chrom_from_gene(gene)
         #for group in self.groups:
         #    chroms_found.extend(self.file.select(group, where='gene_id == gene', columns=['chromosome'], index=False).drop_duplicates().values.tolist())
             #chroms_found.extend(get_data(hdf=self.file, key=group, condition=condition, fields=['chromosome'])['chromosome'].drop_duplicates().values.tolist())
