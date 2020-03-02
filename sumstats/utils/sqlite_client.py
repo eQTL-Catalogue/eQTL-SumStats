@@ -295,7 +295,7 @@ class sqlClient():
         else:
             return False
 
-     def get_chrom_from_gene(self, gene):
+    def get_chrom_from_gene(self, gene):
         data = []
         for row in self.cur.execute("SELECT chromosome FROM trait_meta where gene_id =?", (trait,)):
             data.append(row[0])
