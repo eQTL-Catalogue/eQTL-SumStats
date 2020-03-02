@@ -35,8 +35,7 @@ class Explorer:
         return traits
 
     def get_list_of_genes(self):
-        h5file = fsutils.create_h5file_path(self.search_path, self.trait_dir, self.trait_file)
-        service = trait_service.TraitService(h5file=h5file)
+        service = trait_service.TraitService(self.trait_file)
         genes = service.list_genes()
         return genes
 
@@ -72,15 +71,22 @@ class Explorer:
 
 
     def has_trait(self, trait):
-        search = cr.search_all_assocs(trait=trait, start=0, size=0, properties=self.properties)
-        if search[-1] > 0:
+        service = trait_service.TraitService(self.trait_file)
+        #search = cr.search_all_assocs(trait=trait, start=0, size=0, properties=self.properties)
+        #if search[-1] > 0:
+        #    return True
+        if service.has_trait(trait):
             return True
         raise NotFoundError("Trait " + trait)
+        
 
 
     def has_gene(self, gene):
-        search = cr.search_all_assocs(gene=gene, start=0, size=0, properties=self.properties)
-        if search[-1] > 0:
+        service = trait_service.TraitService(self.trait_file)
+        #search = cr.search_all_assocs(gene=gene, start=0, size=0, properties=self.properties)
+        #if search[-1] > 0:
+        #    return True
+        if service.has_gene(gene):
             return True
         raise NotFoundError("Gene " + gene)
 

@@ -53,29 +53,38 @@ class TraitService:
         return traits
 
     def list_genes(self):
-        genes = []
-        for group in self.groups:
-            genes.extend(get_data(hdf=self.file, key=group, fields=['gene_id'])['gene_id'].drop_duplicates().values.tolist())
+        sq = sql_client.sqlClient(self.file)
+        genes = sq.get_genes()
         return genes
 
     def has_trait(self, trait):
-        list_of_traits = self.list_traits()
-        if trait in list_of_traits:
+        sq = sql_client.sqlClient(self.file)
+        search = sq.get_trait(trait)
+        if search:
+            return True
+        return False
+
+    def has_gene(self, gene):
+        sq = sql_client.sqlClient(self.file)
+        search = sq.get_gene(gene)
+        if search:
             return True
         return False
 
     def chrom_from_trait(self, trait):
-        chroms_found = []
-        for group in self.groups:
-            chroms_found.extend(self.file.select(group, where='phenotype_id == trait', columns=['chromosome'], index=False).drop_duplicates().values.tolist())
+        sq = sql_client.sqlClient(self.file)
+        chroms_found =  sq.get_chrom_from_trait(trait)
+        #for group in self.groups:
+        #    chroms_found.extend(self.file.select(group, where='phenotype_id == trait', columns=['chromosome'], index=False).drop_duplicates().values.tolist())
         chroms_found = [item for sublist in chroms_found for item in sublist] # flatten
         chroms_found = list(set(chroms_found)) # remove dupes
         return chroms_found
 
     def chrom_from_gene(self, gene):
-        chroms_found = []
-        for group in self.groups:
-            chroms_found.extend(self.file.select(group, where='gene_id == gene', columns=['chromosome'], index=False).drop_duplicates().values.tolist())
+        sq = sql_client.sqlClient(self.file)
+        chroms_found =  sq.get_chrom_from_gene(gene)
+        #for group in self.groups:
+        #    chroms_found.extend(self.file.select(group, where='gene_id == gene', columns=['chromosome'], index=False).drop_duplicates().values.tolist())
             #chroms_found.extend(get_data(hdf=self.file, key=group, condition=condition, fields=['chromosome'])['chromosome'].drop_duplicates().values.tolist())
         chroms_found = [item for sublist in chroms_found for item in sublist] # flatten
         chroms_found = list(set(chroms_found)) # remove dupes
