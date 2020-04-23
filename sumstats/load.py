@@ -129,7 +129,7 @@ class Loader():
                             complib='blosc',
                             complevel=9,
                             format='table',
-                            mode='a',
+                            mode='w',
                             append=True,
                             data_columns=list(TO_INDEX),
                             #expectedrows=num_rows,
