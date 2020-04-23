@@ -129,7 +129,7 @@ class Loader():
                             complib='blosc',
                             complevel=9,
                             format='table',
-                            mode='w',
+                            mode='a',
                             append=True,
                             data_columns=list(TO_INDEX),
                             #expectedrows=num_rows,
@@ -147,8 +147,8 @@ class Loader():
                 """Store study specific metadata"""
                 store.get_storer(group).attrs.study_metadata = {'study': self.study,
                                                                 'qtl_group': self.qtl_group,
-                                                                'quant_method': self.quant_method,
-                                                                'trait_file': os.path.basename(self.trait_file)}
+                                                                'quant_method': self.quant_method}
+                                                                
                 if count == 1:
                     chunk.to_csv(self.csv_out, compression='gzip', columns=sorted(TO_LOAD_DSET_HEADERS_DEFAULT),
                                    index=False, mode='w', sep='\t', encoding='utf-8', na_rep="NA")
