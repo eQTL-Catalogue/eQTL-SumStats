@@ -9,7 +9,7 @@ from sumstats.common_constants import *
 from sumstats.utils.properties_handler import properties
 from sumstats.utils import properties_handler
 from sumstats.utils import filesystem_utils as fsutils
-import sumstats.utils.sqlite_client as sq 
+import sumstats.utils.sqlite_client as sq
 
 
 class Loader():
@@ -34,7 +34,7 @@ class Loader():
         self.tissue_ont = tissue_ont
         self.treatment = treatment
         self.treatment_ont = treatment_ont
- 
+
         self.filename = None
         if self.tsv:
             self.filename = os.path.splitext(os.path.basename(self.tsv))[0]
@@ -82,10 +82,11 @@ class Loader():
         """Read in the sumstats files in chunks"""
 
         dfss = pd.read_csv(self.tsv, sep="\t",
-                           dtype={'chromosome': str, 'position': int, 'variant': str},
+                           dtype=DSET_TYPES,
+                           usecols=list(TO_LOAD_DSET_HEADERS_DEFAULT),
                            float_precision='high',
                            chunksize=1000000)
-        
+
         #"""Read in the variant file"""
         #dfvar = pd.read_csv(self.var_file, sep="\t",
         #                    names=['chromosome', 'position', 'variant', 'ref', 'alt',
@@ -148,7 +149,7 @@ class Loader():
                 store.get_storer(group).attrs.study_metadata = {'study': self.study,
                                                                 'qtl_group': self.qtl_group,
                                                                 'quant_method': self.quant_method}
-                                                                
+
                 if count == 1:
                     chunk.to_csv(self.csv_out, compression='gzip', columns=sorted(TO_LOAD_DSET_HEADERS_DEFAULT),
                                    index=False, mode='w', sep='\t', encoding='utf-8', na_rep="NA")
@@ -178,7 +179,7 @@ class Loader():
             trait_file blob not null,
             tissue_ontology blob not null,
             treatment blob,
-            treatment_ontology blob not null, 
+            treatment_ontology blob not null,
             quant_method blob,
             UNIQUE (identifier)
             );
@@ -210,7 +211,7 @@ def main():
     argparser.add_argument('-treatment_ont', help='The treatment ontology term', required=False)
 
     args = argparser.parse_args()
-    
+
     properties_handler.set_properties()  # pragma: no cover
     h5files_path = properties.h5files_path # pragma: no cover
     tsvfiles_path = properties.tsvfiles_path  # pragma: no cover
