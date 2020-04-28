@@ -37,7 +37,7 @@ TISSUE_LABEL_DSET = 'tissue_label'
 #qtl_group, condition, condition_label, cell_type, ontology_term, ontology_label
 
 
-DSET_TYPES = {SNP_DSET: str, RSID_DSET: str, MUTATION_DSET: str, AC_DSET: float, AN_DSET: float, PVAL_DSET: str, MANTISSA_DSET: float, EXP_DSET: "int64", STUDY_DSET: str,
+DSET_TYPES = {SNP_DSET: str, RSID_DSET: str, MUTATION_DSET: str, AC_DSET: float, AN_DSET: float, PVAL_DSET: float, MANTISSA_DSET: float, EXP_DSET: "int64", STUDY_DSET: str,
               CHR_DSET: str, BP_DSET: "int64", R2_DSET: float, BETA_DSET: float, SE_DSET: float,
               EFFECT_DSET: str, OTHER_DSET: str, FREQ_DSET: float, EXPR_DSET: float, TISSUE_DSET: str,
               QTL_GROUP_DSET: str, CONDITION_DSET: str, CONDITION_LABEL_DSET: str, TISSUE_LABEL_DSET: str}
