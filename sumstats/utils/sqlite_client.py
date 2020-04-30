@@ -97,9 +97,24 @@ class sqlClient():
         #                  """, (identifier,))
 
         data = self.cur.fetchone()
-        if data:
+        if len(data) == 10:
             data_dict["study"], data_dict["identifier"], data_dict["qtl_group"], data_dict["tissue_label"], data_dict["phen"], data_dict["tissue_ont"], data_dict["condition"], _ , data_dict["quant_method"], data_dict["condition_label"] = data
-        return data_dict
+            return data_dict
+        # avoid break during schema change
+        else:
+            self.cur.execute("""
+                             SELECT s.study, s.identifier, q.qtl_group, q.cell_type, s.trait_file, q.ontology_term, q.condition, q.condition_label 
+                             FROM qtl_context_mapping AS q 
+                             JOIN study_info AS s 
+                             ON q.study = s.study AND q.qtl_group = s.qtl_group 
+                             WHERE s.identifier =?
+                             """, (identifier,))
+
+            data = self.cur.fetchone()
+            if data:
+                data_dict["study"], data_dict["identifier"], data_dict["qtl_group"], data_dict["tissue_label"], data_dict["phen"], data_dict["tissue_ont"], data_dict["condition"], data_dict["condition_label"] = data
+                return data_dict
+
 
     def get_traits(self):
         data = []
