@@ -186,7 +186,6 @@ class Loader():
         """
         sql = sq.sqlClient(self.sqldb)
         identifier = self.study + "+" + self.qtl_group + "+" + self.quant_method
-        print(self.trait_file)
         trait_file_id = os.path.basename(self.trait_file)
         data = [self.study, identifier, self.qtl_group, self.tissue, trait_file_id, self.tissue_ont, self.treatment, self.treatment_ont, self.quant_method ]
         sql.cur.execute("insert or ignore into study_info values (?,?,?,?,?,?,?,?,?)", data)

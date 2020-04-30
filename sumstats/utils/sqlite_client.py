@@ -86,19 +86,19 @@ class sqlClient():
                      "condition_label": None
                      }
 
-        #self.cur.execute("SELECT * FROM study_info where identifier =?", (identifier,))
+        self.cur.execute("SELECT * FROM study_info where identifier =?", (identifier,))
 
-        self.cur.execute("""
-                          SELECT s.study, s.identifier, q.qtl_group, q.cell_type, s.trait_file, q.ontology_term, q.condition, q.condition_label 
-                          FROM qtl_context_mapping AS q 
-                          JOIN study_info AS s 
-                          ON q.study = s.study AND q.qtl_group = s.qtl_group 
-                          WHERE s.identifier =?
-                          """, (identifier,))
+        #self.cur.execute("""
+        #                  SELECT s.study, s.identifier, q.qtl_group, q.cell_type, s.trait_file, q.ontology_term, q.condition, q.condition_label 
+        #                  FROM qtl_context_mapping AS q 
+        #                  JOIN study_info AS s 
+        #                  ON q.study = s.study AND q.qtl_group = s.qtl_group 
+        #                  WHERE s.identifier =?
+        #                  """, (identifier,))
 
         data = self.cur.fetchone()
         if data:
-            data_dict["study"], data_dict["identifier"], data_dict["qtl_group"], data_dict["tissue_label"], data_dict["phen"], data_dict["tissue_ont"], data_dict["condition"], data_dict["condition_label"] = data
+            data_dict["study"], data_dict["identifier"], data_dict["qtl_group"], data_dict["tissue_label"], data_dict["phen"], data_dict["tissue_ont"], data_dict["condition"], _ , data_dict["quant_method"], data_dict["condition_label"] = data
         return data_dict
 
     def get_traits(self):
@@ -305,7 +305,8 @@ class sqlClient():
         self.cur.execute("COMMIT")
 
     def drop_rsid_index(self):
-        self.cur.execute("DROP INDEX rsid_idx")
+        self.cur.execute("DROP INDEX IF EXISTS rsid_idx")
+            
 
     def create_rsid_index(self):
         self.cur.execute("CREATE INDEX rsid_idx on snp (rsid)")
