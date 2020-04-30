@@ -9,7 +9,7 @@ from sumstats.common_constants import *
 from sumstats.utils.properties_handler import properties
 from sumstats.utils import properties_handler
 from sumstats.utils import filesystem_utils as fsutils
-import sumstats.utils.sqlite_client as sq 
+import sumstats.utils.sqlite_client as sq
 
 
 class Loader():
@@ -34,7 +34,7 @@ class Loader():
         self.tissue_ont = tissue_ont
         self.treatment = treatment
         self.treatment_ont = treatment_ont
- 
+
         self.filename = None
         if self.tsv:
             self.filename = os.path.splitext(os.path.basename(self.tsv))[0]
@@ -82,37 +82,32 @@ class Loader():
         """Read in the sumstats files in chunks"""
 
         dfss = pd.read_csv(self.tsv, sep="\t",
-                           names=['molecular_trait_id', 'pchr', 'a', 'b',
-                                  'strand', 'c', 'd', 'variant_ss', 'chromosome_ss',
-                                  'position_ss', 'e', 'pvalue', 'beta', 'top'],
-                           dtype={'chromosome_ss': str, 'position_ss': int, 'variant_ss': str},
-                           header=None,
-                           usecols=['molecular_trait_id','variant_ss', 'chromosome_ss',
-                                    'position_ss','pvalue', 'beta'],
+                           dtype=DSET_TYPES,
+                           usecols=list(TO_LOAD_DSET_HEADERS_DEFAULT),
                            float_precision='high',
                            chunksize=1000000)
-        
-        """Read in the variant file"""
-        dfvar = pd.read_csv(self.var_file, sep="\t",
-                            names=['chromosome', 'position', 'variant', 'ref', 'alt',
-                                   'type', 'ac', 'an', 'maf', 'r2', 'rsid'],
-                            float_precision='high', skiprows=1,
-                            dtype={'chromosome': str, 'position': int, 'variant': str})
-        
-        """Read in the trait file"""
-        # set the column order
-        dftrait = pd.read_csv(self.trait_file, sep="\t", usecols=['phenotype_id', 'gene_id', 'group_id'])[['phenotype_id', 'gene_id', 'group_id']]
-        dftrait.columns = ['phenotype_id', 'gene_id', 'molecular_trait_object_id']
-        
-        if self.expr_file:
-            """Read in the gene expression file"""
-            dfexpr = pd.read_csv(self.expr_file, sep="\t", float_precision='high', names=['phenotype_id', 'study', 'qtl_group', 'median_tpm'])
-            dfexpr = dfexpr[dfexpr.study == self.study]
-            dfexpr = dfexpr[dfexpr.qtl_group == self.qtl_group]
-            dfexpr["median_tpm"] = pd.to_numeric(dfexpr["median_tpm"], errors='coerce')
-        else:
-            print("no expression file")
-            dfexpr = pd.DataFrame(columns=['phenotype_id', 'study', 'qtl_group', 'median_tpm'])
+
+        #"""Read in the variant file"""
+        #dfvar = pd.read_csv(self.var_file, sep="\t",
+        #                    names=['chromosome', 'position', 'variant', 'ref', 'alt',
+        #                           'type', 'ac', 'an', 'maf', 'r2', 'rsid'],
+        #                    float_precision='high', skiprows=1,
+        #                    dtype={'chromosome': str, 'position': int, 'variant': str})
+        #
+        #"""Read in the trait file"""
+        ## set the column order
+        #dftrait = pd.read_csv(self.trait_file, sep="\t", usecols=['phenotype_id', 'gene_id', 'group_id'])[['phenotype_id', 'gene_id', 'group_id']]
+        #dftrait.columns = ['phenotype_id', 'gene_id', 'molecular_trait_object_id']
+        #
+        #if self.expr_file:
+        #    """Read in the gene expression file"""
+        #    dfexpr = pd.read_csv(self.expr_file, sep="\t", float_precision='high', names=['phenotype_id', 'study', 'qtl_group', 'median_tpm'])
+        #    dfexpr = dfexpr[dfexpr.study == self.study]
+        #    dfexpr = dfexpr[dfexpr.qtl_group == self.qtl_group]
+        #    dfexpr["median_tpm"] = pd.to_numeric(dfexpr["median_tpm"], errors='coerce')
+        #else:
+        #    print("no expression file")
+        #    dfexpr = pd.DataFrame(columns=['phenotype_id', 'study', 'qtl_group', 'median_tpm'])
 
         with pd.HDFStore(hdf) as store:
             """store in hdf5 as below"""
@@ -120,21 +115,22 @@ class Loader():
             for chunk in dfss:
                 print(count)
 
-                merged = pd.merge(chunk, dfvar, how='left', left_on=['variant_ss'], right_on=['variant'])
-                print("merged one ")
-                merged2 = pd.merge(merged, dftrait, how='left', left_on=['molecular_trait_id'], right_on=['phenotype_id'])
-                print("merged two")
-                merged3 = pd.merge(merged2, dfexpr, how='left', left_on=['molecular_trait_id'], right_on=['phenotype_id'])
-                print("merged three")
-                merged3 = merged3[list(TO_LOAD_DSET_HEADERS_DEFAULT)]
+                #merged = pd.merge(chunk, dfvar, how='left', left_on=['variant_ss'], right_on=['variant'])
+                #print("merged one ")
+                #merged2 = pd.merge(merged, dftrait, how='left', left_on=['molecular_trait_id'], right_on=['phenotype_id'])
+                #print("merged two")
+                #merged3 = pd.merge(merged2, dfexpr, how='left', left_on=['molecular_trait_id'], right_on=['phenotype_id'])
+                #print("merged three")
+                #merged3 = merged3[list(TO_LOAD_DSET_HEADERS_DEFAULT)]
+                chunk = chunk[sorted(TO_LOAD_DSET_HEADERS_DEFAULT)]
                 for field in [EFFECT_DSET, OTHER_DSET]:
-                    self.placeholder_if_allele_string_too_long(df=merged3, field=field)
-                self.placeholder_if_variant_id_too_long(df=merged3, field=SNP_DSET)
-                merged3.to_hdf(store, group,
+                    self.placeholder_if_allele_string_too_long(df=chunk, field=field)
+                self.placeholder_if_variant_id_too_long(df=chunk, field=SNP_DSET)
+                chunk.to_hdf(store, group,
                             complib='blosc',
                             complevel=9,
                             format='table',
-                            mode='w',
+                            mode='a',
                             append=True,
                             data_columns=list(TO_INDEX),
                             #expectedrows=num_rows,
@@ -152,13 +148,13 @@ class Loader():
                 """Store study specific metadata"""
                 store.get_storer(group).attrs.study_metadata = {'study': self.study,
                                                                 'qtl_group': self.qtl_group,
-                                                                'quant_method': self.quant_method,
-                                                                'trait_file': os.path.basename(self.trait_file)}
+                                                                'quant_method': self.quant_method}
+
                 if count == 1:
-                    merged3.to_csv(self.csv_out, compression='gzip', columns=list(TO_LOAD_DSET_HEADERS_DEFAULT),
+                    chunk.to_csv(self.csv_out, compression='gzip', columns=sorted(TO_LOAD_DSET_HEADERS_DEFAULT),
                                    index=False, mode='w', sep='\t', encoding='utf-8', na_rep="NA")
                 else:
-                    merged3.to_csv(self.csv_out, compression='gzip', columns=list(TO_LOAD_DSET_HEADERS_DEFAULT),
+                    chunk.to_csv(self.csv_out, compression='gzip', columns=sorted(TO_LOAD_DSET_HEADERS_DEFAULT),
                                    header=False, index=False, mode='a', sep='\t', encoding='utf-8', na_rep="NA")
                 count += 1
 
@@ -183,14 +179,13 @@ class Loader():
             trait_file blob not null,
             tissue_ontology blob not null,
             treatment blob,
-            treatment_ontology blob not null, 
+            treatment_ontology blob not null,
             quant_method blob,
             UNIQUE (identifier)
             );
         """
         sql = sq.sqlClient(self.sqldb)
         identifier = self.study + "+" + self.qtl_group + "+" + self.quant_method
-        print(self.trait_file)
         trait_file_id = os.path.basename(self.trait_file)
         data = [self.study, identifier, self.qtl_group, self.tissue, trait_file_id, self.tissue_ont, self.treatment, self.treatment_ont, self.quant_method ]
         sql.cur.execute("insert or ignore into study_info values (?,?,?,?,?,?,?,?,?)", data)
@@ -215,7 +210,7 @@ def main():
     argparser.add_argument('-treatment_ont', help='The treatment ontology term', required=False)
 
     args = argparser.parse_args()
-    
+
     properties_handler.set_properties()  # pragma: no cover
     h5files_path = properties.h5files_path # pragma: no cover
     tsvfiles_path = properties.tsvfiles_path  # pragma: no cover

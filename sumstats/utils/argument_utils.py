@@ -37,8 +37,6 @@ def convert_search_args(args):
     paginate = args.paginate
 
     chromosome = args.chr
-    if chromosome is not None:
-        chromosome = int(chromosome)
 
     pval_interval = args.pval
     pval_interval = FloatInterval().set_string_tuple(pval_interval)
