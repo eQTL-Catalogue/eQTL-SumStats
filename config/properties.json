@@ -14,7 +14,7 @@
     "available_chromosomes": 24,
     "ols_terms_location":"https://www.ebi.ac.uk/ols/api/terms?id=",
     "gwas_study_location":"http://www.ebi.ac.uk/gwas/rest/api/studies/",
-    "logging_path":"/logs",
+    "logging_path":"logs",
     "LOG_LEVEL": "INFO",
     "APPLICATION_ROOT": "/eqtl/api",
     "sumstats_meta": "/files/output/SumStatsMeta.db",

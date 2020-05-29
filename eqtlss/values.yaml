@@ -10,7 +10,7 @@ image:
   tag: latest
   pullPolicy: Always
   containerPort: 8000
-  logMountPath: "/logs"
+  logMountPath: "logs"
   dataMountPath: "/files/output"
   uid: 1000
   gid: 1000
@@ -23,7 +23,7 @@ volume:
     ClaimName: eqtl-data
     nfsServer: "<host name or IP>"
     path: "/path/to/files/"
-    
+  
     #    VolumeName: eqtl-data
     #    type: persistentVolumeClaim
     #    storageClassName: standard
