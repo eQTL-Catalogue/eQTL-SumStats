@@ -173,6 +173,7 @@ def _get_array_to_display(datasets, variant=None, chromosome=None, links=False):
         element_info['molecular_trait_id'] = trait
         element_info['gene_id'] = gene
         element_info['tissue'] = tissue
+        element_info['se'] = element_info['se'] if element_info['se'] else None
 
         if links:
             element_info['_links'] = {'self': _create_href(method_name='api.get_chromosome_variants',
