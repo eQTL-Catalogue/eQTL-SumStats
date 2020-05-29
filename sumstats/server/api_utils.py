@@ -170,10 +170,10 @@ def _get_array_to_display(datasets, variant=None, chromosome=None, links=False):
         gene = datasets[GENE_DSET][index]
         tissue = datasets[TISSUE_DSET][index]
 
-        element_info['molecular_trait_id'] = trait
-        element_info['gene_id'] = gene
-        element_info['tissue'] = tissue
-        element_info['se'] = element_info['se'] if element_info['se'] else None
+        element_info[PHEN_DSET] = trait
+        element_info[GENE_DSET] = gene
+        element_info[TISSUE_DSET] = tissue
+        element_info[SE_DSET] = element_info[SE_DSET] if SE_DSET in element_info.keys() else None
 
         if links:
             element_info['_links'] = {'self': _create_href(method_name='api.get_chromosome_variants',
