@@ -5,9 +5,9 @@ metadata:
   name: eqtl-api-logs
   namespace: eqtl
 spec:
+  storageClassName: standard-nfs-production
   accessModes:
     -  ReadWriteOnce
   resources:
     requests:
       storage: 2Gi
-storageClassName: standard-nfs-production
