@@ -3,6 +3,7 @@ import sys
 import logging
 from logging import config
 from flask import Flask, make_response, Response
+from flask_cors import CORS
 from sumstats.utils import register_logger
 from sumstats.utils.properties_handler import properties
 from sumstats.server.error_classes import *
@@ -16,6 +17,7 @@ logger = logging.getLogger()
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
+cors = CORS(app)
 
 
 @api.errorhandler(APIException)
