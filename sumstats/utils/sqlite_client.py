@@ -42,10 +42,7 @@ class sqlClient():
         data = []
         for row in self.cur.execute("SELECT chr, position FROM snp WHERE rsid=?", (snp,)):
             data.append(row)
-        if data:
-            return data
-        else:
-            return False
+        return data
 
     def get_uuid_from_study(self, study):
         uuids = []
