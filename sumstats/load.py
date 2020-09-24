@@ -150,12 +150,13 @@ class Loader():
                                                                 'qtl_group': self.qtl_group,
                                                                 'quant_method': self.quant_method}
 
-                if count == 1:
-                    chunk.to_csv(self.csv_out, compression='gzip', columns=sorted(TO_LOAD_DSET_HEADERS_DEFAULT),
-                                   index=False, mode='w', sep='\t', encoding='utf-8', na_rep="NA")
-                else:
-                    chunk.to_csv(self.csv_out, compression='gzip', columns=sorted(TO_LOAD_DSET_HEADERS_DEFAULT),
-                                   header=False, index=False, mode='a', sep='\t', encoding='utf-8', na_rep="NA")
+                if self.csv_out:
+                    if count == 1:
+                        chunk.to_csv(self.csv_out, compression='gzip', columns=sorted(TO_LOAD_DSET_HEADERS_DEFAULT),
+                                       index=False, mode='w', sep='\t', encoding='utf-8', na_rep="NA")
+                    else:
+                        chunk.to_csv(self.csv_out, compression='gzip', columns=sorted(TO_LOAD_DSET_HEADERS_DEFAULT),
+                                       header=False, index=False, mode='a', sep='\t', encoding='utf-8', na_rep="NA")
                 count += 1
 
 

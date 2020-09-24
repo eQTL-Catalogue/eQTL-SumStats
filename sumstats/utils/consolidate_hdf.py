@@ -15,7 +15,7 @@ def consolidate(in_file, out_file, study, key, qtl_group, tissue_ont):
             df[STUDY_DSET] = study
             df[TISSUE_DSET] = tissue_ont
             df[QTL_GROUP_DSET] = qtl_group
-            df.astype(DSET_TYPES)
+            df.astype(dict((k, DSET_TYPES[k]) for k in df.columns.values.tolist()))
             df.to_hdf(store, group,
                          complib='blosc',
                          complevel=9,
@@ -41,8 +41,8 @@ def consolidate(in_file, out_file, study, key, qtl_group, tissue_ont):
 
 def main():
     argparser = argparse.ArgumentParser()
-    argparser.add_argument('-in', help='The path to the hdf in file', required=False)
-    argparser.add_argument('-out', help='The path to the hdf out file', required=False)
+    argparser.add_argument('-in_file', help='The path to the hdf in file', required=False)
+    argparser.add_argument('-out_file', help='The path to the hdf out file', required=False)
     argparser.add_argument('-key', help='The hdf key/group', required=False)
     argparser.add_argument('-study', help='The study identifier', required=False)
     argparser.add_argument('-qtl_group', help='The qtl group e.g. "LCL"', required=False)
@@ -50,8 +50,8 @@ def main():
 
     args = argparser.parse_args()
 
-    in_file = args.in
-    out_file = args.out
+    in_file = args.in_file
+    out_file = args.out_file
     study = args.study
     key = args.key
     qtl_group = args.qtl_group

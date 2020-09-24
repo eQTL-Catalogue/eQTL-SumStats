@@ -26,7 +26,7 @@ class AssociationSearch:
         self.starting_point = start
         self.start = start
         self.max_size = 1000
-        self.size = size if int(size) <= self.max_size else self.max_size 
+        self.size = size if int(size) <= self.max_size else self.max_size
         self.study = study
         self.pval_interval = pval_interval
         self.chromosome = chromosome
@@ -48,7 +48,7 @@ class AssociationSearch:
         self.snpdb = self.properties.snpdb
         self.trait_file = os.path.join(self.search_path, self.trait_dir, "file_phen_meta.sqlite")
         self.hdfs = []
-        
+
 
         self.datasets = None #utils.create_dictionary_of_empty_dsets(TO_QUERY_DSETS)
         # index marker will be returned along with the datasets
@@ -75,7 +75,10 @@ class AssociationSearch:
         if chromosome and bp_interval:
             self.chromosome = chromosome
             self.bp_interval = IntInterval().set_string_tuple(bp_interval)
-            
+        else:
+            raise RequestedNotFound("Could not find variant ID: {}".format(self.snp))
+
+
 
     def chrom_for_trait(self):
         #h5file = fsutils.create_h5file_path(self.search_path, self.trait_dir, self.trait_file)
@@ -104,7 +107,8 @@ class AssociationSearch:
         try:
             snp_no_prefix = re.search(r"[a-zA-Z]+([0-9]+)", self.snp).group(1)
             sql = sq.sqlClient(self.snpdb)
-            chromosome, position = sql.get_chr_pos(snp_no_prefix)[0]
+            mapping = sql.get_chr_pos(snp_no_prefix)
+            chromosome, position = mapping[0] if mapping else (None, None) 
             bp_interval = ':'.join([str(position), str(position)])
             return (chromosome, bp_interval)
         except AttributeError:
@@ -131,7 +135,7 @@ class AssociationSearch:
     def _narrow_hdf_pool(self):
 
         # narrow by tissue
-        
+
         if self.tissue and self.study:
             logger.debug("tissue and study")
             sql = sq.sqlClient(self.database)
@@ -183,7 +187,7 @@ class AssociationSearch:
             else:
                 raise RequestedNotFound("QTL group: {} with quantification method: {}".format(self.qtl_group, self.quant_method))
 
-                
+
         # narrow by anything else
 
         if self.study and not (self.qtl_group or self.tissue):
@@ -202,17 +206,22 @@ class AssociationSearch:
         if self.trait and not (self.study or self.tissue):
             logger.debug("phen")
             self.chrom_for_trait()
-            self.hdfs = glob.glob(os.path.join(self.search_path, self.study_dir) + "/" + str(self.chromosome) + "/file_*+" + str(self.quant_method) + ".h5")
+            self.hdfs = glob.glob(os.path.join(self.search_path, self.chr_dir) + "/" +  "/file_" + str(self.chromosome) + "." + str(self.quant_method) + ".h5")
+            return "chr"
         if self.gene and not (self.study or self.tissue):
             logger.debug("gene")
             self.chrom_for_gene()
-            self.hdfs = glob.glob(os.path.join(self.search_path, self.study_dir) + "/" + str(self.chromosome) + "/file_*+" + str(self.quant_method) + ".h5")
+            self.hdfs = glob.glob(os.path.join(self.search_path, self.chr_dir) + "/" +  "/file_" + str(self.chromosome) + "." + str(self.quant_method) + ".h5")
+            return "chr"
         if self.chromosome and all(v is None for v in [self.study, self.trait, self.gene, self.tissue]):
             logger.debug("bp/chr")
-            self.hdfs = glob.glob(os.path.join(self.search_path, self.study_dir) + "/" + str(self.chromosome) + "/file_*+" + str(self.quant_method) + ".h5")
+            self.hdfs = glob.glob(os.path.join(self.search_path, self.chr_dir) + "/" +  "/file_" + str(self.chromosome) + "." + str(self.quant_method) + ".h5")
+            return "chr"
         if all(v is None for v in [self.chromosome, self.study, self.gene, self.trait, self.tissue, self.qtl_group]):
             logger.debug("all")
-            self.hdfs = glob.glob(os.path.join(self.search_path, self.study_dir) + "/*/file_*+" + str(self.quant_method) + ".h5") 
+            self.hdfs = glob.glob(os.path.join(self.search_path, self.chr_dir) + "/" +  "/file_" + str(self.chromosome) + "." + str(self.quant_method) + ".h5")
+            return "chr"
+        return "study"
 
     def _narrow_by_chromosome(self, file_ids):
         if self.chromosome:
@@ -226,7 +235,7 @@ class AssociationSearch:
         if self.hdfs:
             return True
         return False
- 
+
     def search_associations(self):
         """
         Traverses the hdfs breaking if once the required results are retrieved, while
@@ -238,7 +247,7 @@ class AssociationSearch:
         """
         logger.info("Searching all associations for start %s, size %s, pval_interval %s",
                     str(self.start), str(self.size), str(self.pval_interval))
-        self._narrow_hdf_pool()
+        self.search_dir = self._narrow_hdf_pool()
 
         if len(self.hdfs) == 1 and not self.paginate and self.condition:
             logger.info("unpaginated request")
@@ -250,7 +259,7 @@ class AssociationSearch:
         else:
             logger.info("paginated request")
             self.paginated_request()
-        
+
         self.datasets = self.df.to_dict(orient='list') if len(self.df.index) > 0 else self.datasets # return as lists - but could be parameterised to return in a specified format
         #self.index_marker = self.starting_point + len(self.df.index)
         self.index_marker = len(self.df.index)
@@ -264,12 +273,12 @@ class AssociationSearch:
                 key = store.keys()[0]
                 identifier = key.strip("/")
                 logger.debug(key)
-                meta_dict = self._get_study_metadata(identifier) 
-                
+                meta_dict = self._get_study_metadata(identifier) if self.search_dir == "study" else None
+
                 if self.condition:
                     print(self.condition)
                     #set pvalue and other conditions
-                    chunks = store.select(key, chunksize=1, start=self.start, where=self.condition) 
+                    chunks = store.select(key, chunksize=1, start=self.start, where=self.condition)
                 else:
                     logger.debug("No condition")
                     chunks = store.select(key, chunksize=1, start=self.start)
@@ -283,7 +292,7 @@ class AssociationSearch:
                     continue
 
                 for i, chunk in enumerate(chunks):
-                    if self.snp: 
+                    if self.snp:
                         # filter for correct snp
                         if self._snp_format() == 'rs':
                             chunk = chunk[chunk[RSID_DSET] == self.snp]
@@ -292,10 +301,11 @@ class AssociationSearch:
                         else:
                             raise BadUserRequest("Could not interpret variant ID format from the value provided: {}".format(self.snp))
 
-                    chunk = self._update_df_with_metadata(chunk, meta_dict)
+                    chunk = self._update_df_with_metadata(chunk, meta_dict) if self.search_dir == "study" else chunk
+
                     self.df = pd.concat([self.df, chunk])
 
-                    if len(self.df.index) >= self.size: 
+                    if len(self.df.index) >= self.size:
                         # break once we have enough
                         break
 
@@ -305,7 +315,7 @@ class AssociationSearch:
 
                 if len(self.df.index) >= self.size:
                     break
-        
+
     def unpaginated_request(self):
         hdf = self.hdfs[0]
         with pd.HDFStore(hdf, mode='r') as store:
@@ -313,21 +323,22 @@ class AssociationSearch:
             key = store.keys()[0]
             identifier = key.strip("/")
             logger.debug(key)
-            meta_dict = self._get_study_metadata(identifier) 
+            meta_dict = self._get_study_metadata(identifier) if self.search_dir == "study" else chunk
 
-            
+
             print(self.condition)
             #set pvalue and other conditions
-            chunk = store.select(key, where=self.condition) 
+            chunk = store.select(key, where=self.condition)
 
-            if self.snp: 
+            if self.snp:
                 # filter for correct snp
                 if self._snp_format() == 'rs':
                     chunk = chunk[chunk[RSID_DSET] == self.snp]
                 elif self._snp_format() == 'chr_bp':
                     chunk = chunk[chunk[SNP_DSET] == self.snp]
-                
-            chunk = self._update_df_with_metadata(chunk, meta_dict)
+
+            chunk = self._update_df_with_metadata(chunk, meta_dict) if self.search_dir == "study" else chunk
+
             self.df = pd.concat([self.df, chunk])
 
     @staticmethod
@@ -340,19 +351,10 @@ class AssociationSearch:
         df[TISSUE_LABEL_DSET] = meta_dict['tissue_label']
         return df
 
-        
+
     def _construct_conditional_statement(self):
         conditions = []
         statement = None
-
-        if self.trait:
-            #self.chrom_for_trait()
-            # single quotes here enable values with '.'s in them to be interpretted by pytables
-            conditions.append("{trait} == '{id}'".format(trait=PHEN_DSET, id=str(self.trait)))
-
-        if self.gene:
-            #self.chrom_for_gene()
-            conditions.append("{gene} == {id}".format(gene=GENE_DSET, id=str(self.gene)))
 
         if self.bp_interval:
             if self.bp_interval.lower_limit:
@@ -362,7 +364,6 @@ class AssociationSearch:
 
         if self.snp:
             self._chr_bp_from_snp()
-            print(self.bp_interval.lower_limit)
             if self.bp_interval:
                 conditions.append("{bp} >= {lower}".format(bp = BP_DSET, lower = self.bp_interval.lower_limit))
                 conditions.append("{bp} <= {upper}".format(bp = BP_DSET, upper = self.bp_interval.upper_limit))
@@ -372,6 +373,15 @@ class AssociationSearch:
                 conditions.append("{pval} >= {lower}".format(pval = PVAL_DSET, lower = str(self.pval_interval.lower_limit)))
             if self.pval_interval.upper_limit:
                 conditions.append("{pval} <= {upper}".format(pval = PVAL_DSET, upper = str(self.pval_interval.upper_limit)))
+
+        if self.trait:
+            #self.chrom_for_trait()
+            # single quotes here enable values with '.'s in them to be interpretted by pytables
+            conditions.append("{trait} == '{id}'".format(trait=PHEN_DSET, id=str(self.trait)))
+
+        if self.gene:
+            #self.chrom_for_gene()
+            conditions.append("{gene} == {id}".format(gene=GENE_DSET, id=str(self.gene)))
 
         if len(conditions) > 0:
             statement = " & ".join(conditions)
