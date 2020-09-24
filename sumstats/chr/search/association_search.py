@@ -278,10 +278,10 @@ class AssociationSearch:
                 if self.condition:
                     print(self.condition)
                     #set pvalue and other conditions
-                    chunks = store.select(key, chunksize=1, start=self.start, where=self.condition)
+                    chunks = store.select(key, chunksize=self.size, start=self.start, where=self.condition)
                 else:
                     logger.debug("No condition")
-                    chunks = store.select(key, chunksize=1, start=self.start)
+                    chunks = store.select(key, chunksize=self.size, start=self.start)
 
                 chunk_size = chunks.coordinates.size
                 n = chunk_size - (self.start + 1)
@@ -292,18 +292,10 @@ class AssociationSearch:
                     continue
 
                 for i, chunk in enumerate(chunks):
-                    if self.snp:
-                        # filter for correct snp
-                        if self._snp_format() == 'rs':
-                            chunk = chunk[chunk[RSID_DSET] == self.snp]
-                        elif self._snp_format() == 'chr_bp':
-                            chunk = chunk[chunk[SNP_DSET] == self.snp]
-                        else:
-                            raise BadUserRequest("Could not interpret variant ID format from the value provided: {}".format(self.snp))
 
                     chunk = self._update_df_with_metadata(chunk, meta_dict) if self.search_dir == "study" else chunk
 
-                    self.df = pd.concat([self.df, chunk])
+                    self.df = self.df.append(chunk)
 
                     if len(self.df.index) >= self.size:
                         # break once we have enough
@@ -329,13 +321,6 @@ class AssociationSearch:
             print(self.condition)
             #set pvalue and other conditions
             chunk = store.select(key, where=self.condition)
-
-            if self.snp:
-                # filter for correct snp
-                if self._snp_format() == 'rs':
-                    chunk = chunk[chunk[RSID_DSET] == self.snp]
-                elif self._snp_format() == 'chr_bp':
-                    chunk = chunk[chunk[SNP_DSET] == self.snp]
 
             chunk = self._update_df_with_metadata(chunk, meta_dict) if self.search_dir == "study" else chunk
 
@@ -367,6 +352,14 @@ class AssociationSearch:
             if self.bp_interval:
                 conditions.append("{bp} >= {lower}".format(bp = BP_DSET, lower = self.bp_interval.lower_limit))
                 conditions.append("{bp} <= {upper}".format(bp = BP_DSET, upper = self.bp_interval.upper_limit))
+                if self._snp_format() == 'rs':
+                    conditions.append("{rsid} == '{id}'".format(rsid=RSID_DSET, id=str(self.snp)))
+                elif self._snp_format() == 'chr_bp':
+                    conditions.append("{snp} == '{id}'".format(snp=SNP_DSET, id=str(self.snp)))
+                else:
+                    raise BadUserRequest("Could not interpret variant ID format from the value provided: {}".format(self.snp))
+
+
 
         if self.pval_interval:
             if self.pval_interval.lower_limit:
