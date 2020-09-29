@@ -11,6 +11,7 @@ from collections import OrderedDict
 import logging
 from sumstats.utils import register_logger
 from sumstats.errors.error_classes import *
+import itertools
 
 logger = logging.getLogger(__name__)
 register_logger.register(__name__)
@@ -37,11 +38,12 @@ def _get_study_list_no_info(studies, start, size):
     return study_list
 
 
-def _get_tissue_list(tissues, start, size):
+def _get_tissue_list(tissues, start, size, links=None):
     tissue_list = []
     end = min(start + size, len(tissues))
-    for tissue in tissues[start:end]:
-        tissue_list.append(_create_info_for_tissue(tissue))
+    for item in list(OrderedDict(tissues).items())[start:end]:
+        tissue, tissue_name = item
+        tissue_list.append(_create_info_for_tissue(tissue, tissue_name, links))
     return tissue_list
 
 
@@ -61,12 +63,14 @@ def _create_study_info_for_tissue(studies, tissue=None):
     return study_list
 
 
-def _create_info_for_tissue(tissue):
-    tissue_info = {'tissue': tissue,
-                   '_links': {'self': _create_href(method_name='api.get_tissue', params={'tissue': tissue})}
-                   }
-    tissue_info['_links']['studies'] = _create_href(method_name='api.get_studies_for_tissue', params={'tissue': tissue})
-    tissue_info['_links']['associations'] = _create_href(method_name='api.get_tissue_assocs', params={'tissue': tissue})
+def _create_info_for_tissue(tissue, tissue_name=None, links=None):
+    tissue_info = {'tissue': tissue}
+    if tissue_name:
+        tissue_info['tissue_label'] = tissue_name
+    if links is True:
+        tissue_info['_links'] = {'self': _create_href(method_name='api.get_tissue', params={'tissue': tissue})}
+        tissue_info['_links']['studies'] = _create_href(method_name='api.get_studies_for_tissue', params={'tissue': tissue})
+        tissue_info['_links']['associations'] = _create_href(method_name='api.get_tissue_assocs', params={'tissue': tissue})
     return tissue_info
 
 
