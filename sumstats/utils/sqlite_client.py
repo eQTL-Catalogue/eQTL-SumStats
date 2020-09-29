@@ -134,6 +134,16 @@ class sqlClient():
         else:
             return False
 
+
+    def get_tissue_ont_dict(self):
+        data = {}
+        for row in self.cur.execute("SELECT tissue_ontology, tissue FROM study_info"):
+            data[row[0]] = row[1]
+        if data:
+            return data
+        else:
+            return False
+
     def get_tissue_ontos(self):
         data = []
         for row in self.cur.execute("SELECT tissue_ontology FROM study_info"):

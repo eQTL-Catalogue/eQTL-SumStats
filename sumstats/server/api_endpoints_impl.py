@@ -407,14 +407,14 @@ def variant_resource(variant, chromosome=None):
 def tissues():
     args = request.args.to_dict()
     try:
-        start, size = apiu._get_start_size(args)
+        start, size, p_lower, p_upper, pval_interval, quant_method, snp, _, gene, study, trait, paginate, links, qtl_group = apiu._get_basic_arguments(args)
     except ValueError as error:
         logging.error("/tissues. " + (str(error)))
         raise BadUserRequest(str(error))
 
     explorer = ex.Explorer(apiu.properties)
-    tissues = explorer.get_list_of_tissues()
-    tissue_list = apiu._get_tissue_list(tissues=tissues, start=start, size=size)
+    tissue_dict = explorer.get_tissue_ont_dict()
+    tissue_list = apiu._get_tissue_list(tissues=tissue_dict, start=start, size=size, links=links)
     response = apiu._create_response(collection_name='tissues', method_name='api.get_tissues',
                                      start=start, size=size, index_marker=size, data_dict=tissue_list)
 

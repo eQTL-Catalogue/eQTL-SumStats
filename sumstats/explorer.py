@@ -52,6 +52,11 @@ class Explorer:
         tissues = sq.get_tissue_ontos()
         return sorted(list(set(tissues)))
 
+    def get_tissue_ont_dict(self):
+        sq = sql_client.sqlClient(self.sqlite_db)
+        tissue_ont_dict = sq.get_tissue_ont_dict()
+        return tissue_ont_dict
+
     def get_studies_of_tissue(self, tissue): 
         sq = sql_client.sqlClient(self.sqlite_db)
         studies = sq.get_studies_for_tissue(tissue)
