@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from sumstats.common_constants import *
 import os
 import argparse
@@ -15,7 +16,8 @@ def consolidate(in_file, out_file, study, key, qtl_group, tissue_ont):
             df[STUDY_DSET] = study
             df[TISSUE_DSET] = tissue_ont
             df[QTL_GROUP_DSET] = qtl_group
-            df.astype(dict((k, DSET_TYPES[k]) for k in df.columns.values.tolist()))
+            df = df.astype(dict((k, DSET_TYPES[k]) for k in df.columns.values.tolist()))
+            df[SE_DSET] = np.nan
             df.to_hdf(store, group,
                          complib='blosc',
                          complevel=9,

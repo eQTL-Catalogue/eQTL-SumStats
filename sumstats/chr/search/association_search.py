@@ -284,16 +284,17 @@ class AssociationSearch:
                     chunks = store.select(key, chunksize=self.size, start=self.start)
 
                 chunk_size = chunks.coordinates.size
-                n = chunk_size - (self.start + 1)
+                chunk_diff = chunk_size - self.start
+                print(chunk_diff)
 
                 # skip this file if the start is beyond the chunksize
-                if n < 0:
+                if chunk_diff < 1:
                     self.start -= chunk_size
                     continue
 
                 for i, chunk in enumerate(chunks):
-
                     chunk = self._update_df_with_metadata(chunk, meta_dict) if self.search_dir == "study" else chunk
+                    print(len(chunk))
 
                     self.df = self.df.append(chunk)
 
@@ -301,7 +302,7 @@ class AssociationSearch:
                         # break once we have enough
                         break
 
-                    if i == n: # Need to explicitly break loop once complete - not sure why - investigate this
+                    if len(chunk)  == chunk_diff: # Need to explicitly break loop once complete - not sure why - investigate this
                         self.start = 0
                         break
 
