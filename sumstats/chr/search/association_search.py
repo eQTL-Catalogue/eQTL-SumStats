@@ -48,6 +48,7 @@ class AssociationSearch:
         self.snpdb = self.properties.snpdb
         self.trait_file = os.path.join(self.search_path, self.trait_dir, "file_phen_meta.sqlite")
         self.hdfs = []
+        self.search_dir = None
 
 
         self.datasets = None #utils.create_dictionary_of_empty_dsets(TO_QUERY_DSETS)
@@ -56,8 +57,6 @@ class AssociationSearch:
         # will pinpoint where the next search needs to continue from
         self.index_marker = self.search_traversed = 0
         self.df = pd.DataFrame()
-        self.condition = self._construct_conditional_statement()
-        logger.debug(self.condition)
         logger.debug("quant: ".format(self.quant_method))
 
 
@@ -203,17 +202,22 @@ class AssociationSearch:
                 raise RequestedNotFound("Study :{} with quantification method: {}".format(self.study, self.quant_method))
 
 
-        if self.trait and not (self.study or self.tissue):
+        if self.snp:
+            logger.debug("snp")
+            self._chr_bp_from_snp()
+            self.hdfs = glob.glob(os.path.join(self.search_path, self.chr_dir) + "/" +  "/file_" + str(self.chromosome) + "." + str(self.quant_method) + ".h5")
+            return "chr"
+        if self.trait and not (self.study or self.tissue or self.qtl_group):
             logger.debug("phen")
             self.chrom_for_trait()
             self.hdfs = glob.glob(os.path.join(self.search_path, self.chr_dir) + "/" +  "/file_" + str(self.chromosome) + "." + str(self.quant_method) + ".h5")
             return "chr"
-        if self.gene and not (self.study or self.tissue):
+        if self.gene and not (self.study or self.tissue or self.qtl_group):
             logger.debug("gene")
             self.chrom_for_gene()
             self.hdfs = glob.glob(os.path.join(self.search_path, self.chr_dir) + "/" +  "/file_" + str(self.chromosome) + "." + str(self.quant_method) + ".h5")
             return "chr"
-        if self.chromosome and all(v is None for v in [self.study, self.trait, self.gene, self.tissue]):
+        if self.chromosome and all(v is None for v in [self.study, self.qtl_group, self.tissue]):
             logger.debug("bp/chr")
             self.hdfs = glob.glob(os.path.join(self.search_path, self.chr_dir) + "/" +  "/file_" + str(self.chromosome) + "." + str(self.quant_method) + ".h5")
             return "chr"
@@ -248,6 +252,8 @@ class AssociationSearch:
         logger.info("Searching all associations for start %s, size %s, pval_interval %s",
                     str(self.start), str(self.size), str(self.pval_interval))
         self.search_dir = self._narrow_hdf_pool()
+        self.condition = self._construct_conditional_statement()
+        logger.debug(self.condition)
 
         if len(self.hdfs) == 1 and not self.paginate and self.condition:
             logger.info("unpaginated request")
@@ -343,24 +349,15 @@ class AssociationSearch:
         statement = None
 
         if self.bp_interval:
-            if self.bp_interval.lower_limit:
-                conditions.append("{bp} >= {lower}".format(bp = BP_DSET, lower = self.bp_interval.lower_limit))
-            if self.bp_interval.upper_limit:
-                conditions.append("{bp} <= {upper}".format(bp = BP_DSET, upper = self.bp_interval.upper_limit))
-
-        if self.snp:
-            self._chr_bp_from_snp()
-            if self.bp_interval:
-                conditions.append("{bp} >= {lower}".format(bp = BP_DSET, lower = self.bp_interval.lower_limit))
-                conditions.append("{bp} <= {upper}".format(bp = BP_DSET, upper = self.bp_interval.upper_limit))
+            conditions.append("{bp} >= {lower}".format(bp = BP_DSET, lower = self.bp_interval.lower_limit))
+            conditions.append("{bp} <= {upper}".format(bp = BP_DSET, upper = self.bp_interval.upper_limit))
+            if self.snp:
                 if self._snp_format() == 'rs':
                     conditions.append("{rsid} == '{id}'".format(rsid=RSID_DSET, id=str(self.snp)))
                 elif self._snp_format() == 'chr_bp':
                     conditions.append("{snp} == '{id}'".format(snp=SNP_DSET, id=str(self.snp)))
                 else:
                     raise BadUserRequest("Could not interpret variant ID format from the value provided: {}".format(self.snp))
-
-
 
         if self.pval_interval:
             if self.pval_interval.lower_limit:
@@ -375,7 +372,17 @@ class AssociationSearch:
 
         if self.gene:
             #self.chrom_for_gene()
-            conditions.append("{gene} == {id}".format(gene=GENE_DSET, id=str(self.gene)))
+            conditions.append("{gene} == '{id}'".format(gene=GENE_DSET, id=str(self.gene)))
+
+        if self.search_dir == "chr":
+            if self.study:
+                conditions.append("{study_id} == '{id}'".format(study_id=STUDY_DSET, id=str(self.study)))
+            if self.tissue:
+                conditions.append("{tissue} == '{id}'".format(tissue=TISSUE_DSET, id=str(self.tissue)))
+            if self.qtl_group:
+                conditions.append("{qtl_group} == '{id}'".format(qtl_group=QTL_GROUP_DSET, id=str(self.qtl_group)))
+
+
 
         if len(conditions) > 0:
             statement = " & ".join(conditions)
