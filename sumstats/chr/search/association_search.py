@@ -133,6 +133,10 @@ class AssociationSearch:
 
     def _narrow_hdf_pool(self):
 
+        if self.snp:
+            logger.debug("snp")
+            self._chr_bp_from_snp()
+
         # narrow by tissue
 
         if self.tissue and self.study:
@@ -202,29 +206,45 @@ class AssociationSearch:
                 raise RequestedNotFound("Study :{} with quantification method: {}".format(self.study, self.quant_method))
 
 
-        if self.snp:
-            logger.debug("snp")
-            self._chr_bp_from_snp()
-            self.hdfs = glob.glob(os.path.join(self.search_path, self.chr_dir) + "/" +  "/file_" + str(self.chromosome) + "." + str(self.quant_method) + ".h5")
-            return "chr"
-        if self.trait and not (self.study or self.tissue or self.qtl_group):
-            logger.debug("phen")
-            self.chrom_for_trait()
-            self.hdfs = glob.glob(os.path.join(self.search_path, self.chr_dir) + "/" +  "/file_" + str(self.chromosome) + "." + str(self.quant_method) + ".h5")
-            return "chr"
-        if self.gene and not (self.study or self.tissue or self.qtl_group):
-            logger.debug("gene")
-            self.chrom_for_gene()
-            self.hdfs = glob.glob(os.path.join(self.search_path, self.chr_dir) + "/" +  "/file_" + str(self.chromosome) + "." + str(self.quant_method) + ".h5")
-            return "chr"
-        if self.chromosome and all(v is None for v in [self.study, self.qtl_group, self.tissue]):
-            logger.debug("bp/chr")
-            self.hdfs = glob.glob(os.path.join(self.search_path, self.chr_dir) + "/" +  "/file_" + str(self.chromosome) + "." + str(self.quant_method) + ".h5")
-            return "chr"
-        if all(v is None for v in [self.chromosome, self.study, self.gene, self.trait, self.tissue, self.qtl_group]):
-            logger.debug("all")
-            self.hdfs = glob.glob(os.path.join(self.search_path, self.chr_dir) + "/" +  "/file_" + str(self.chromosome) + "." + str(self.quant_method) + ".h5")
-            return "chr"
+        if self.quant_method in ["ge", "microarray"]:
+            if self.snp:
+                self.hdfs = glob.glob(os.path.join(self.search_path, self.chr_dir) + "/" +  "/file_" + str(self.chromosome) + "." + str(self.quant_method) + ".h5")
+                return "chr"
+            if self.trait and not (self.study or self.tissue or self.qtl_group):
+                logger.debug("phen")
+                self.chrom_for_trait()
+                self.hdfs = glob.glob(os.path.join(self.search_path, self.chr_dir) + "/" +  "/file_" + str(self.chromosome) + "." + str(self.quant_method) + ".h5")
+                return "chr"
+            if self.gene and not (self.study or self.tissue or self.qtl_group):
+                logger.debug("gene")
+                self.chrom_for_gene()
+                self.hdfs = glob.glob(os.path.join(self.search_path, self.chr_dir) + "/" +  "/file_" + str(self.chromosome) + "." + str(self.quant_method) + ".h5")
+                return "chr"
+            if self.chromosome and all(v is None for v in [self.study, self.qtl_group, self.tissue]):
+                logger.debug("bp/chr")
+                self.hdfs = glob.glob(os.path.join(self.search_path, self.chr_dir) + "/" +  "/file_" + str(self.chromosome) + "." + str(self.quant_method) + ".h5")
+                return "chr"
+            if all(v is None for v in [self.chromosome, self.study, self.gene, self.trait, self.tissue, self.qtl_group]):
+                logger.debug("all")
+                self.hdfs = glob.glob(os.path.join(self.search_path, self.chr_dir) + "/" +  "/file_" + str(self.chromosome) + "." + str(self.quant_method) + ".h5")
+                return "chr"
+        else:
+            # block for tx/exon/txrev
+            if self.trait and not (self.study or self.tissue):
+                logger.debug("phen")
+                self.chrom_for_trait()
+                self.hdfs = glob.glob(os.path.join(self.search_path, self.study_dir) + "/" + str(self.chromosome) + "/file_*+" + str(self.quant_method) + ".h5")
+            if self.gene and not (self.study or self.tissue):
+                logger.debug("gene")
+                self.chrom_for_gene()
+                self.hdfs = glob.glob(os.path.join(self.search_path, self.study_dir) + "/" + str(self.chromosome) + "/file_*+" + str(self.quant_method) + ".h5")
+            if self.chromosome and all(v is None for v in [self.study, self.trait, self.gene, self.tissue]):
+                logger.debug("bp/chr")
+                self.hdfs = glob.glob(os.path.join(self.search_path, self.study_dir) + "/" + str(self.chromosome) + "/file_*+" + str(self.quant_method) + ".h5")
+            if all(v is None for v in [self.chromosome, self.study, self.gene, self.trait, self.tissue, self.qtl_group]):
+                logger.debug("all")
+                self.hdfs = glob.glob(os.path.join(self.search_path, self.study_dir) + "/*/file_*+" + str(self.quant_method) + ".h5")             
+
         return "study"
 
     def _narrow_by_chromosome(self, file_ids):
