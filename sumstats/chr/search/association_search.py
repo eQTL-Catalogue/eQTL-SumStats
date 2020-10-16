@@ -275,7 +275,7 @@ class AssociationSearch:
         self.condition = self._construct_conditional_statement()
         logger.debug(self.condition)
 
-        if len(self.hdfs) == 1 and not self.paginate and self.condition:
+        if len(self.hdfs) == 1 and not self.paginate and self.condition and self.search_dir != "chr":
             logger.info("unpaginated request")
             self.unpaginated_request()
         elif len(self.hdfs) > 1 and (not self.paginate or self.condition):
@@ -342,7 +342,7 @@ class AssociationSearch:
             key = store.keys()[0]
             identifier = key.strip("/")
             logger.debug(key)
-            meta_dict = self._get_study_metadata(identifier) if self.search_dir == "study" else chunk
+            meta_dict = self._get_study_metadata(identifier) if self.search_dir == "study" else None
 
 
             print(self.condition)
