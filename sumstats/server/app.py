@@ -1504,50 +1504,30 @@ def get_tissues():
             Content-Type: application/json
 
             {
-              "_embedded": {
-                "tissues": [
-                  {
-                    "_links": {
-                      "associations": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/tissues/CL_0000057/associations"
-                      },
-                      "studies": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/tissues/CL_0000057/studies"
-                      },
-                      "self": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/tissues/CL_0000057"
-                      }
-                    },
-                    "tissue": "CL_0000057"
+               _embedded: {
+                  tissues: [{
+                        tissue_label: "Esophagus - Mucosa",
+                        tissue: "UBER_0006920"
+                     },
+                     {
+                        tissue_label: "Artery - Coronary",
+                        tissue: "UBER_0001621"
+                     }
+                  ]
+               },
+               _links: {
+                  self: {
+                     href: "http://wwwdev.ebi.ac.uk/eqtl/api/tissues"
                   },
-                  {
-                    "_links": {
-                      "associations": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/tissues/CL_0000101/associations"
-                      },
-                      "studies": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/tissues/CL_0000101/studies"
-                      },
-                      "self": {
-                        "href": "http://www.ebi.ac.uk/eqtl/api/tissues/CL_0000101"
-                      }
-                    },
-                    "tissue": "CL_0000101"
+                  first: {
+                     href: "http://wwwdev.ebi.ac.uk/eqtl/api/tissues?start=0&size=2"
+                  },
+                  next: {
+                     href: "http://wwwdev.ebi.ac.uk/eqtl/api/tissues?start=2&size=2"
                   }
-                ]
-              },
-              "_links": {
-                "self": {
-                  "href": "http://www.ebi.ac.uk/eqtl/api/tissues"
-                },
-                "first": {
-                  "href": "http://www.ebi.ac.uk/eqtl/api/tissues?size=2&start=0"
-                },
-                "next": {
-                  "href": "http://www.ebi.ac.uk/eqtl/api/tissues?size=2&start=2"
-                }
-              }
+               }
             }
+
 
         :query start: offset number. default is 0
         :query size: number of items returned. default is 20
