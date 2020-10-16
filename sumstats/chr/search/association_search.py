@@ -225,9 +225,10 @@ class AssociationSearch:
                 self.hdfs = glob.glob(os.path.join(self.search_path, self.chr_dir) + "/" +  "/file_" + str(self.chromosome) + "." + str(self.quant_method) + ".h5")
                 return "chr"
             if all(v is None for v in [self.chromosome, self.study, self.gene, self.trait, self.tissue, self.qtl_group]):
+                print("all")
                 logger.debug("all")
-                self.hdfs = glob.glob(os.path.join(self.search_path, self.chr_dir) + "/" +  "/file_" + str(self.chromosome) + "." + str(self.quant_method) + ".h5")
-                return "chr"
+                self.hdfs = glob.glob(os.path.join(self.search_path, self.study_dir) + "/*/file_*+" + str(self.quant_method) + ".h5")             
+                return "study"
         else:
             # block for tx/exon/txrev
             if self.trait and not (self.study or self.tissue):
