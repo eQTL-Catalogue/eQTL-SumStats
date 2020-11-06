@@ -19,6 +19,7 @@ def root():
             ('molecular_phenotypes', apiu._create_href(method_name='api.get_traits')),
             ('studies', apiu._create_href(method_name='api.get_studies')),
             ('tissues', apiu._create_href(method_name='api.get_tissues')),
+            ('qtl_groups', apiu._create_href(method_name='api.get_qtl_groups')),
             ('genes', apiu._create_href(method_name='api.get_genes')),
             ('chromosomes', apiu._create_href(method_name='api.get_chromosomes'))
         ])
@@ -433,6 +434,35 @@ def tissue(tissue):
         logging.error("/tissue/" + tissue + ". " + (str(error)))
         raise RequestedNotFound(str(error))
 
+
+def qtl_groups():
+    args = request.args.to_dict()
+    try:
+        start, size, p_lower, p_upper, pval_interval, quant_method, snp, _, gene, study, trait, paginate, links, qtl_group = apiu._get_basic_arguments(args)
+    except ValueError as error:
+        logging.error("/qtl_groups. " + (str(error)))
+        raise BadUserRequest(str(error))
+
+    explorer = ex.Explorer(apiu.properties)
+    qtls = explorer.get_qtl_list()
+    qtl_list = apiu._get_qtl_list(qtls=qtls, start=start, size=size, links=links)
+    response = apiu._create_response(collection_name='qtl_groups', method_name='api.get_qtl_groups',
+                                     start=start, size=size, index_marker=size, data_dict=qtl_list)
+
+    return simplejson.dumps(response)
+
+
+def qtl_group(qtl_group):
+    try:
+        explorer = ex.Explorer(config_properties=properties)
+        if explorer.get_studies_of_tissue(tissue):
+            response = apiu._create_info_for_tissue(tissue)
+            return simplejson.dumps(response, ignore_nan=True)
+        else:
+            raise RequestedNotFound("Tissue: {} not found".format(tissue))
+    except NotFoundError as error:
+        logging.error("/tissue/" + tissue + ". " + (str(error)))
+        raise RequestedNotFound(str(error))
 
 def genes():
     args = request.args.to_dict()

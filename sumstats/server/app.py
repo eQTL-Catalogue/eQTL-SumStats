@@ -1517,13 +1517,13 @@ def get_tissues():
                },
                _links: {
                   self: {
-                     href: "http://wwwdev.ebi.ac.uk/eqtl/api/tissues"
+                     href: "http://www.ebi.ac.uk/eqtl/api/tissues"
                   },
                   first: {
-                     href: "http://wwwdev.ebi.ac.uk/eqtl/api/tissues?start=0&size=2"
+                     href: "http://www.ebi.ac.uk/eqtl/api/tissues?start=0&size=2"
                   },
                   next: {
-                     href: "http://wwwdev.ebi.ac.uk/eqtl/api/tissues?start=2&size=2"
+                     href: "http://www.ebi.ac.uk/eqtl/api/tissues?start=2&size=2"
                   }
                }
             }
@@ -1584,6 +1584,63 @@ def get_tissue(tissue):
         :statuscode 404: not found error
     """
     resp = endpoints.tissue(tissue=tissue)
+    return Response(response=resp,
+                    status=200,
+                    mimetype="application/json")
+
+
+@api.route('/qtl_groups')
+def get_qtl_groups():
+    """QTL groups
+
+        .. :quickref: QTL groups; List all existing qtl groups (datasets)
+
+        Lists all of the existing qtl groups.
+
+        **Example request**:
+
+        .. sourcecode:: http
+
+            GET /qtl_groups HTTP/1.1
+            Host: www.ebi.ac.uk
+
+        **Example response**:
+
+        .. sourcecode:: http
+
+            HTTP/1.1 200 OK
+            Content-Type: application/json
+
+        {
+        	_embedded: {
+        		qtl_groups: [{
+        				qtl_group: "Adipose_Subcutaneous"
+        			},
+        			{
+        				qtl_group: "Adipose_Visceral_Omentum"
+        			}
+        		]
+        	},
+        	_links: {
+        		self: {
+        			href: "http://www.ebi.ac.uk/eqtl/api/qtl_groups"
+        		},
+        		first: {
+        			href: "http://www.ebi.ac.uk/eqtl/api/qtl_groups?start=0&size=2"
+        		},
+        		next: {
+        			href: "http://www.ebi.ac.uk/eqtl/api/qtl_groups?start=2&size=2"
+        		}
+        	}
+        }
+
+        :query start: offset number. default is 0
+        :query size: number of items returned. default is 20
+
+        :statuscode 200: no error
+
+    """
+    resp = endpoints.qtl_groups()
     return Response(response=resp,
                     status=200,
                     mimetype="application/json")
