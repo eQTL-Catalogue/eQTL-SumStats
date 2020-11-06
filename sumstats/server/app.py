@@ -1624,28 +1624,29 @@ def get_qtl_groups():
             HTTP/1.1 200 OK
             Content-Type: application/json
 
-        {
-        	_embedded: {
-        		qtl_groups: [{
-        				qtl_group: "Adipose_Subcutaneous"
-        			},
-        			{
-        				qtl_group: "Adipose_Visceral_Omentum"
-        			}
-        		]
-        	},
-        	_links: {
-        		self: {
-        			href: "http://www.ebi.ac.uk/eqtl/api/qtl_groups"
-        		},
-        		first: {
-        			href: "http://www.ebi.ac.uk/eqtl/api/qtl_groups?start=0&size=2"
-        		},
-        		next: {
-        			href: "http://www.ebi.ac.uk/eqtl/api/qtl_groups?start=2&size=2"
-        		}
-        	}
-        }
+            {
+              "_embedded": {
+                "qtl_groups": [
+                  {
+                    "qtl_group": "Adipose_Subcutaneous"
+                  },
+                  {
+                    "qtl_group": "Adipose_Visceral_Omentum"
+                  }
+                ]
+              },
+              "_links": {
+                "self": {
+                  "href": "http://localhost:8000/eqtl/api/qtl_groups"
+                },
+                "first": {
+                  "href": "http://localhost:8000/eqtl/api/qtl_groups?start=0&size=2"
+                },
+                "next": {
+                  "href": "http://localhost:8000/eqtl/api/qtl_groups?start=2&size=2"
+                }
+              }
+            }
 
         :query start: offset number. default is 0
         :query size: number of items returned. default is 20
