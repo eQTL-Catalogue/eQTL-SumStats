@@ -347,8 +347,8 @@ def variants(variant, chromosome=None):
     args = request.args.to_dict()
     try:
         start, size, p_lower, p_upper, pval_interval, quant_method, _, tissue, gene, study, trait, paginate, links, qtl_group  = apiu._get_basic_arguments(args)
-        if study is not None:
-            return variant_resource(variant=variant, chromosome=chromosome)
+        #if study is not None:
+        #    return variant_resource(variant=variant, chromosome=chromosome)
     except ValueError as error:
         logging.debug("/chromosomes/" + chromosome + "/associations/" + variant + ". " + (str(error)))
         raise BadUserRequest(str(error))
@@ -398,7 +398,7 @@ def variant_resource(variant, chromosome=None):
         if chromosome is not None:
             params['chromosome'] = chromosome
         response = apiu._create_resource_response(data_dict=data_dict, params=params)
-
+        print(response)
         return simplejson.dumps(response, ignore_nan=True)
     except (NotFoundError, SubgroupError) as error:
         logging.debug(str(error))
