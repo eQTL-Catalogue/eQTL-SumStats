@@ -250,6 +250,8 @@ class AssociationSearch:
         return "study"
 
     def _narrow_by_chromosome(self, file_ids):
+        self.chrom_for_gene() if self.gene else None
+        self.chrom_for_trait() if self.trait else None
         if self.chromosome:
             logger.debug("chr{}".format(self.chromosome))
             self.hdfs = [glob.glob(os.path.join(self.search_path, self.study_dir) + "/" + str(self.chromosome) + "/file_" + f + ".h5") for f in file_ids]
