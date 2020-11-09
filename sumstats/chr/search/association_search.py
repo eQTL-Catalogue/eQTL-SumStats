@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import re
 import glob
 import itertools
@@ -324,6 +325,7 @@ class AssociationSearch:
                     print(len(chunk))
 
                     self.df = self.df.append(chunk)
+                    self.add_neg_log10_pvalue()
 
                     if len(self.df.index) >= self.size:
                         # break once we have enough
@@ -353,6 +355,7 @@ class AssociationSearch:
             chunk = self._update_df_with_metadata(chunk, meta_dict) if self.search_dir == "study" else chunk
 
             self.df = pd.concat([self.df, chunk])
+            self.add_neg_log10_pvalue()
 
     @staticmethod
     def _update_df_with_metadata(df, meta_dict):
@@ -363,6 +366,9 @@ class AssociationSearch:
         df[CONDITION_LABEL_DSET] = meta_dict['condition_label']
         df[TISSUE_LABEL_DSET] = meta_dict['tissue_label']
         return df
+
+    def add_neg_log10_pvalue(self):
+        self.df[NEG_LOG_PVAL_DSET] = np.negative(np.log10(self.df[PVAL_DSET]))
 
 
     def _construct_conditional_statement(self):

@@ -141,6 +141,15 @@ class sqlClient():
         else:
             return False
 
+    def get_qtl_list(self):
+        data = []
+        for row in self.cur.execute("SELECT qtl_group FROM study_info"):
+            data.append(row[0])
+        if data:
+            return data
+        else:
+            return False
+
     def get_tissue_ontos(self):
         data = []
         for row in self.cur.execute("SELECT tissue_ontology FROM study_info"):

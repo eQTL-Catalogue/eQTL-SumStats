@@ -102,6 +102,7 @@ def get_assocs():
                      "maf": 0.246914,
                      "median_tpm": 12.272,
                      "pvalue": 0.0166984,
+                     "neg_log10_p_value": 1.77732514,
                      "molecular_trait_id": "ENSG00000011304",
                      "gene_id": "ENSG00000011304",
                      "tissue": "UBERON_0009834",
@@ -126,6 +127,7 @@ def get_assocs():
                      "maf": 0.246914,
                      "median_tpm": 27.623,
                      "pvalue": 0.424836,
+                     "neg_log10_p_value": 0.371778689,
                      "molecular_trait_id": "ENSG00000129951",
                      "gene_id": "ENSG00000129951",
                      "tissue": "UBERON_0009834",
@@ -228,6 +230,7 @@ def get_variant(variant_id=None, rsid=None):
                      "maf": 0.246914,
                      "median_tpm": 12.272,
                      "pvalue": 0.0166984,
+                     "neg_log10_p_value": 1.77732514,
                      "molecular_trait_id": "ENSG00000011304",
                      "gene_id": "ENSG00000011304",
                      "tissue": "UBERON_0009834",
@@ -252,6 +255,7 @@ def get_variant(variant_id=None, rsid=None):
                      "maf": 0.246914,
                      "median_tpm": 27.623,
                      "pvalue": 0.424836,
+                     "neg_log10_p_value": 0.371778689,
                      "molecular_trait_id": "ENSG00000129951",
                      "gene_id": "ENSG00000129951",
                      "tissue": "UBERON_0009834",
@@ -461,6 +465,7 @@ def get_trait_assocs(molecular_trait_id):
                      "maf": 0.246914,
                      "median_tpm": 12.272,
                      "pvalue": 0.0166984,
+                     "neg_log10_p_value": 1.77732514,
                      "molecular_trait_id": "ENSG00000011304",
                      "gene_id": "ENSG00000011304",
                      "tissue": "UBERON_0009834",
@@ -772,6 +777,7 @@ def get_tissue_assocs(tissue):
                     "type": "SNP",
                     "maf": 0.380952,
                     "pvalue": 0.5004,
+                    "neg_log10_p_value": 0.300682699,
                     "molecular_trait_id": "ENSG00000011304",
                     "gene_id": "ENSG00000011304",
                     "tissue": "CL_0000235",
@@ -796,6 +802,7 @@ def get_tissue_assocs(tissue):
                     "type": "SNP",
                     "maf": 0.380952,
                     "pvalue": 0.0528997,
+                    "neg_log10_p_value": 1.276546791,
                     "molecular_trait_id": "ENSG00000099817",
                     "gene_id": "ENSG00000099817",
                     "tissue": "CL_0000235",
@@ -930,6 +937,7 @@ def get_tissue_study_assocs(study, tissue=None):
                     "qtl_group": "macrophage_IFNg+Salmonella",
                     "ref": "G",
                     "pvalue": 0.5004,
+                    "neg_log10_p_value": 0.300682699,
                     "position": 229783,
                     "variant": "chr19_229783_G_A",
                     "tissue_label": "macrophage",
@@ -954,6 +962,7 @@ def get_tissue_study_assocs(study, tissue=None):
                     "qtl_group": "macrophage_IFNg+Salmonella",
                     "ref": "G",
                     "pvalue": 0.0528997,
+                    "neg_log10_p_value": 1.276546791,
                     "position": 229783,
                     "variant": "chr19_229783_G_A",
                     "tissue_label": "macrophage",
@@ -1288,6 +1297,7 @@ def get_chromosome_assocs(chromosome):
                     "alt": "A",
                     "position": 1053768,
                     "pvalue": 0.483624,
+                    "neg_log10_p_value": 0.315492155,
                     "maf": 0.0123457,
                     "type": "SNP",
                     "ac": 12,
@@ -1312,6 +1322,7 @@ def get_chromosome_assocs(chromosome):
                     "alt": "A",
                     "position": 1053768,
                     "pvalue": 0.468078,
+                    "neg_log10_p_value": 0.329681771,
                     "maf": 0.0123457,
                     "type": "SNP",
                     "ac": 12,
@@ -1408,6 +1419,7 @@ def get_chromosome_variants(chromosome, variant_id):
                     "qtl_group": "macrophage_naive",
                     "ref": "T",
                     "pvalue": 0.24666,
+                    "neg_log10_p_value": 0.607901273,
                     "position": 814583,
                     "variant": "rs56197012",
                     "tissue_label": "macrophage",
@@ -1432,6 +1444,7 @@ def get_chromosome_variants(chromosome, variant_id):
                     "qtl_group": "macrophage_naive",
                     "ref": "T",
                     "pvalue": 0.711897,
+                    "neg_log10_p_value": 0.147582837,
                     "position": 814583,
                     "variant": "rs56197012",
                     "tissue_label": "macrophage",
@@ -1517,13 +1530,13 @@ def get_tissues():
                },
                _links: {
                   self: {
-                     href: "http://wwwdev.ebi.ac.uk/eqtl/api/tissues"
+                     href: "http://www.ebi.ac.uk/eqtl/api/tissues"
                   },
                   first: {
-                     href: "http://wwwdev.ebi.ac.uk/eqtl/api/tissues?start=0&size=2"
+                     href: "http://www.ebi.ac.uk/eqtl/api/tissues?start=0&size=2"
                   },
                   next: {
-                     href: "http://wwwdev.ebi.ac.uk/eqtl/api/tissues?start=2&size=2"
+                     href: "http://www.ebi.ac.uk/eqtl/api/tissues?start=2&size=2"
                   }
                }
             }
@@ -1584,6 +1597,64 @@ def get_tissue(tissue):
         :statuscode 404: not found error
     """
     resp = endpoints.tissue(tissue=tissue)
+    return Response(response=resp,
+                    status=200,
+                    mimetype="application/json")
+
+
+@api.route('/qtl_groups')
+def get_qtl_groups():
+    """QTL groups
+
+        .. :quickref: QTL groups; List all existing qtl groups (datasets)
+
+        Lists all of the existing qtl groups.
+
+        **Example request**:
+
+        .. sourcecode:: http
+
+            GET /qtl_groups HTTP/1.1
+            Host: www.ebi.ac.uk
+
+        **Example response**:
+
+        .. sourcecode:: http
+
+            HTTP/1.1 200 OK
+            Content-Type: application/json
+
+            {
+              "_embedded": {
+                "qtl_groups": [
+                  {
+                    "qtl_group": "Adipose_Subcutaneous"
+                  },
+                  {
+                    "qtl_group": "Adipose_Visceral_Omentum"
+                  }
+                ]
+              },
+              "_links": {
+                "self": {
+                  "href": "http://localhost:8000/eqtl/api/qtl_groups"
+                },
+                "first": {
+                  "href": "http://localhost:8000/eqtl/api/qtl_groups?start=0&size=2"
+                },
+                "next": {
+                  "href": "http://localhost:8000/eqtl/api/qtl_groups?start=2&size=2"
+                }
+              }
+            }
+
+        :query start: offset number. default is 0
+        :query size: number of items returned. default is 20
+
+        :statuscode 200: no error
+
+    """
+    resp = endpoints.qtl_groups()
     return Response(response=resp,
                     status=200,
                     mimetype="application/json")
@@ -1746,6 +1817,7 @@ def get_gene_assocs(gene_id):
                     "alt": "C",
                     "position": 192658,
                     "pvalue": 0.644378,
+                    "neg_log10_p_value": 0.190859295,
                     "maf": 0.00925926,
                     "type": "SNP",
                     "ac": 9,
@@ -1770,6 +1842,7 @@ def get_gene_assocs(gene_id):
                     "alt": "A",
                     "position": 193051,
                     "pvalue": 0.166599,
+                    "neg_log10_p_value": 0.77832761,
                     "maf": 0.0277778,
                     "type": "SNP",
                     "ac": 27,

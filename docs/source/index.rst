@@ -155,6 +155,8 @@ Available data fields
 +-------------------------+--------+--------------------------------------------------------------+
 | pvalue                  | Number | P-value of association between the variant and the phenotype |
 +-------------------------+--------+--------------------------------------------------------------+
+| neg_log10_pvalue        | Number | Negative log10 p-value                                       |
++-------------------------+--------+--------------------------------------------------------------+
 | ac                      | Number | Allele count                                                 |
 +-------------------------+--------+--------------------------------------------------------------+
 | alt                     | String | GRCh38 effect allele (alt allele)                            |
@@ -237,6 +239,7 @@ Links will be provided in the response to navigate the resources.
            "maf": 0.246914,
            "median_tpm": 12.272,
            "pvalue": 0.0166984,
+           "neg_log10_pvalue": 1.77732514,
            "molecular_trait_id": "ENSG00000011304",
            "gene_id": "ENSG00000011304",
            "tissue": "UBERON_0009834",

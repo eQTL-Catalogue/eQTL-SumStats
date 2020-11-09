@@ -46,6 +46,13 @@ def _get_tissue_list(tissues, start, size, links=None):
         tissue_list.append(_create_info_for_tissue(tissue, tissue_name, links))
     return tissue_list
 
+def _get_qtl_list(qtls, start, size, links=None):
+    qtl_list = []
+    end = min(start + size, len(qtls))
+    for qtl in qtls[start:end]:
+        qtl_list.append({'qtl_group': qtl})
+    return qtl_list
+
 
 def _create_study_info_for_trait(studies, trait=None):
     study_list = []
