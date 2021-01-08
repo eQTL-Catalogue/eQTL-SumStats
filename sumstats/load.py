@@ -48,7 +48,7 @@ class Loader():
         identifier = self.study + "+" + self.qtl_group + "+" + self.quant_method
         #group = "/{study}".format(study=self.study.replace('-','_'))
         #hdf_store = fsutils.create_h5file_path(path=self.hdf_path, file_name=identifier, dir_name=self.study_dir + "/" + self.chromosome)
-        hdf_store = os.path.join(self.chromosome, identifier + ".h5")
+        hdf_store = os.path.join(self.chromosome, "file_" + identifier + ".h5")
         self.write_csv_to_hdf(hdf_store, identifier)
 
 

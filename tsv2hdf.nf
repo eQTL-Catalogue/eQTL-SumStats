@@ -4,6 +4,7 @@ params.meta_table = 'metadata.tsv'
 params.properties = 'properties.py'
 params.tsv_in = './tsv/'
 params.hdf5_study_dir = './studies/'
+params.hdf5_chrom_dir = './chroms/'
 tsv_glob = new File(params.tsv_in, "*.tsv.gz")
 tsv_to_process = Channel.fromPath(tsv_glob)
 
@@ -30,14 +31,17 @@ process study_tsv_to_hdf5 {
   file "${chr}/*.h5" optional true into hdf5_study_no_index
 
   """
-  EQSS_CONFIG=$params.properties;
   mkdir $chr;
   eqtl-load -f $tsv -metadata $params.meta_table -chr $chr -loader study;
   """
-
 }
 
 
-// need to send the outputs to the correct paths
+//process consolidate_hdfs_by_chrom {
+
+ 
+
+
+
 
 // consolidate and reindex
