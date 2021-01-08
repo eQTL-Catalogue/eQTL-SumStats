@@ -16,7 +16,7 @@ class Loader():
     def __init__(self, tsv=None, csv_out=None, var_file=None, qtl_group=None, quant_method=None,
                  study_dir=None, study=None, trait=None, hdf_path=None,
                  chromosome=None, expr_file=None, sqldb=None, loader=None, trait_dir=None, tissue=None,
-                 tissue_ont=None, treatment=None, treatment_ont=None):
+                 tissue_ont=None, treatment=None, treatment_ont=None, condition_label=None):
         self.tsv = tsv
         self.csv_out = csv_out
         self.var_file = var_file
@@ -34,6 +34,7 @@ class Loader():
         self.tissue_ont = tissue_ont
         self.treatment = treatment
         self.treatment_ont = treatment_ont
+        self.condition_label = condition_label
 
         self.filename = None
         if self.tsv:
@@ -64,9 +65,6 @@ class Loader():
         dftrait = dftrait[pd.to_numeric(dftrait[CHR_DSET], errors='coerce').notnull()]
         dftrait[CHR_DSET] = dftrait[CHR_DSET].astype(int)
 
-        #dftrait = pd.to_numeric(dftrait[CHR_DSET], errors='coerce')
-        #['X|x', 'Y|y', 'MT|mt|Mt'], ['23', '24', '25'])
-
         with pd.HDFStore(hdf) as store:
             """store in hdf5 as below"""
             dftrait.to_hdf(store, group,
@@ -87,76 +85,49 @@ class Loader():
                            float_precision='high',
                            chunksize=1000000)
 
-        #"""Read in the variant file"""
-        #dfvar = pd.read_csv(self.var_file, sep="\t",
-        #                    names=['chromosome', 'position', 'variant', 'ref', 'alt',
-        #                           'type', 'ac', 'an', 'maf', 'r2', 'rsid'],
-        #                    float_precision='high', skiprows=1,
-        #                    dtype={'chromosome': str, 'position': int, 'variant': str})
-        #
-        #"""Read in the trait file"""
-        ## set the column order
-        #dftrait = pd.read_csv(self.trait_file, sep="\t", usecols=['phenotype_id', 'gene_id', 'group_id'])[['phenotype_id', 'gene_id', 'group_id']]
-        #dftrait.columns = ['phenotype_id', 'gene_id', 'molecular_trait_object_id']
-        #
-        #if self.expr_file:
-        #    """Read in the gene expression file"""
-        #    dfexpr = pd.read_csv(self.expr_file, sep="\t", float_precision='high', names=['phenotype_id', 'study', 'qtl_group', 'median_tpm'])
-        #    dfexpr = dfexpr[dfexpr.study == self.study]
-        #    dfexpr = dfexpr[dfexpr.qtl_group == self.qtl_group]
-        #    dfexpr["median_tpm"] = pd.to_numeric(dfexpr["median_tpm"], errors='coerce')
-        #else:
-        #    print("no expression file")
-        #    dfexpr = pd.DataFrame(columns=['phenotype_id', 'study', 'qtl_group', 'median_tpm'])
 
         with pd.HDFStore(hdf) as store:
             """store in hdf5 as below"""
             count = 1
             for chunk in dfss:
                 print(count)
+                chunk = chunk[(chunk[CHR_DSET] == self.chromosome)]
+                if not chunk.empty:
+                    chunk = chunk[sorted(TO_LOAD_DSET_HEADERS_DEFAULT)]
+                    for field in [EFFECT_DSET, OTHER_DSET]:
+                        self.placeholder_if_allele_string_too_long(df=chunk, field=field)
+                    self.placeholder_if_variant_id_too_long(df=chunk, field=SNP_DSET)
+                    chunk.to_hdf(store, group,
+                                complib='blosc',
+                                complevel=9,
+                                format='table',
+                                mode='a',
+                                append=True,
+                                data_columns=list(TO_INDEX),
+                                #expectedrows=num_rows,
+                                min_itemsize={OTHER_DSET: self.max_string,
+                                              EFFECT_DSET: self.max_string,
+                                              PHEN_DSET: self.max_string,
+                                              GENE_DSET: self.max_string,
+                                              MTO_DSET: self.max_string,
+                                              RSID_DSET: 24,
+                                              CHR_DSET: 2,
+                                              SNP_DSET: self.max_string},
+                                index = False
+                                )
 
-                #merged = pd.merge(chunk, dfvar, how='left', left_on=['variant_ss'], right_on=['variant'])
-                #print("merged one ")
-                #merged2 = pd.merge(merged, dftrait, how='left', left_on=['molecular_trait_id'], right_on=['phenotype_id'])
-                #print("merged two")
-                #merged3 = pd.merge(merged2, dfexpr, how='left', left_on=['molecular_trait_id'], right_on=['phenotype_id'])
-                #print("merged three")
-                #merged3 = merged3[list(TO_LOAD_DSET_HEADERS_DEFAULT)]
-                chunk = chunk[sorted(TO_LOAD_DSET_HEADERS_DEFAULT)]
-                for field in [EFFECT_DSET, OTHER_DSET]:
-                    self.placeholder_if_allele_string_too_long(df=chunk, field=field)
-                self.placeholder_if_variant_id_too_long(df=chunk, field=SNP_DSET)
-                chunk.to_hdf(store, group,
-                            complib='blosc',
-                            complevel=9,
-                            format='table',
-                            mode='a',
-                            append=True,
-                            data_columns=list(TO_INDEX),
-                            #expectedrows=num_rows,
-                            min_itemsize={OTHER_DSET: self.max_string,
-                                          EFFECT_DSET: self.max_string,
-                                          PHEN_DSET: self.max_string,
-                                          GENE_DSET: self.max_string,
-                                          MTO_DSET: self.max_string,
-                                          RSID_DSET: 24,
-                                          CHR_DSET: 2,
-                                          SNP_DSET: self.max_string},
-                            index = False
-                            )
+                    """Store study specific metadata"""
+                    store.get_storer(group).attrs.study_metadata = {'study': self.study,
+                                                                    'qtl_group': self.qtl_group,
+                                                                    'quant_method': self.quant_method}
 
-                """Store study specific metadata"""
-                store.get_storer(group).attrs.study_metadata = {'study': self.study,
-                                                                'qtl_group': self.qtl_group,
-                                                                'quant_method': self.quant_method}
-
-                if self.csv_out:
-                    if count == 1:
-                        chunk.to_csv(self.csv_out, compression='gzip', columns=sorted(TO_LOAD_DSET_HEADERS_DEFAULT),
-                                       index=False, mode='w', sep='\t', encoding='utf-8', na_rep="NA")
-                    else:
-                        chunk.to_csv(self.csv_out, compression='gzip', columns=sorted(TO_LOAD_DSET_HEADERS_DEFAULT),
-                                       header=False, index=False, mode='a', sep='\t', encoding='utf-8', na_rep="NA")
+                    if self.csv_out:
+                        if count == 1:
+                            chunk.to_csv(self.csv_out, compression='gzip', columns=sorted(TO_LOAD_DSET_HEADERS_DEFAULT),
+                                           index=False, mode='w', sep='\t', encoding='utf-8', na_rep="NA")
+                        else:
+                            chunk.to_csv(self.csv_out, compression='gzip', columns=sorted(TO_LOAD_DSET_HEADERS_DEFAULT),
+                                           header=False, index=False, mode='a', sep='\t', encoding='utf-8', na_rep="NA")
                 count += 1
 
 
@@ -182,15 +153,17 @@ class Loader():
             treatment blob,
             treatment_ontology blob not null,
             quant_method blob,
+            condition_label blob not null
             UNIQUE (identifier)
             );
         """
         sql = sq.sqlClient(self.sqldb)
         identifier = self.study + "+" + self.qtl_group + "+" + self.quant_method
         trait_file_id = os.path.basename(self.trait_file)
-        data = [self.study, identifier, self.qtl_group, self.tissue, trait_file_id, self.tissue_ont, self.treatment, self.treatment_ont, self.quant_method ]
-        sql.cur.execute("insert or ignore into study_info values (?,?,?,?,?,?,?,?,?)", data)
+        data = [self.study, identifier, self.qtl_group, self.tissue, trait_file_id, self.tissue_ont, self.treatment, self.treatment_ont, self.quant_method , self.condition_label]
+        sql.cur.execute("insert or ignore into study_info values (?,?,?,?,?,?,?,?,?, ?)", data)
         sql.cur.execute('COMMIT')
+        #Schmiedel_2018|Schmiedel_2018+Treg_memory+exon|Treg_memory|Treg|Ensembl_96_phenotype_metadata.tsv.gz|CL_0002678|Treg_memory|None|exon|naive
 
 
 def main():
@@ -205,10 +178,11 @@ def main():
     argparser.add_argument('-quant', help='The quantification method e.g. "gene counts"', required=False)
     argparser.add_argument('-tissue', help='The tissue', required=False)
     argparser.add_argument('-chr', help='The chromosome the data belongs to', required=False)
-    argparser.add_argument('-loader', help='The loader', choices=['study', 'trait', 'study_info'], default=None, required=True)
+    argparser.add_argument('-loader', help='The loader type', choices=['study', 'trait', 'study_info'], default=None, required=True)
     argparser.add_argument('-tissue_ont', help='The tissue ontology term', required=False)
     argparser.add_argument('-treatment', help='The treatment', required=False)
     argparser.add_argument('-treatment_ont', help='The treatment ontology term', required=False)
+    argparser.add_argument('-condition_label', help='The condition label e.g. "naive"', required=False)
 
     args = argparser.parse_args()
 
@@ -234,6 +208,7 @@ def main():
     tissue_ont = args.tissue_ont
     treatment = args.treatment
     treatment_ont = args.treatment_ont
+    condition_label = args.condition_label
 
     if loader_type == 'study':
         if chromosome is None:
@@ -246,7 +221,7 @@ def main():
             loader = Loader(trait=phen_file, hdf_path=h5files_path, loader=loader_type, trait_dir=trait_dir)
             loader.load_traits()
     elif loader_type == "study_info":
-            loader = Loader(qtl_group=qtl_group, quant_method=quant_method, study=study, sqldb=database, trait=phen_file, loader=loader_type, tissue=tissue, tissue_ont=tissue_ont, treatment=treatment, treatment_ont=treatment_ont)
+            loader = Loader(qtl_group=qtl_group, quant_method=quant_method, study=study, sqldb=database, trait=phen_file, loader=loader_type, tissue=tissue, tissue_ont=tissue_ont, treatment=treatment, treatment_ont=treatment_ont, condition_label=condition_label)
         #loader = Loader(filename, tsvfiles_path, chr_dir, study_dir, study, traits, h5files_path, chromosome, database, loader_type)
             loader.load_study_info()
     else:
