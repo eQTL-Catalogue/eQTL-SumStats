@@ -46,7 +46,8 @@ class Loader():
         print(self.tsv)
         identifier = self.study + "+" + self.qtl_group + "+" + self.quant_method
         #group = "/{study}".format(study=self.study.replace('-','_'))
-        hdf_store = fsutils.create_h5file_path(path=self.hdf_path, file_name=identifier, dir_name=self.study_dir + "/" + self.chromosome)
+        #hdf_store = fsutils.create_h5file_path(path=self.hdf_path, file_name=identifier, dir_name=self.study_dir + "/" + self.chromosome)
+        hdf_store = "study.h5"
         self.write_csv_to_hdf(hdf_store, identifier)
 
 
@@ -118,12 +119,6 @@ class Loader():
                     store.get_storer(group).attrs.study_metadata = {'study': self.study,
                                                                     'qtl_group': self.qtl_group,
                                                                     'quant_method': self.quant_method}
-            # remove file if nothing written
-            if len(store.keys()) == 0:
-                try:
-                    os.remove(hdf)
-                except FileNotFoundError as e:
-                    print(e)
 
 
 

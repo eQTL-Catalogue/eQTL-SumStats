@@ -8,7 +8,7 @@ tsv_glob = new File(params.tsv_in, "*.tsv.gz")
 tsv_to_process = Channel.fromPath(tsv_glob)
 
 //chromosomes = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'X']
-chromosomes = ['1', '2', '3', 'X']
+chromosomes = ['1', 'X']
 
 
 process study_tsv_to_hdf5 {
@@ -25,11 +25,12 @@ process study_tsv_to_hdf5 {
   file tsv from tsv_to_process
 
   output:
-  file "$chr/${tsv.baseName}.h5" optional true into hdf5_study_no_index
+  file "study.h5" optional true into hdf5_study_no_index
 
   """
   EQSS_CONFIG=$params.properties;
-  eqtl-load -f $tsv -metadata $params.meta_table -chr $chr -loader study
+  eqtl-load -f $tsv -metadata $params.meta_table -chr $chr -loader study;
+  eqtl-reindex -f study.h5
   """
 
 }
