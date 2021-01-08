@@ -16,6 +16,8 @@ process study_tsv_to_hdf5 {
   containerOptions "--bind $params.tsv_in"
   containerOptions "--bind $params.hdf5_study_dir"
 
+  publishDir "$params.hdf5_study_dir", mode: 'copy'
+
   memory { 8.GB * task.attempt }
   maxRetries 3
   errorStrategy { task.exitStatus == 140 ? 'retry' : 'terminate' }
@@ -25,14 +27,17 @@ process study_tsv_to_hdf5 {
   file tsv from tsv_to_process
 
   output:
-  file "study.h5" optional true into hdf5_study_no_index
+  file "${chr}/*.h5" optional true into hdf5_study_no_index
 
   """
   EQSS_CONFIG=$params.properties;
+  mkdir $chr;
   eqtl-load -f $tsv -metadata $params.meta_table -chr $chr -loader study;
-  eqtl-reindex -f study.h5
   """
 
 }
 
 
+// need to send the outputs to the correct paths
+
+// consolidate and reindex

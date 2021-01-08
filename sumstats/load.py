@@ -10,6 +10,7 @@ from sumstats.utils.properties_handler import properties
 from sumstats.utils import properties_handler
 from sumstats.utils import filesystem_utils as fsutils
 import sumstats.utils.sqlite_client as sq
+import sumstats.reindex as ri
 
 
 class Loader():
@@ -47,7 +48,7 @@ class Loader():
         identifier = self.study + "+" + self.qtl_group + "+" + self.quant_method
         #group = "/{study}".format(study=self.study.replace('-','_'))
         #hdf_store = fsutils.create_h5file_path(path=self.hdf_path, file_name=identifier, dir_name=self.study_dir + "/" + self.chromosome)
-        hdf_store = "study.h5"
+        hdf_store = os.path.join(self.chromosome, identifier + ".h5")
         self.write_csv_to_hdf(hdf_store, identifier)
 
 
@@ -119,6 +120,8 @@ class Loader():
                     store.get_storer(group).attrs.study_metadata = {'study': self.study,
                                                                     'qtl_group': self.qtl_group,
                                                                     'quant_method': self.quant_method}
+            indexer = ri.H5Indexer(hdf)
+            indexer.reindex_file()
 
 
 
