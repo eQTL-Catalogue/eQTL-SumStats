@@ -118,8 +118,14 @@ class Loader():
                     store.get_storer(group).attrs.study_metadata = {'study': self.study,
                                                                     'qtl_group': self.qtl_group,
                                                                     'quant_method': self.quant_method}
-                else:
-                    print("chunk contains no data for chr {}".format(self.chromosome))
+            # remove file if nothing written
+            if len(store.keys()) == 0:
+                try:
+                    os.remove(hdf)
+                except FileNotFoundError as e:
+                    print(e)
+
+
 
 
 
