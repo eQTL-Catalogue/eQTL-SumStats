@@ -12,7 +12,8 @@ setup(
                             'eqtl-rebuild-snps = sumstats.utils.vcf_to_sqlite:main',
                             'eqtl-prep-file = sumstats.utils.split_by_chrom:main',
                             'eqtl-reindex = sumstats.reindex:main',
-                            'eqtl-delete = sumstats.deleter:main']
+                            'eqtl-delete = sumstats.deleter:main',
+                            'eqtl-consolidate = sumstats.utils.consolidate_hdf:main']
     },
     url='https://github.com/EBISPOT/SumStats',
     license='',
