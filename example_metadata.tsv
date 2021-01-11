@@ -1,0 +1,17 @@
+study	qtl_group	tissue_ontology_id	tissue_ontology_term	tissue_label	condition_label	quant_method	sample_size	filename
+BLUEPRINT	monocyte	CL_0002057	CD14-positive, CD16-negative classical monocyte	monocyte	naive	ge	191	BLUEPRINT.monocyte_ge.nominal.sorted.tsv.gz
+BLUEPRINT	monocyte	CL_0002057	CD14-positive, CD16-negative classical monocyte	monocyte	naive	exon	191	BLUEPRINT.monocyte_exon.nominal.sorted.tsv.gz
+BLUEPRINT	monocyte	CL_0002057	CD14-positive, CD16-negative classical monocyte	monocyte	naive	tx	191	BLUEPRINT.monocyte_tx.nominal.sorted.tsv.gz
+BLUEPRINT	monocyte	CL_0002057	CD14-positive, CD16-negative classical monocyte	monocyte	naive	txrev	191	BLUEPRINT.monocyte_txrev.nominal.sorted.tsv.gz
+BLUEPRINT	neutrophil	CL_0000775	neutrophil	neutrophil	naive	ge	196	BLUEPRINT.neutrophil_ge.nominal.sorted.tsv.gz
+BLUEPRINT	neutrophil	CL_0000775	neutrophil	neutrophil	naive	exon	196	BLUEPRINT.neutrophil_exon.nominal.sorted.tsv.gz
+BLUEPRINT	neutrophil	CL_0000775	neutrophil	neutrophil	naive	tx	196	BLUEPRINT.neutrophil_tx.nominal.sorted.tsv.gz
+BLUEPRINT	neutrophil	CL_0000775	neutrophil	neutrophil	naive	txrev	196	BLUEPRINT.neutrophil_txrev.nominal.sorted.tsv.gz
+BLUEPRINT	T-cell	CL_0000624	CD4-positive, alpha-beta T cell	CD4+ T cell	naive	ge	167	BLUEPRINT.T-cell_ge.nominal.sorted.tsv.gz
+BLUEPRINT	T-cell	CL_0000624	CD4-positive, alpha-beta T cell	CD4+ T cell	naive	exon	167	BLUEPRINT.T-cell_exon.nominal.sorted.tsv.gz
+BLUEPRINT	T-cell	CL_0000624	CD4-positive, alpha-beta T cell	CD4+ T cell	naive	tx	167	BLUEPRINT.T-cell_tx.nominal.sorted.tsv.gz
+BLUEPRINT	T-cell	CL_0000624	CD4-positive, alpha-beta T cell	CD4+ T cell	naive	txrev	167	BLUEPRINT.T-cell_txrev.nominal.sorted.tsv.gz
+BrainSeq	brain	UBERON_0009834	dorsolateral prefrontal cortex	brain (DLPFC)	naive	ge	479	BrainSeq.brain_ge.nominal.sorted.tsv.gz
+BrainSeq	brain	UBERON_0009834	dorsolateral prefrontal cortex	brain (DLPFC)	naive	exon	479	BrainSeq.brain_exon.nominal.sorted.tsv.gz
+BrainSeq	brain	UBERON_0009834	dorsolateral prefrontal cortex	brain (DLPFC)	naive	tx	479	BrainSeq.brain_tx.nominal.sorted.tsv.gz
+BrainSeq	brain	UBERON_0009834	dorsolateral prefrontal cortex	brain (DLPFC)	naive	txrev	479	BrainSeq.brain_txrev.nominal.sorted.tsv.gz
