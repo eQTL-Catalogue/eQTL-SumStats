@@ -103,6 +103,7 @@ deploy_staging:
     - helm install --name eqtl-sumstats --set k8Namespace=eqtl,image.repository=$CI_REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.uid=$UID,image.gid=$GID,staticService.image.repository=$CI_REGISTRY_DOCS_IMAGE,staticService.image.tag=$CI_COMMIT_SHA,volume.data.nfsServer=$NFS_SERVER,volume.data.path=$NFS_PATH,replicaCount=1 ./eqtlss/ --wait
   environment:
     name: dev
+  when: manual
   only:
     - master
 
