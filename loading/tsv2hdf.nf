@@ -19,7 +19,6 @@ hdf5_study_glob = new File(params.hdf5_study_dir, "*/file_*.h5")
 hdf5_study = Channel.fromPath(hdf5_study_glob)
 
 
-
 /*
 ================================================================================
               Split tsvs by chromosome, convert to hdf5 and index
@@ -31,8 +30,7 @@ process study_tsv_to_hdf5 {
   containerOptions "--bind $params.tsv_in"
   containerOptions "--bind $params.hdf5_study_dir"
   containerOptions "--bind $params.meta_table"
-
-
+  
   publishDir "$params.hdf5_study_dir", mode: 'copy'
 
   memory { 8.GB * task.attempt }
@@ -71,7 +69,6 @@ process consolidate_hdfs_by_chrom {
   memory { 8.GB * task.attempt }
   maxRetries 3
   errorStrategy { task.exitStatus == 140 ? 'retry' : 'terminate' }
-  //stageInMode 'copy'
 
   input:
   each chr from params.chromosomes
@@ -87,5 +84,4 @@ process consolidate_hdfs_by_chrom {
   echo $method;
   eqtl-consolidate -in_dir $params.hdf5_study_dir -out_file file_${chr}.${method}.h5 -meta  $params.meta_table -quant $method -chrom $chr
   """
-
 }
