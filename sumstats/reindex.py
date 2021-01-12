@@ -2,6 +2,7 @@ import argparse
 import pandas as pd
 import tables as tb
 from sumstats.common_constants import *
+import os
 
 
 class H5Indexer():
@@ -10,10 +11,15 @@ class H5Indexer():
 
     def reindex_file(self):
         with pd.HDFStore(self.h5file) as store:
-            group = store.keys()[0]
-            for i in TO_INDEX:
-                self.create_index(i, group)
-            self.create_cs_index(BP_DSET, group)
+            try:
+                group = store.keys()[0]
+                for i in TO_INDEX:
+                    self.create_index(i, group)
+                self.create_cs_index(BP_DSET, group)
+            except IndexError as e:
+                print(e)
+                os.remove(self.h5file)
+                
 
 
     def create_index(self, field, group):

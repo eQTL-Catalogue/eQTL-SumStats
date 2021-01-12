@@ -10,15 +10,15 @@ from sumstats.utils.properties_handler import properties
 from sumstats.utils import properties_handler
 from sumstats.utils import filesystem_utils as fsutils
 import sumstats.utils.sqlite_client as sq
+import sumstats.reindex as ri
 
 
 class Loader():
-    def __init__(self, tsv=None, csv_out=None, var_file=None, qtl_group=None, quant_method=None,
+    def __init__(self, tsv=None, var_file=None, qtl_group=None, quant_method=None,
                  study_dir=None, study=None, trait=None, hdf_path=None,
                  chromosome=None, expr_file=None, sqldb=None, loader=None, trait_dir=None, tissue=None,
                  tissue_ont=None, treatment=None, treatment_ont=None, condition_label=None):
         self.tsv = tsv
-        self.csv_out = csv_out
         self.var_file = var_file
         self.qtl_group = qtl_group
         self.quant_method = quant_method
@@ -47,7 +47,8 @@ class Loader():
         print(self.tsv)
         identifier = self.study + "+" + self.qtl_group + "+" + self.quant_method
         #group = "/{study}".format(study=self.study.replace('-','_'))
-        hdf_store = fsutils.create_h5file_path(path=self.hdf_path, file_name=identifier, dir_name=self.study_dir + "/" + self.chromosome)
+        #hdf_store = fsutils.create_h5file_path(path=self.hdf_path, file_name=identifier, dir_name=self.study_dir + "/" + self.chromosome)
+        hdf_store = os.path.join(self.chromosome, "file_" + identifier + ".h5")
         self.write_csv_to_hdf(hdf_store, identifier)
 
 
@@ -88,11 +89,10 @@ class Loader():
 
         with pd.HDFStore(hdf) as store:
             """store in hdf5 as below"""
-            count = 1
             for chunk in dfss:
-                print(count)
                 chunk = chunk[(chunk[CHR_DSET] == self.chromosome)]
                 if not chunk.empty:
+                    print("store chunk in hdf5")
                     chunk = chunk[sorted(TO_LOAD_DSET_HEADERS_DEFAULT)]
                     for field in [EFFECT_DSET, OTHER_DSET]:
                         self.placeholder_if_allele_string_too_long(df=chunk, field=field)
@@ -120,15 +120,11 @@ class Loader():
                     store.get_storer(group).attrs.study_metadata = {'study': self.study,
                                                                     'qtl_group': self.qtl_group,
                                                                     'quant_method': self.quant_method}
+            indexer = ri.H5Indexer(hdf)
+            indexer.reindex_file()
 
-                    if self.csv_out:
-                        if count == 1:
-                            chunk.to_csv(self.csv_out, compression='gzip', columns=sorted(TO_LOAD_DSET_HEADERS_DEFAULT),
-                                           index=False, mode='w', sep='\t', encoding='utf-8', na_rep="NA")
-                        else:
-                            chunk.to_csv(self.csv_out, compression='gzip', columns=sorted(TO_LOAD_DSET_HEADERS_DEFAULT),
-                                           header=False, index=False, mode='a', sep='\t', encoding='utf-8', na_rep="NA")
-                count += 1
+
+
 
 
     def placeholder_if_allele_string_too_long(self, df, field):
@@ -166,10 +162,26 @@ class Loader():
         #Schmiedel_2018|Schmiedel_2018+Treg_memory+exon|Treg_memory|Treg|Ensembl_96_phenotype_metadata.tsv.gz|CL_0002678|Treg_memory|None|exon|naive
 
 
+def update_metadate_from_tsv(metadata, ss_file):
+    meta_df = pd.read_csv(metadata, sep='\t')
+    meta_for_file = meta_df[meta_df['filename'] == os.path.basename(ss_file)]
+    if meta_for_file.empty:
+        print("filename {} not found in metadata".format(ss_file))
+    elif len(meta_for_file) > 1:
+        print("filename {} found more than once in metadata".format(ss_file))
+    else:
+        study = meta_for_file['study'].values[0]
+        qtl_group = meta_for_file['qtl_group'].values[0]
+        quant_method = meta_for_file['quant_method'].values[0]
+        tissue_ont = meta_for_file['tissue_ontology_id'].values[0]
+        return study, qtl_group, quant_method, tissue_ont
+
+
+
+
 def main():
     argparser = argparse.ArgumentParser()
     argparser.add_argument('-f', help='The path to the summary statistics file to be processed', required=False)
-    argparser.add_argument('-csv', help='The path to the csv OUT file', required=False)
     argparser.add_argument('-var', help='The path to the variant/genotype metadata file', required=False)
     argparser.add_argument('-phen', help='The path to the trait/phenotype metadata file', required=False)
     argparser.add_argument('-expr', help='The path to the gene expression file', default=None, required=False)
@@ -183,6 +195,8 @@ def main():
     argparser.add_argument('-treatment', help='The treatment', required=False)
     argparser.add_argument('-treatment_ont', help='The treatment ontology term', required=False)
     argparser.add_argument('-condition_label', help='The condition label e.g. "naive"', required=False)
+    argparser.add_argument('-metadata', help='path to tsv containing metadata for the study. Columns "filename", "study", "qtl_group", "tissue_ont", "quant" must be present and will override/replace and of the cmd line arguments given. "filename" refers the basename of the summary statistics file that was passed to the "-f" parameter', required=False)
+
 
     args = argparser.parse_args()
 
@@ -193,9 +207,9 @@ def main():
     chr_dir = properties.chr_dir
     trait_dir = properties.trait_dir
     study_dir = properties.study_dir
+    
 
     ss_file = args.f
-    csv_file = args.csv
     var_file = args.var
     phen_file = args.phen
     study = args.study
@@ -209,12 +223,18 @@ def main():
     treatment = args.treatment
     treatment_ont = args.treatment_ont
     condition_label = args.condition_label
+    metadata = args.metadata
+
+    if metadata is not None:
+        study, qtl_group, quant_method, tissue_ont = update_metadate_from_tsv(metadata, ss_file)
+
+    print( study, qtl_group, quant_method, tissue_ont)
 
     if loader_type == 'study':
         if chromosome is None:
             print("You must specify the '-chr'...exiting")
         else:
-            loader = Loader(tsv=ss_file, expr_file=expr_file, csv_out=csv_file, var_file=var_file, qtl_group=qtl_group, quant_method=quant_method, study_dir=study_dir, study=study, trait=phen_file, hdf_path=h5files_path, chromosome=chromosome, sqldb=database, loader=loader_type)
+            loader = Loader(tsv=ss_file, expr_file=expr_file,  var_file=var_file, qtl_group=qtl_group, quant_method=quant_method, study_dir=study_dir, study=study, trait=phen_file, hdf_path=h5files_path, chromosome=chromosome, sqldb=database, loader=loader_type)
             #loader = Loader(filename, tsvfiles_path, chr_dir, study_dir, study, traits, h5files_path, chromosome, database, loader_type)
             loader.load_bystudy()
     elif loader_type == 'trait':
