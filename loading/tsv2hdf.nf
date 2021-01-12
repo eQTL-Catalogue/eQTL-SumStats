@@ -1,4 +1,4 @@
-// nextflow run tsv2hdf.nf 
+// nextflow run tsv2hdf.nf
 
 /*
 ================================================================================
@@ -13,7 +13,7 @@ tsv_glob = new File(params.tsv_in, "*.tsv.gz")
 tsv_to_process = Channel.fromPath(tsv_glob)
 
 /* Any previously generated HDF5 files in the hdf5_study_dir will be included
-   in the chromosome + quant_method files. 
+   in the chromosome + quant_method files.
 */
 hdf5_study_glob = new File(params.hdf5_study_dir, "*/file_*.h5")
 hdf5_study = Channel.fromPath(hdf5_study_glob)
@@ -30,6 +30,8 @@ process study_tsv_to_hdf5 {
 
   containerOptions "--bind $params.tsv_in"
   containerOptions "--bind $params.hdf5_study_dir"
+  containerOptions "--bind $params.meta_table"
+
 
   publishDir "$params.hdf5_study_dir", mode: 'copy'
 
@@ -62,6 +64,7 @@ process consolidate_hdfs_by_chrom {
 
   containerOptions "--bind $params.hdf5_study_dir"
   containerOptions "--bind $params.hdf5_chrom_dir"
+  containerOptions "--bind $params.meta_table"
 
   publishDir "$params.hdf5_chrom_dir", mode: 'copy'
 
