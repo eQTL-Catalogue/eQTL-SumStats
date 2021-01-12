@@ -20,7 +20,7 @@ This pipeline takes eQTL summary statistics tsv data and converts to HDF5 ready 
     consolidate the hdf5 in <hdf5_study_dir> and write new hdf5 to <hdf5_chrom_dir>
   ```
 - Configuration
-  - see [nextflow.config](nexflow.config)
+  - see [nextflow.config](nextflow.config)
 - tested using nextflow version 20.10.0.5430
 
 ## Example run
