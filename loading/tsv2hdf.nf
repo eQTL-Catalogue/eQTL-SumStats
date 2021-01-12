@@ -1,12 +1,30 @@
 // nextflow run tsv2hdf.nf 
 
+/*
+================================================================================
+   Convert eQTL summary statistics to HDF5 for using in the eQTL SumStats API
+================================================================================
+*/
 
-hdf5_study_glob = new File(params.hdf5_study_dir, "*/file_*.h5")
-hdf5_study = Channel.fromPath(hdf5_study_glob)
+
+// Input files _must_ be of the *.tsv.gz residing in the tsv_in directory
 
 tsv_glob = new File(params.tsv_in, "*.tsv.gz")
 tsv_to_process = Channel.fromPath(tsv_glob)
 
+/* Any previously generated HDF5 files in the hdf5_study_dir will be included
+   in the chromosome + quant_method files. 
+*/
+hdf5_study_glob = new File(params.hdf5_study_dir, "*/file_*.h5")
+hdf5_study = Channel.fromPath(hdf5_study_glob)
+
+
+
+/*
+================================================================================
+              Split tsvs by chromosome, convert to hdf5 and index
+================================================================================
+*/
 
 process study_tsv_to_hdf5 {
 
@@ -33,6 +51,12 @@ process study_tsv_to_hdf5 {
   """
 }
 
+
+/*
+================================================================================
+Consolidate all chromosome + quant method combinations into their own HDF5 files
+================================================================================
+*/
 
 process consolidate_hdfs_by_chrom {
 
