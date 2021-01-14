@@ -25,11 +25,7 @@ tsv_to_process = Channel.fromPath(tsv_glob)
 
 process study_tsv_to_hdf5 {
 
-  containerOptions "--bind $params.tsv_in"
-  containerOptions "--bind $params.hdf5_study_dir"
-  containerOptions "--bind $params.meta_table"
-
-
+  containerOptions "--bind $params.data_dir"
   publishDir "$params.hdf5_study_dir", mode: 'copy'
 
   memory { 8.GB * task.attempt }
@@ -58,11 +54,8 @@ Consolidate all chromosome + quant method combinations into their own HDF5 files
 
 process consolidate_hdfs_by_chrom {
 
-  containerOptions "--bind $params.hdf5_study_dir"
-  containerOptions "--bind $params.hdf5_chrom_dir"
-  containerOptions "--bind $params.meta_table"
-
-  publishDir "$params.hdf5_chrom_dir", mode: 'move'
+  containerOptions "--bind $params.data_dir"
+  publishDir "$params.hdf5_chrom_dir", mode: 'copy'
 
   memory { 8.GB * task.attempt }
   maxRetries 3
@@ -79,6 +72,7 @@ process consolidate_hdfs_by_chrom {
   """
   echo $chr;
   echo $method;
+  ls -lR $params.hdf5_study_dir;
   eqtl-consolidate -in_dir $params.hdf5_study_dir -out_file file_${chr}.${method}.h5 -meta  $params.meta_table -quant $method -chrom $chr
   """
 
