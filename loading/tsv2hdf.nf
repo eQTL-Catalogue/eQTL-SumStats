@@ -72,7 +72,6 @@ process consolidate_hdfs_by_chrom {
   """
   echo $chr;
   echo $method;
-  ls -lR $params.hdf5_study_dir;
   eqtl-consolidate -in_dir $params.hdf5_study_dir -out_file file_${chr}.${method}.h5 -meta  $params.meta_table -quant $method -chrom $chr
   """
 
