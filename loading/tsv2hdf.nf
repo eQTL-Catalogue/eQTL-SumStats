@@ -30,7 +30,7 @@ process study_tsv_to_hdf5 {
 
   memory { 8.GB * task.attempt }
   maxRetries 3
-  errorStrategy { task.exitStatus == 140 ? 'retry' : 'terminate' }
+  errorStrategy { task.exitStatus == 130 ? 'retry' : 'terminate' }
 
   input:
   each chr from params.chromosomes
@@ -59,7 +59,7 @@ process consolidate_hdfs_by_chrom {
 
   memory { 8.GB * task.attempt }
   maxRetries 3
-  errorStrategy { task.exitStatus == 140 ? 'retry' : 'terminate' }
+  errorStrategy { task.exitStatus == 130 ? 'retry' : 'terminate' }
 
   input:
   each chr from params.chromosomes
