@@ -21,7 +21,6 @@ def append_to_file(in_file, out_file, study, key, qtl_group, tissue_ont):
             df[TISSUE_DSET] = tissue_ont
             df[QTL_GROUP_DSET] = qtl_group
             df = df.astype(dict((k, DSET_TYPES[k]) for k in df.columns.values.tolist()))
-            df[SE_DSET] = np.nan
             df.to_hdf(store, group,
                          complib='blosc',
                          complevel=9,
