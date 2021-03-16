@@ -60,7 +60,7 @@ process consolidate_hdfs_by_chrom {
 
   memory { 8.GB * task.attempt }
   maxRetries 3
-  errorStrategy { task.exitStatus == 130 ? 'retry' : 'terminate' }
+  errorStrategy 'retry'
 
   input:
   each chr from params.chromosomes
@@ -96,7 +96,7 @@ process index_consolidated_hdfs {
 
   memory { 8.GB * task.attempt }
   maxRetries 3
-  errorStrategy { task.exitStatus == 130 ? 'retry' : 'terminate' }
+  errorStrategy 'retry'
 
   input:
   file hdf5 from hdf5_chrom
