@@ -2,6 +2,8 @@
 
 This pipeline takes eQTL summary statistics tsv data and converts to HDF5 ready for querying by the eQTL SumStats REST API.
 
+![flowchart](loader_flow.png?raw=true "Flowchart")
+
 ## Summary of tasks
 - Inputs: 
   - *.tsv.gz files in the directory, <tsv_in>
