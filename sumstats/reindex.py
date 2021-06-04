@@ -10,17 +10,20 @@ class H5Indexer():
         self.h5file = h5file
 
     def reindex_file(self):
+        print('indexing {}'.format(self.h5file))
         with pd.HDFStore(self.h5file) as store:
             try:
                 group = store.keys()[0]
+                print('key: {}'.format(group))
                 for i in TO_INDEX:
+                    print('indexing {}...'.format(i))
                     self.create_index(i, group)
+                print('full index on position...')
                 self.create_cs_index(BP_DSET, group)
             except IndexError as e:
                 print(e)
                 os.remove(self.h5file)
                 
-
 
     def create_index(self, field, group):
         with tb.open_file(self.h5file, "a") as hdf:
