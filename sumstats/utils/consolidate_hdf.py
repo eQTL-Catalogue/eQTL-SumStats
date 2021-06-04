@@ -38,6 +38,7 @@ def append_to_file(in_file, out_file, study, key, qtl_group, tissue_ont):
                                        TISSUE_DSET: max_string,
                                        RSID_DSET: 24,
                                        CHR_DSET: 2,
+                                       MUTATION_DSET: max_string,
                                        SNP_DSET: max_string},
                          index = False
                          )
