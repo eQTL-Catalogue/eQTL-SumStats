@@ -112,6 +112,7 @@ class Loader():
                                               MTO_DSET: self.max_string,
                                               RSID_DSET: 24,
                                               CHR_DSET: 2,
+                                              MUTATION_DSET: self.max_string,
                                               SNP_DSET: self.max_string},
                                 index = False
                                 )
