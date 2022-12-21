@@ -69,6 +69,42 @@ async def get_studies(request: Request,
                              request=request)
 
 
+@router.get("/studies/{study}/associations")
+@router.get("/tissues/{tissue}/studies/{study}/associations")
+async def get_tissue_study_assocs(study: str,
+                                  request: Request,
+                                  args: Args = Depends(),
+                                  tissue: str = None):
+    return endpoints.tissue_study_associations(study=study,
+                                               tissue=tissue,
+                                               request_args=args,
+                                               request=request)
+
+
+@router.get("/tissues")
+async def get_tissues(request: Request,
+                      start: int = 0,
+                      size: int = 20):
+    args = Args()
+    args.start = start
+    args.size = size
+    return endpoints.tissues(request_args=args,
+                             request=request)
+
+
+@router.get("/tissues/{tissue}")
+async def get_tissue(tissue: str,
+                     request: Request,
+                     start: int = 0,
+                     size: int = 20):
+    args = Args()
+    args.start = start
+    args.size = size
+    return endpoints.tissue(tissue=tissue,
+                            request_args=args,
+                            request=request)
+
+
 @router.get("/tissues/{tissue}/studies")
 async def get_studies_for_tissue(tissue: str,
                                  request: Request,
@@ -99,18 +135,6 @@ async def get_tissue_study(study: str,
     return endpoints.tissue_study(study=study,
                                   tissue=tissue,
                                   request=request)
-
-
-@router.get("/studies/{study}/associations")
-@router.get("/tissues/{tissue}/studies/{study}/associations")
-async def get_tissue_study_assocs(study: str,
-                                  request: Request,
-                                  args: Args = Depends(),
-                                  tissue: str = None):
-    return endpoints.tissue_study_associations(study=study,
-                                               tissue=tissue,
-                                               request_args=args,
-                                               request=request)
 
 
 @router.get("/chromosomes")
@@ -144,30 +168,6 @@ async def get_chromosome_variants(variant_id: str,
                               chromosome=chromosome,
                               request_args=args,
                               request=request)
-
-
-@router.get("/tissues")
-async def get_tissues(request: Request,
-                      start: int = 0,
-                      size: int = 20):
-    args = Args()
-    args.start = start
-    args.size = size
-    return endpoints.tissues(request_args=args,
-                             request=request)
-
-
-@router.get("/tissues/{tissue}")
-async def get_tissue(tissue: str,
-                     request: Request,
-                     start: int = 0,
-                     size: int = 20):
-    args = Args()
-    args.start = start
-    args.size = size
-    return endpoints.tissue(tissue=tissue,
-                            request_args=args,
-                            request=request)
 
 
 @router.get("/qtl_groups")
