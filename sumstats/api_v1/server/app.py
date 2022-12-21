@@ -6,7 +6,7 @@ from flask import Flask, make_response, Response
 from flask_cors import CORS
 from sumstats.api_v1.utils import register_logger
 from sumstats.api_v1.utils.properties_handler import properties
-from sumstats.api_v1.server.error_classes import *
+from sumstats.dependencies.error_classes import *
 import sumstats.api_v1.server.api_utils as apiu
 from flask import Blueprint
 import sumstats.api_v1.server.api_endpoints_impl as endpoints
@@ -832,7 +832,7 @@ def get_tissue_study(study, tissue=None):#DONE
 
 @api.route('/studies/<study>/associations')
 @api.route('/tissues/<string:tissue>/studies/<string:study>/associations')
-def get_tissue_study_assocs(study, tissue=None):
+def get_tissue_study_assocs(study, tissue=None):#DONE
     """Search Study for Associations
 
         .. :quickref: Search Study for Associations; Lists associations for a specific study.
@@ -1150,7 +1150,7 @@ def get_chromosomes():
 
 
 @api.route('/chromosomes/<string:chromosome>')
-def get_chromosome(chromosome):
+def get_chromosome(chromosome):#DONE
     """Chromosome Resource
 
         .. :quickref: Chromosome Resource; List a specific chromosome resource
@@ -1310,7 +1310,7 @@ def get_chromosome_assocs(chromosome):#DONE
 
 
 @api.route('/chromosomes/<string:chromosome>/associations/<string:variant_id>')
-def get_chromosome_variants(chromosome, variant_id):
+def get_chromosome_variants(chromosome, variant_id):#DONE
     """Search Variant on Chromosome
 
         .. :quickref: Search Variant on Chromosome; Lists all of the available associations of a specific variant.
@@ -1430,7 +1430,7 @@ def get_chromosome_variants(chromosome, variant_id):
 
 
 @api.route('/tissues')
-def get_tissues():
+def get_tissues():#DONE
     """Tissues
 
         .. :quickref: Tissues; List all existing tissue/cell type resources
@@ -1489,7 +1489,7 @@ def get_tissues():
 
 
 @api.route('/tissues/<string:tissue>')
-def get_tissue(tissue):
+def get_tissue(tissue):#DONE
     """Tissue
 
         .. :quickref: Tissue; Lists a specific tissue/cell type ontology resource
@@ -1538,7 +1538,7 @@ def get_tissue(tissue):
 
 
 @api.route('/qtl_groups')
-def get_qtl_groups():
+def get_qtl_groups():#DONE
     """QTL groups
 
         .. :quickref: QTL groups; List all existing qtl groups (datasets)
@@ -1596,7 +1596,7 @@ def get_qtl_groups():
 
 
 @api.route('/genes')
-def get_genes():
+def get_genes():#DONE
     """Genes
 
         .. :quickref: Genes; List all existing gene resources

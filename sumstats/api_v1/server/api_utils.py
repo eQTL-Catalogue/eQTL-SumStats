@@ -41,12 +41,12 @@ def _get_study_list_no_info(studies, start, size):
     return study_list
 
 
-def _get_tissue_list(tissues, start, size, links=None):
+def _get_tissue_list(tissues, start, size, links=None, request=None):
     tissue_list = []
     end = min(start + size, len(tissues))
     for item in list(OrderedDict(tissues).items())[start:end]:
         tissue, tissue_name = item
-        tissue_list.append(_create_info_for_tissue(tissue, tissue_name, links))
+        tissue_list.append(_create_info_for_tissue(tissue, tissue_name, links, request=request))
     return tissue_list
 
 def _get_qtl_list(qtls, start, size, links=None):
@@ -128,7 +128,7 @@ def _create_info_for_trait(trait, request):
     trait_info = {'molecular_trait_id': trait,
                   '_links': {'self': _create_href(method_name='get_trait', request=request, path_params={'molecular_trait_id': trait})}}
     #trait_info['_links']['studies'] = _create_href(request=request, method_name='api.get_studies_for_trait', params={'trait': trait})
-    trait_info['_links']['associations'] = _create_href(rmethod_name='get_trait_assocs', request=request, path_params={'molecular_trait_id': trait})
+    trait_info['_links']['associations'] = _create_href(method_name='get_trait_assocs', request=request, path_params={'molecular_trait_id': trait})
     return trait_info
 
 def _create_info_for_gene(gene, request=None):
@@ -195,7 +195,7 @@ def _get_array_to_display(datasets, variant=None, chromosome=None, links=False, 
             element_info['_links']['variant'] = _create_href(request=request, method_name='get_chromosome_variants',
                                                              path_params={'variant_id': specific_variant, 'chromosome': specific_chromosome})
             element_info['_links']['study'] = _create_href(request=request, method_name='get_tissue_study',
-                                                           path_arams={'study': study})
+                                                           path_params={'study': study})
             element_info['_links']['tissue'] = _create_href(request=request, method_name='get_tissue', path_params={'tissue': tissue})
 
         data_dict[index] = element_info

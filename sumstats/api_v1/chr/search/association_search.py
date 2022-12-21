@@ -4,7 +4,7 @@ import re
 import glob
 import itertools
 import os
-from sumstats.api_v1.server.error_classes import *
+from sumstats.dependencies.error_classes import *
 import sumstats.api_v1.utils.dataset_utils as utils
 import sumstats.api_v1.utils.filesystem_utils as fsutils
 import sumstats.api_v1.trait.search.access.trait_service as ts

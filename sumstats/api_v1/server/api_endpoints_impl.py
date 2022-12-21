@@ -6,7 +6,7 @@ from collections import OrderedDict
 import sumstats.api_v1.explorer as ex
 import sumstats.api_v1.controller as search
 from sumstats.api_v1.utils.properties_handler import properties
-from sumstats.api_v1.server.error_classes import *
+from sumstats.dependencies.error_classes import *
 from sumstats.api_v1.errors.error_classes import *
 import sumstats.api_v1.server.api_utils as apiu
 import sumstats.api_v1.utils.sqlite_client as sq
@@ -15,7 +15,7 @@ import sumstats.api_v1.utils.sqlite_client as sq
 def root(request):
     response = {
         '_links': OrderedDict([
-            ('associations', apiu._create_href(method_name='get_assocs', request=request))
+            ('associations', apiu._create_href(method_name='get_assocs', request=request)),
             ('molecular_phenotypes', apiu._create_href(method_name='get_traits', request=request)),
             ('studies', apiu._create_href(method_name='get_studies', request=request)),
             ('tissues', apiu._create_href(method_name='get_tissues', request=request)),
@@ -205,8 +205,7 @@ def tissue_associations(tissue, request_args=None, request=None):
         raise RequestedNotFound(str(error))
 
 
-def tissue_study(study, tissue=None, request_args=None, request=None):
-    args = request_args.dict() if request_args is not None else {}
+def tissue_study(study, tissue=None, request=None):
     try:
         explorer = ex.Explorer(apiu.properties)
         if explorer.check_study(study):
@@ -264,7 +263,7 @@ def tissue_study_associations(study, tissue=None, request_args=None, request=Non
         raise RequestedNotFound(str(error))
 
 
-def chromosomes():
+def chromosomes(request=None):
     chromosomes = []
     #for chromosome in range(1, (properties.available_chromosomes + 1)):
     try:
@@ -272,26 +271,26 @@ def chromosomes():
         chrom_list = explorer.get_list_of_chroms()
         for chromosome in chrom_list:
             # adding plus one to include the available_chromosomes number
-            chromosome_info = _create_chromosome_info(chromosome)
+            chromosome_info = _create_chromosome_info(chromosome, request=request)
             chromosomes.append(chromosome_info)
     except NotFoundError:
         logging.debug("Chromosome %s does not have data...", str(chromosomes))
 
     response = OrderedDict({'_embedded': {'chromosomes': chromosomes}})
-    return simplejson.dumps(response)
+    return response
 
 
-def chromosome(chromosome):
+def chromosome(chromosome, request=None):
     try:
-        response = _create_chromosome_info(chromosome)
-        return simplejson.dumps(response)
+        response = _create_chromosome_info(chromosome, request=request)
+        return response
     except NotFoundError as error:
         logging.error("/chromosomes/" + chromosome + ". " + (str(error)))
         raise RequestedNotFound(str(error))
 
 
-def chromosome_associations(chromosome):
-    args = request.args.to_dict()
+def chromosome_associations(chromosome, request_args=None, request=None):
+    args = request_args.dict() if request_args is not None else {}
     try:
         start, size, p_lower, p_upper, pval_interval, quant_method, snp, tissue, gene, study, trait, paginate, links, qtl_group = apiu._get_basic_arguments(args)
         bp_lower, bp_upper, bp_interval = apiu._get_bp_arguments(args)
@@ -308,10 +307,10 @@ def chromosome_associations(chromosome):
                                                             quant_method=quant_method, tissue=tissue, gene=gene, 
                                                             trait=trait, paginate=paginate, qtl_group=qtl_group)
         data_dict = apiu._get_array_to_display(request=request, datasets=datasets, chromosome=chromosome, links=links)
-        return _create_chromosome_response(dict(chromosome=chromosome, data_dict=data_dict, start=start, size=size,
+        return _create_chromosome_response(search_info=dict(chromosome=chromosome, data_dict=data_dict, start=start, size=size,
                                                 index_marker=index_marker, bp_lower=bp_lower, bp_upper=bp_upper, variant_id=snp,
                                                 p_lower=p_lower, p_upper=p_upper, study=study, quant_method=quant_method, 
-                                                tissue=tissue, gene=gene, trait=trait, qtl_group=qtl_group, links=links))
+                                                tissue=tissue, gene=gene, trait=trait, qtl_group=qtl_group, links=links), request=request)
 
     except NotFoundError as error:
         logging.error("/chromosomes/" + chromosome + ". " + (str(error)))
@@ -320,13 +319,13 @@ def chromosome_associations(chromosome):
         # we have not found bp in chromosome, return empty collection
         data_dict = {}
         index_marker = 0
-        return _create_chromosome_response(dict(chromosome=chromosome, data_dict=data_dict, start=start, size=size,
+        return _create_chromosome_response(search_info=dict(chromosome=chromosome, data_dict=data_dict, start=start, size=size,
                                                 index_marker=index_marker, bp_lower=bp_lower, bp_upper=bp_upper, variant_id=snp,
                                                 p_lower=p_lower, p_upper=p_upper, study=study, quant_method=quant_method, 
-                                                tissue=tissue, gene=gene, trait=trait, qtl_group=qtl_group, links=links))
+                                                tissue=tissue, gene=gene, trait=trait, qtl_group=qtl_group, links=links), request=request)
 
 
-def variants(variant, request_args, request, chromosome=None):
+def variants(variant, request_args=None, request=None, chromosome=None):
     args = request_args.dict() if request_args is not None else {}
     try:
         start, size, p_lower, p_upper, pval_interval, quant_method, _, tissue, gene, study, trait, paginate, links, qtl_group  = apiu._get_basic_arguments(args)
@@ -389,8 +388,8 @@ def variant_resource(variant, chromosome=None):
         raise RequestedNotFound(str(error))
 
 
-def tissues():
-    args = request.args.to_dict()
+def tissues(request_args=None, request=None):
+    args = request_args.dict() if request_args is not None else {}
     try:
         start, size, p_lower, p_upper, pval_interval, quant_method, snp, _, gene, study, trait, paginate, links, qtl_group = apiu._get_basic_arguments(args)
     except ValueError as error:
@@ -399,19 +398,20 @@ def tissues():
 
     explorer = ex.Explorer(apiu.properties)
     tissue_dict = explorer.get_tissue_ont_dict()
-    tissue_list = apiu._get_tissue_list(tissues=tissue_dict, start=start, size=size, links=links)
-    response = apiu._create_response(collection_name='tissues', method_name='api.get_tissues',
+    tissue_list = apiu._get_tissue_list(tissues=tissue_dict, start=start, size=size, links=links, request=request)
+    response = apiu._create_response(collection_name='tissues', method_name='get_tissues', request=request,
                                      start=start, size=size, index_marker=size, data_dict=tissue_list)
 
-    return simplejson.dumps(response)
+    return response
 
 
-def tissue(tissue):
+def tissue(tissue, request_args=None, request=None):
+    args = request_args.dict() if request_args is not None else {}
     try:
         explorer = ex.Explorer(config_properties=properties)
         if explorer.get_studies_of_tissue(tissue):
             response = apiu._create_info_for_tissue(tissue)
-            return simplejson.dumps(response, ignore_nan=True)
+            return response
         else:
             raise RequestedNotFound("Tissue: {} not found".format(tissue))
     except NotFoundError as error:
@@ -419,8 +419,8 @@ def tissue(tissue):
         raise RequestedNotFound(str(error))
 
 
-def qtl_groups():
-    args = request.args.to_dict()
+def qtl_groups(request_args=None, request=None):
+    args = request_args.dict() if request_args is not None else {}
     try:
         start, size, p_lower, p_upper, pval_interval, quant_method, snp, _, gene, study, trait, paginate, links, qtl_group = apiu._get_basic_arguments(args)
     except ValueError as error:
@@ -430,10 +430,10 @@ def qtl_groups():
     explorer = ex.Explorer(apiu.properties)
     qtls = explorer.get_qtl_list()
     qtl_list = apiu._get_qtl_list(qtls=qtls, start=start, size=size, links=links)
-    response = apiu._create_response(collection_name='qtl_groups', method_name='api.get_qtl_groups',
+    response = apiu._create_response(collection_name='qtl_groups', method_name='get_qtl_groups', request=request,
                                      start=start, size=size, index_marker=size, data_dict=qtl_list)
 
-    return simplejson.dumps(response)
+    return response
 
 
 def qtl_group(qtl_group):
@@ -448,8 +448,9 @@ def qtl_group(qtl_group):
         logging.error("/tissue/" + tissue + ". " + (str(error)))
         raise RequestedNotFound(str(error))
 
-def genes():
-    args = request.args.to_dict()
+
+def genes(request_args=None, request=None):
+    args = request_args.dict() if request_args is not None else {}
     try:
         start, size = apiu._get_start_size(args)
     except ValueError as error:
@@ -457,26 +458,26 @@ def genes():
         raise BadUserRequest(str(error))
     explorer = ex.Explorer(apiu.properties)
     genes = explorer.get_list_of_genes()
-    gene_list = apiu._get_gene_list(genes=genes, start=start, size=size)
+    gene_list = apiu._get_gene_list(genes=genes, start=start, size=size, request=request)
 
-    response = apiu._create_response(collection_name='gene', method_name='api.get_genes',
+    response = apiu._create_response(collection_name='gene', method_name='get_genes', request=request,
                                      start=start, size=size, index_marker=size, data_dict=gene_list)
-    return simplejson.dumps(response)
+    return response
 
 
-def gene(gene):
+def gene(gene, request=None):
     try:
         explorer = ex.Explorer(config_properties=properties)
         if explorer.has_gene(gene):
-            response = apiu._create_info_for_gene(gene)
-            return simplejson.dumps(response, ignore_nan=True)
+            response = apiu._create_info_for_gene(gene, request=request)
+            return response
     except NotFoundError as error:
         logging.error("/genes/" + gene + ". " + (str(error)))
         raise RequestedNotFound(str(error))
 
 
-def gene_associations(gene):
-    args = request.args.to_dict()
+def gene_associations(gene, request_args=None, request=None):
+    args = request_args.dict() if request_args is not None else {}
     try:
         start, size, p_lower, p_upper, pval_interval, quant_method, snp, tissue, _, study, trait, paginate, links, qtl_group = apiu._get_basic_arguments(args)
     except ValueError as error:
@@ -490,36 +491,35 @@ def gene_associations(gene):
                 quant_method=quant_method, tissue=tissue, study=study, trait=trait, paginate=paginate, qtl_group=qtl_group)
 
         data_dict = apiu._get_array_to_display(request=request, datasets=datasets, links=links)
-        params = dict(gene_id=gene, p_lower=p_lower, p_upper=p_upper, quant_method=quant_method, tissue=tissue, variant_id=snp, study=study, molecular_trait_id=trait, qtl_group=qtl_group, links=links)
-        response = apiu._create_response(method_name='api.get_gene_assocs', start=start, size=size,
-                                         index_marker=index_marker,
+        path_params = dict(gene_id=gene)
+        params = dict(p_lower=p_lower, p_upper=p_upper, quant_method=quant_method, tissue=tissue, variant_id=snp, study=study, molecular_trait_id=trait, qtl_group=qtl_group, links=links)
+        response = apiu._create_response(method_name='get_gene_assocs', start=start, size=size,
+                                         index_marker=index_marker, request=request, path_params=path_params,
                                          data_dict=data_dict, params=params)
-
-        return simplejson.dumps(response, ignore_nan=True)
-
+        return response
     except NotFoundError as error:
         logging.error("/genes/" + gene + ". " + (str(error)))
         raise RequestedNotFound(str(error))
 
 
-def _create_chromosome_info(chromosome):
-    explorer = ex.Explorer(apiu.properties)
-    if explorer.has_chromosome(chromosome):
-        chromosome_info = {'chromosome': chromosome,
-                           '_links': {'self': apiu._create_href(method_name='api.get_chromosome',
-                                                                params={'chromosome': chromosome}),
-                                      'associations': apiu._create_href(method_name='api.get_chromosome_assocs',
-                                                                        params={'chromosome': chromosome})}}
-        return chromosome_info
-    raise NotFoundError("Chromosome " + str(chromosome))
+def _create_chromosome_info(chromosome, request=None):
+    chromosome_info = {'chromosome': chromosome,
+                           '_links': {'self': apiu._create_href(method_name='get_chromosome',
+                                                                path_params={'chromosome': chromosome},
+                                                                request=request),
+                                      'associations': apiu._create_href(method_name='get_chromosome_assocs',
+                                                                        path_params={'chromosome': chromosome},
+                                                                        request=request)}}
+    return chromosome_info
 
 
-def _create_chromosome_response(search_info):
-    params = dict(chromosome=search_info['chromosome'], p_lower=search_info['p_lower'], p_upper=search_info['p_upper'],
+def _create_chromosome_response(search_info, request=None):
+    params = dict(p_lower=search_info['p_lower'], p_upper=search_info['p_upper'],
                   bp_lower=search_info['bp_lower'], bp_upper=search_info['bp_upper'],
                   study=search_info['study'], links=search_info['links'])
-    response = apiu._create_response(method_name='api.get_chromosome_assocs', start=search_info['start'], size=search_info['size'],
-                                     index_marker=search_info['index_marker'],
-                                     data_dict=search_info['data_dict'], params=params)
+    path_params = dict(chromosome=search_info['chromosome'])
+    response = apiu._create_response(method_name='get_chromosome_assocs', start=search_info['start'], size=search_info['size'],
+                                     index_marker=search_info['index_marker'], request=request,
+                                     data_dict=search_info['data_dict'], path_params=path_params, params=params)
 
-    return simplejson.dumps(response, ignore_nan=True)
+    return response
