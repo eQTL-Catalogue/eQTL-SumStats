@@ -49,7 +49,7 @@ def internal_server_error(error):
 
 
 @api.route('/')
-def root():
+def root():#DONE
     resp = endpoints.root()
     return Response(response=resp,
                     status=200,
@@ -57,7 +57,7 @@ def root():
 
 
 @api.route('/associations')
-def get_assocs():
+def get_assocs():#DONE
     """Associations
 
          .. :quickref: Associations; Lists all of the available associations.
@@ -176,7 +176,7 @@ def get_assocs():
 
 @api.route('/associations/<string:variant_id>')
 @api.route('/associations/<string:rsid>')
-def get_variant(variant_id=None, rsid=None):
+def get_variant(variant_id=None, rsid=None):#DONE
     """Search Variant Associations
 
         .. :quickref: Variant Associations; Lists all of the available associations of a specific variant.
@@ -303,7 +303,7 @@ def get_variant(variant_id=None, rsid=None):
 
 
 @api.route('/molecular_phenotypes')
-def get_traits():
+def get_traits():#DONE
     """Molecular phenotypes
 
         .. :quickref: Molecular phenotypes; List all existing molecular phenotypes resources
@@ -377,7 +377,7 @@ def get_traits():
 
 
 @api.route('/molecular_phenotypes/<string:molecular_trait_id>')
-def get_trait(molecular_trait_id):
+def get_trait(molecular_trait_id):#DONE
     """Molecular phenotype Resource
 
         .. :quickref: Molecular Phenotype Resource; Lists a specific molecular phenotype resource.
@@ -421,7 +421,7 @@ def get_trait(molecular_trait_id):
 
 
 @api.route('/molecular_phenotypes/<string:molecular_trait_id>/associations')
-def get_trait_assocs(molecular_trait_id):
+def get_trait_assocs(molecular_trait_id):#DONE
     """Search Molecular phenotype for Associations
 
         .. :quickref: Search Molecular phenotype for Associations; Lists associations for a specific molecular trait id.
@@ -509,7 +509,7 @@ def get_trait_assocs(molecular_trait_id):
 
 
 @api.route('/studies')
-def get_studies():
+def get_studies():#DONE
     """Studies
 
         .. :quickref: Studies; List all existing study resources
@@ -590,74 +590,9 @@ def get_studies():
                     status=200,
                     mimetype="application/json")
 
-#@api.route('/traits/<string:trait>/studies')
-#def get_studies_for_trait(trait):
-#    """Search Trait for Studies
-#
-#        .. :quickref: Search Trait for Studies; Lists studies for a specific trait.
-#
-#        Lists studies for a specific trait.
-#
-#        **Example request**:
-#
-#        .. sourcecode:: http
-#
-#            GET /traits/EFO_0003785/studies HTTP/1.1
-#            Host: www.ebi.ac.uk
-#
-#        **Example response**:
-#
-#        .. sourcecode:: http
-#
-#            HTTP/1.1 200 OK
-#            Content-Type: application/json
-#
-#            {
-#              "_embedded": {
-#                "studies": [
-#                  {
-#                    "study_accession": "GCST005038",
-#                    "_links": {
-#                      "associations": {
-#                        "href": "http://www.ebi.ac.uk/gwas/summary-statistics/api/traits/EFO_0003785/studies/GCST005038/associations"
-#                      },
-#                      "self": {
-#                        "href": "http://www.ebi.ac.uk/gwas/summary-statistics/api/traits/EFO_0003785/studies/GCST005038"
-#                      },
-#                      "trait": {
-#                        "href": "http://www.ebi.ac.uk/gwas/summary-statistics/api/traits/EFO_0003785"
-#                      },
-#                      "gwas_catalog": {
-#                        "href": "http://www.ebi.ac.uk/gwas/labs/rest/api/studies/GCST005038"
-#                      }
-#                    }
-#                  }
-#                ]
-#              },
-#              "_links": {
-#                "self": {
-#                  "href": "http://www.ebi.ac.uk/gwas/summary-statistics/api/traits/EFO_0003785/studies"
-#                },
-#                "first": {
-#                  "href": "http://www.ebi.ac.uk/gwas/summary-statistics/api/traits/EFO_0003785/studies?start=0&size=20"
-#                }
-#              }
-#            }
-#
-#        :query start: offset number. default is 0
-#        :query size: number of items returned. default is 20
-#
-#        :statuscode 200: no error
-#        :statuscode 404: not found error
-#    """
-#    resp = endpoints.studies_for_trait(trait)
-#    return Response(response=resp,
-#                    status=200,
-#                    mimetype="application/json")
-
 
 @api.route('/tissues/<string:tissue>/studies')
-def get_studies_for_tissue(tissue):
+def get_studies_for_tissue(tissue):#DONE
     """Studies for tissues
 
         .. :quickref: Studies for tissues; List all existing study resources for a given tissue ontology
@@ -733,7 +668,7 @@ def get_studies_for_tissue(tissue):
 
 
 @api.route('/tissues/<string:tissue>/associations')
-def get_tissue_assocs(tissue):
+def get_tissue_assocs(tissue):#DONE
     """Search Tissue for Associations
 
         .. :quickref: Search Tissue/Cell type for Associations; Lists associations for a specific tissue ontology.
@@ -850,7 +785,7 @@ def get_tissue_assocs(tissue):
 
 @api.route('/studies/<string:study>')
 @api.route('/tissues/<string:tissue>/studies/<string:study>')
-def get_tissue_study(study, tissue=None):
+def get_tissue_study(study, tissue=None):#DONE
     """Study
 
         .. :quickref: Study; Lists a specific study resource
@@ -1258,7 +1193,7 @@ def get_chromosome(chromosome):
 
 
 @api.route('/chromosomes/<string:chromosome>/associations')
-def get_chromosome_assocs(chromosome):
+def get_chromosome_assocs(chromosome):#DONE
     """Search Chromosome Associations
 
         .. :quickref: Search Chromosome Associations; Returns associations for a specific chromosome. Will return 404 Not Found if the chromosome value does not exist.

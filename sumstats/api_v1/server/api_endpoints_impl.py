@@ -39,7 +39,7 @@ def associations(request_args=None, request=None):
     datasets, index_marker, paginate = searcher.search(start=start, size=size, pval_interval=pval_interval, quant_method=quant_method, 
             tissue=tissue, gene=gene, study=study, trait=trait, paginate=paginate, qtl_group=qtl_group, snp=snp)
 
-    data_dict = apiu._get_array_to_display(datasets=datasets, links=links)
+    data_dict = apiu._get_array_to_display(request=request, datasets=datasets, links=links)
     params = dict(p_lower=p_lower, p_upper=p_upper, quant_method=quant_method, tissue=tissue, gene_id=gene, study=study, molecular_trait_id=trait, qtl_group=qtl_group, variant_id=snp, links=links)
     response = apiu._create_response(method_name='get_assocs', start=start, size=size, index_marker=index_marker,
                                      data_dict=data_dict, params=params, request=request)
@@ -97,7 +97,7 @@ def trait_associations(trait, request_args=None, request=None):
         datasets, index_marker, paginate = searcher.search(trait=trait, start=start, size=size, pval_interval=pval_interval, quant_method=quant_method, 
                 tissue=tissue, gene=gene, study=study, snp=snp, paginate=paginate, qtl_group=qtl_group)
 
-        data_dict = apiu._get_array_to_display(datasets=datasets, links=links)
+        data_dict = apiu._get_array_to_display(request=request, datasets=datasets, links=links)
         path_params = {'molecular_trait_id': trait}
         params = dict(p_lower=p_lower, p_upper=p_upper, quant_method=quant_method, tissue=tissue, gene_id=gene, study=study, variant_id=snp, qtl_group=qtl_group, links=links)
         response = apiu._create_response(method_name='get_trait_assocs', start=start, size=size,
@@ -111,8 +111,8 @@ def trait_associations(trait, request_args=None, request=None):
         raise RequestedNotFound(str(error))
 
 
-def studies():
-    args = request.args.to_dict()
+def studies(request_args=None, request=None):
+    args = request_args.dict() if request_args is not None else {}
     try:
         start, size = apiu._get_start_size(args)
     except ValueError as error:
@@ -121,12 +121,13 @@ def studies():
 
     explorer = ex.Explorer(apiu.properties)
     studies = explorer.get_list_of_studies()
-    study_list = apiu._get_study_list(studies=studies, start=start, size=size)
+    study_list = apiu._get_study_list(studies=studies, start=start, size=size, request=request)
 
-    response = apiu._create_response(collection_name='studies', method_name='api.get_studies',
-                                     start=start, size=size, index_marker=size, data_dict=study_list)
+    response = apiu._create_response(collection_name='studies', method_name='get_studies',
+                                     start=start, size=size, index_marker=size, 
+                                     request=request, data_dict=study_list)
 
-    return simplejson.dumps(response)
+    return response
 
 
 def study_list():
@@ -152,32 +153,8 @@ def study_list():
     return simplejson.dumps(response)
 
 
-
-def studies_for_trait(trait):
-    args = request.args.to_dict()
-    try:
-        start, size = apiu._get_start_size(args)
-    except ValueError as error:
-        logging.error("/molecular_phenotypes/" + trait + "/studies. " + (str(error)))
-        raise BadUserRequest(str(error))
-
-    try:
-        explorer = ex.Explorer(apiu.properties)
-        studies = explorer.get_list_of_studies_for_trait(trait)
-        study_list = apiu._create_study_info_for_trait(studies, trait)
-        end = min(start + size, len(study_list))
-        response = apiu._create_response(collection_name='studies', method_name='api.get_studies_for_trait',
-                                         start=start, size=size, index_marker=size,
-                                         data_dict=study_list[start:end], params=dict(molecular_phenotypes=trait))
-
-        return simplejson.dumps(response)
-    except NotFoundError as error:
-        logging.error("/molecular_phenotypes/" + trait + "/studies. " + (str(error)))
-        raise RequestedNotFound(str(error))
-
-
-def studies_for_tissue(tissue):
-    args = request.args.to_dict()
+def studies_for_tissue(tissue, request_args=None, request=None):
+    args = request_args.dict() if request_args is not None else {}
     try:
         start, size = apiu._get_start_size(args)
     except ValueError as error:
@@ -187,19 +164,19 @@ def studies_for_tissue(tissue):
     try:
         explorer = ex.Explorer(apiu.properties)
         studies = explorer.get_studies_of_tissue(tissue)
-        study_list = apiu._create_study_info_for_tissue(studies, tissue)
+        study_list = apiu._create_study_info_for_tissue(studies, tissue, request=request)
         end = min(start + size, len(study_list))
-        response = apiu._create_response(collection_name='studies', method_name='api.get_studies_for_tissue',
-                                         start=start, size=size, index_marker=size, data_dict=study_list, params=dict(tissue=tissue))
+        response = apiu._create_response(collection_name='studies', method_name='get_studies_for_tissue', request=request,
+                                         start=start, size=size, index_marker=size, data_dict=study_list, path_params=dict(tissue=tissue))
 
-        return simplejson.dumps(response)
+        return response
     except NotFoundError as error:
         logging.error("/tissues/" + tissue + "/studies. " + (str(error)))
         raise RequestedNotFound(str(error))
 
 
-def tissue_associations(tissue):
-    args = request.args.to_dict()
+def tissue_associations(tissue, request_args=None, request=None):
+    args = request_args.dict() if request_args is not None else {}
     try:
         start, size, p_lower, p_upper, pval_interval, quant_method, snp, _, gene, study, trait, paginate, links, qtl_group = apiu._get_basic_arguments(args)
     except ValueError as error:
@@ -213,26 +190,28 @@ def tissue_associations(tissue):
         datasets, index_marker, paginate = searcher.search(tissue=tissue, start=start, size=size, pval_interval=pval_interval, quant_method=quant_method, 
                 gene=gene, study=study, trait=trait, snp=snp, paginate=paginate, qtl_group=qtl_group)
 
-        data_dict = apiu._get_array_to_display(datasets=datasets, links=links)
+        data_dict = apiu._get_array_to_display(request=request, datasets=datasets, links=links)
         #params = dict(trait=trait, study=study, p_lower=p_lower, p_upper=p_upper)
-        params = dict(p_lower=p_lower, p_upper=p_upper, tissue=tissue, quant_method=quant_method, gene_id=gene, study=study, molecular_trait_id=trait, variant_id=snp, qtl_group=qtl_group, links=links)
-        response = apiu._create_response(method_name='api.get_tissue_assocs', start=start, size=size,
-                                         index_marker=index_marker,
-                                         data_dict=data_dict, params=params)
+        path_params = {'tissue': tissue}
+        params = dict(p_lower=p_lower, p_upper=p_upper, quant_method=quant_method, gene_id=gene, study=study, molecular_trait_id=trait, variant_id=snp, qtl_group=qtl_group, links=links)
+        response = apiu._create_response(method_name='get_tissue_assocs', start=start, size=size,
+                                         index_marker=index_marker, request=request,
+                                         data_dict=data_dict, params=params, path_params=path_params)
 
-        return simplejson.dumps(response, ignore_nan=True)
+        return response
 
     except (NotFoundError, SubgroupError) as error:
         logging.error("/tissues/" + tissue + ". " + (str(error)))
         raise RequestedNotFound(str(error))
 
 
-def tissue_study(study, tissue=None):
+def tissue_study(study, tissue=None, request_args=None, request=None):
+    args = request_args.dict() if request_args is not None else {}
     try:
         explorer = ex.Explorer(apiu.properties)
         if explorer.check_study(study):
-            response = apiu._create_info_for_study(study=study, tissue=tissue)
-            return simplejson.dumps(response, ignore_nan=True)
+            response = apiu._create_info_for_study(study=study, tissue=tissue, request=request)
+            return response
         else:
             raise RequestedNotFound("Study: {}.".format(study))
     except (NotFoundError, SubgroupError) as error:
@@ -240,8 +219,8 @@ def tissue_study(study, tissue=None):
         raise RequestedNotFound(str(error))
 
 
-def tissue_study_associations(study, tissue=None):
-    args = request.args.to_dict()
+def tissue_study_associations(study, tissue=None, request_args=None, request=None):
+    args = request_args.dict() if request_args is not None else {}
     try:
         start, size, p_lower, p_upper, pval_interval, quant_method, snp, _, gene, _, trait, paginate, links, qtl_group = apiu._get_basic_arguments(args)
     except ValueError as error:
@@ -254,28 +233,31 @@ def tissue_study_associations(study, tissue=None):
 
         #datasets, index_marker = searcher.search_study(trait=trait, study=study,
         #                                               start=start, size=size, pval_interval=pval_interval)
+
         if tissue:
             datasets, index_marker, paginate = searcher.search(tissue=tissue, study=study, trait=trait, gene=gene, snp=snp,
                                                      start=start, size=size, pval_interval=pval_interval,
                                                      quant_method=quant_method, paginate=paginate, qtl_group=qtl_group)
 
-            data_dict = apiu._get_array_to_display(datasets=datasets, links=links)
+            data_dict = apiu._get_array_to_display(request=request, datasets=datasets, links=links)
 
-            params = dict(tissue=tissue, molecular_trait_id=trait,  variant_id=snp, study=study, p_lower=p_lower, p_upper=p_upper, gene_id=gene, quant_method=quant_method, qtl_group=qtl_group, links=links)
+            path_params = dict(tissue=tissue, study=study)
+            params = dict(molecular_trait_id=trait,  variant_id=snp, p_lower=p_lower, p_upper=p_upper, gene_id=gene, quant_method=quant_method, qtl_group=qtl_group, links=links)
         else:
             datasets, index_marker, paginate = searcher.search(study=study, gene=gene, snp=snp, trait=trait, start=start, size=size, 
                     pval_interval=pval_interval, quant_method=quant_method, paginate=paginate, qtl_group=qtl_group)
 
-            data_dict = apiu._get_array_to_display(datasets=datasets, links=links)
+            data_dict = apiu._get_array_to_display(request=request, datasets=datasets, links=links)
 
+            path_params = dict(study=study)
             params = dict(study=study, p_lower=p_lower, p_upper=p_upper,  variant_id=snp, gene_id=gene, molecular_trait_id=trait, quant_method=quant_method, qtl_group=qtl_group, links=links)
 
 
-        response = apiu._create_response(method_name='api.get_tissue_study_assocs', start=start, size=size,
-                                         index_marker=index_marker,
-                                         data_dict=data_dict, params=params)
+        response = apiu._create_response(method_name='get_tissue_study_assocs', start=start, size=size,
+                                         index_marker=index_marker, request=request,
+                                         data_dict=data_dict, path_params=path_params, params=params)
 
-        return simplejson.dumps(response, ignore_nan=True)
+        return response
 
     except (NotFoundError, SubgroupError) as error:
         logging.error("/studies/" + study + ". " + (str(error)))
@@ -325,7 +307,7 @@ def chromosome_associations(chromosome):
                                                             pval_interval=pval_interval, bp_interval=bp_interval, 
                                                             quant_method=quant_method, tissue=tissue, gene=gene, 
                                                             trait=trait, paginate=paginate, qtl_group=qtl_group)
-        data_dict = apiu._get_array_to_display(datasets=datasets, chromosome=chromosome, links=links)
+        data_dict = apiu._get_array_to_display(request=request, datasets=datasets, chromosome=chromosome, links=links)
         return _create_chromosome_response(dict(chromosome=chromosome, data_dict=data_dict, start=start, size=size,
                                                 index_marker=index_marker, bp_lower=bp_lower, bp_upper=bp_upper, variant_id=snp,
                                                 p_lower=p_lower, p_upper=p_upper, study=study, quant_method=quant_method, 
@@ -361,7 +343,7 @@ def variants(variant, request_args, request, chromosome=None):
                                                      pval_interval=pval_interval, study=study, quant_method=quant_method, 
                                                      tissue=tissue, gene=gene, trait=trait, paginate=paginate, qtl_group=qtl_group)
 
-        data_dict = apiu._get_array_to_display(datasets=datasets, variant=variant, links=links)
+        data_dict = apiu._get_array_to_display(request=request, datasets=datasets, variant=variant, links=links)
         path_params = {'variant_id': variant}
         params = {'p_lower': p_lower, 'p_upper': p_upper, 'study': study, 'quant_method': quant_method, 'tissue': tissue, 'gene_id': gene, 'molecular_trait_id': trait, 'qtl_group': qtl_group, 'links': links}
         if chromosome is None:
@@ -394,7 +376,7 @@ def variant_resource(variant, chromosome=None):
         datasets, index_marker, paginate = searcher.search(snp=variant, chromosome=chromosome, start=start, size=size,
                                                      pval_interval=pval_interval, study=study, quant_method=quant_method, 
                                                      tissue=tissue, gene=gene, trait=trait, paginate=paginate, qtl_group=qtl_group)
-        data_dict = apiu._get_array_to_display(datasets=datasets, variant=variant, links=links)
+        data_dict = apiu._get_array_to_display(request=request, datasets=datasets, variant=variant, links=links)
         params = {'variant_id': variant, 'study': study, 'quant_method': quant_method, 'tissue': tissue, 'gene_id': gene, 'molecular_trait_id': trait, 'qtl_group': qtl_group, 'links': links}
 
         if chromosome is not None:
@@ -507,7 +489,7 @@ def gene_associations(gene):
         datasets, index_marker, paginate = searcher.search(gene=gene, start=start, size=size, pval_interval=pval_interval, snp=snp,
                 quant_method=quant_method, tissue=tissue, study=study, trait=trait, paginate=paginate, qtl_group=qtl_group)
 
-        data_dict = apiu._get_array_to_display(datasets=datasets, links=links)
+        data_dict = apiu._get_array_to_display(request=request, datasets=datasets, links=links)
         params = dict(gene_id=gene, p_lower=p_lower, p_upper=p_upper, quant_method=quant_method, tissue=tissue, variant_id=snp, study=study, molecular_trait_id=trait, qtl_group=qtl_group, links=links)
         response = apiu._create_response(method_name='api.get_gene_assocs', start=start, size=size,
                                          index_marker=index_marker,

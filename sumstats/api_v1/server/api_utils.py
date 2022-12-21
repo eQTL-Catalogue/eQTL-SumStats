@@ -24,13 +24,13 @@ def set_properties():
     set_p.set_properties()
 
 
-def _get_study_list(studies, start, size):
+def _get_study_list(studies, start, size, request=None):
     study_list = []
     end = min(start + size, len(studies))
     for study in studies[start:end]:
         #trait = _find_study_info(study)
         #study_list.append(_create_study_info_for_trait([study], trait))
-        study_list.append(_create_study_info_for_tissue([study]))
+        study_list.append(_create_study_info_for_tissue([study], request=request))
     return study_list
 
 def _get_study_list_no_info(studies, start, size):
@@ -57,52 +57,52 @@ def _get_qtl_list(qtls, start, size, links=None):
     return qtl_list
 
 
-def _create_study_info_for_trait(studies, trait=None):
+def _create_study_info_for_trait(studies, trait=None, request=None):
     study_list = []
     for study in studies:
-        study_info = _create_info_for_study(study=study, trait=trait)
+        study_info = _create_info_for_study(study=study, trait=trait, request=request)
         study_list.append(study_info)
     return study_list
 
 
-def _create_study_info_for_tissue(studies, tissue=None):
+def _create_study_info_for_tissue(studies, tissue=None, request=None):
     study_list = []
     for study in studies:
-        study_info = _create_info_for_study(study=study, tissue=tissue)
+        study_info = _create_info_for_study(study=study, tissue=tissue, request=request)
         study_list.append(study_info)
     return study_list
 
 
-def _create_info_for_tissue(tissue, tissue_name=None, links=None):
+def _create_info_for_tissue(tissue, tissue_name=None, links=None, request=None):
     tissue_info = {'tissue': tissue}
     if tissue_name:
         tissue_info['tissue_label'] = tissue_name
     if links is True:
-        tissue_info['_links'] = {'self': _create_href(request=request, method_name='api.get_tissue', params={'tissue': tissue})}
-        tissue_info['_links']['studies'] = _create_href(request=request, method_name='api.get_studies_for_tissue', params={'tissue': tissue})
-        tissue_info['_links']['associations'] = _create_href(request=request, method_name='api.get_tissue_assocs', params={'tissue': tissue})
+        tissue_info['_links'] = {'self': _create_href(request=request, method_name='get_tissue', path_params={'tissue': tissue})}
+        tissue_info['_links']['studies'] = _create_href(request=request, method_name='get_studies_for_tissue', path_params={'tissue': tissue})
+        tissue_info['_links']['associations'] = _create_href(request=request, method_name='get_tissue_assocs', path_params={'tissue': tissue})
     return tissue_info
 
 
-def _create_info_for_study(study, tissue=None):
+def _create_info_for_study(study, tissue=None, request=None):
     if tissue:
         study_info = {'study_accession': study,
-                      '_links': {'self': _create_href(request=request, method_name='api.get_tissue_study',
-                                                      params={'tissue': tissue, 'study': study}),
-                                 'tissue': _create_href(request=request, method_name='api.get_tissues', params={'study_accession': study})}}
+                      '_links': {'self': _create_href(request=request, method_name='get_tissue_study',
+                                                      path_params={'tissue': tissue, 'study': study}),
+                                 'tissue': _create_href(request=request, method_name='get_tissues', params={'study_accession': study})}}
 
         study_info['_links'] = _add_gwas_catalog_href(info_array=study_info['_links'], study_accession=study)
-        study_info['_links']['associations'] = _create_href(request=request, method_name='api.get_tissue_study_assocs',
-                                                            params={'tissue': tissue, 'study': study})
+        study_info['_links']['associations'] = _create_href(request=request, method_name='get_tissue_study_assocs',
+                                                            path_params={'tissue': tissue, 'study': study})
     else:
         study_info = {'study_accession': study,
-                      '_links': {'self': _create_href(request=request, method_name='api.get_tissue_study',
-                                                      params={'study': study}),
-                                 'tissue': _create_href(request=request, method_name='api.get_tissues', params={'study_accession': study})}}
+                      '_links': {'self': _create_href(request=request, method_name='get_tissue_study',
+                                                      path_params={'study': study}),
+                                 'tissue': _create_href(request=request, method_name='get_tissues', params={'study_accession': study})}}
 
         study_info['_links'] = _add_gwas_catalog_href(info_array=study_info['_links'], study_accession=study)
-        study_info['_links']['associations'] = _create_href(request=request, method_name='api.get_tissue_study_assocs',
-                                                            params={'study': study})
+        study_info['_links']['associations'] = _create_href(request=request, method_name='get_tissue_study_assocs',
+                                                            path_params={'study': study})
     return study_info
 
 
@@ -115,11 +115,11 @@ def _get_trait_list(traits, start, size, request=None):
     return trait_list
 
 
-def _get_gene_list(genes, start, size):
+def _get_gene_list(genes, start, size, request=None):
     gene_list = []
     end = min(start + size, len(genes))
     for gene in genes[start:end]:
-        gene_info = _create_info_for_gene(gene)
+        gene_info = _create_info_for_gene(gene, request=request)
         gene_list.append(gene_info)
     return gene_list
 
@@ -131,11 +131,11 @@ def _create_info_for_trait(trait, request):
     trait_info['_links']['associations'] = _create_href(rmethod_name='get_trait_assocs', request=request, path_params={'molecular_trait_id': trait})
     return trait_info
 
-def _create_info_for_gene(gene):
+def _create_info_for_gene(gene, request=None):
     gene_info = {'gene': gene,
-                  '_links': {'self': _create_href(request=request, method_name='api.get_gene', params={'gene_id': gene})}}
+                  '_links': {'self': _create_href(request=request, method_name='get_gene', path_params={'gene_id': gene})}}
     #gene_info['_links']['studies'] = _create_href(request=request, method_name='api.get_studies_for_gene', params={'gene': gene})
-    gene_info['_links']['associations'] = _create_href(request=request, method_name='api.get_gene_assocs', params={'gene_id': gene})
+    gene_info['_links']['associations'] = _create_href(request=request, method_name='get_gene_assocs', path_params={'gene_id': gene})
     return gene_info
 
 def _add_ontology_href(info_array, trait):
@@ -297,7 +297,7 @@ def _create_next_links(method_name, start, size, index_marker, size_retrieved, p
     response = OrderedDict([('self', _create_href(method_name=method_name, params=params, path_params=path_params, request=request))])
     params['start'] = 0
     params['size'] = size
-    response['first'] = _create_href(rmethod_name=method_name, params=params, path_params=path_params, request=request)
+    response['first'] = _create_href(method_name=method_name, params=params, path_params=path_params, request=request)
     params['start'] = prev
     # response['prev'] = _create_href(request=request, method_name=method_name, params=params)
 
