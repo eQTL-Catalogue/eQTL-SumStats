@@ -46,6 +46,7 @@ service:
   port: 8000
   path: /eqtl/api(/|$)(.*)
   gunicornCmd: '["gunicorn", "-b", "0.0.0.0:8000", "sumstats.server.app:app","--log-level=debug","--access-logfile=logs/ss_access.log","--error-logfile=logs/ss_error.log", "--workers=4"]'
+  uvicornCmd: '["uvicorn", "sumstats.main:app", "--log-level=debug"]'
 
 staticService:
   replicaCount: 1

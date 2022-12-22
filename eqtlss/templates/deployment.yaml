@@ -25,7 +25,7 @@ spec:
       containers:
       - name: {{.Values.service.name}}
         image: "{{.Values.image.repository}}:{{.Values.image.tag}}"
-        command: {{.Values.service.gunicornCmd}}
+        command: {{.Values.service.uvicornCmd}}
         imagePullPolicy: {{.Values.image.pullPolicy}}
         resources:
           requests:
