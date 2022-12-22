@@ -1,4 +1,4 @@
-FROM hdfgroup/h5py:2.7.0
+FROM hdfgroup/hdf5lib:1.13.1
 
 
 COPY requirements.txt /application/
@@ -9,7 +9,7 @@ COPY setup.py .
 COPY config config
 COPY sumstats sumstats
 
-RUN pip install . --ignore-installed six
+#RUN pip install . --ignore-installed six
 RUN mkdir logs
 
 # Expose ports

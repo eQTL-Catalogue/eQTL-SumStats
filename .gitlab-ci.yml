@@ -16,7 +16,7 @@ variables:
 
 # generate the docs with sphinx
 sphinxdocs:
-  image: $CI_REGISTRY_IMAGE:latest
+  image: $CI_REGISTRY_IMAGE:dev
   stage: docs
   script:
    - mkdir logs

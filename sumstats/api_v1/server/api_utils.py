@@ -221,7 +221,7 @@ def _add_dset_index(info_array, dset_name, dataset, index):
         # string elements that where empty are saved as the string 'nan'
         # and as such need to be converted and displayed as null like the numbers
         dataset[index] = None
-    info_array[dset_name] = np.asscalar(np.array(dataset[index]))
+    info_array[dset_name] = np.ndarray.item(np.array(dataset[index]))
     return info_array
 
 

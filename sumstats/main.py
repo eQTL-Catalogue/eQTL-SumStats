@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, ORJSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from sumstats.dependencies.error_classes import APIException
@@ -44,10 +44,12 @@ app.add_middleware(CORSMiddleware,
 # v1 API (default)
 app.include_router(routes_v1.router,
                    prefix=API_BASE,
-                   include_in_schema=False)
+                   include_in_schema=False,
+                   default_response_class=ORJSONResponse)
 
 app.include_router(routes_v1.router,
                    prefix=f"{API_BASE}/v1",
+                   default_response_class=ORJSONResponse,
                    deprecated=True,
                    tags=["eQTL API v1"])
 # v2 API
