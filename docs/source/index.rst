@@ -69,7 +69,7 @@ API quick reference
 
 With the exception of genomic region requests, all requests for associations can all be made using the ``/associations`` endpoint, adding and combining parameters as needed for filtering. 
 
-.. qrefflask:: sumstats.server.app:app
+.. qrefflask:: sumstats.api_v1.server.app:app
    :undoc-static:
    :order: path
 
@@ -363,6 +363,6 @@ A ``GET`` request is used to access the API.
 API detailed reference
 ======================
 
-.. autoflask:: sumstats.server.app:app
+.. autoflask:: sumstats.api_v1.server.app:app
    :undoc-static:
    :order: path
