@@ -1,4 +1,4 @@
-FROM hdfgroup/hdf5lib:1.13.1
+FROM hdfgroup/hdf5lib:1.10.6
 
 
 COPY requirements.txt /application/
