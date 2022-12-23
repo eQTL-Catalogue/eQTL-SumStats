@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from sumstats.dependencies.error_classes import APIException
 import sumstats.api_v1.routers.routes as routes_v1
+import sumstats.api_v2.routers.routes as routes_v2
 
 
 API_BASE = "/eqtl/api"
@@ -53,3 +54,6 @@ app.include_router(routes_v1.router,
                    deprecated=True,
                    tags=["eQTL API v1"])
 # v2 API
+app.include_router(routes_v2.router,
+                   prefix=f"{API_BASE}/v2",
+                   tags=["eQTL API v2"])
