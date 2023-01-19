@@ -1,14 +1,22 @@
 from enum import Enum
-from pydantic import BaseModel, constr, validator
+from typing import Union
+from pydantic import BaseModel, constr, Field, PositiveInt, root_validator
 
 
-class Chromosome(str, Enum):
+MAX_GENOMIC_WINDOW = 1_000_000
+
+
+"""
+Enums
+"""
+
+class ChromosomeEnum(str, Enum):
     chr1 = '1'
     chr2 = '2'
     chr3 = '3'
     chr4 = '4'
     chr5 = '5'
-    chr6 = '6'    
+    chr6 = '6'
     chr7 = '7'
     chr8 = '8'
     chr9 = '9'
@@ -30,73 +38,175 @@ class Chromosome(str, Enum):
     chrMT = 'MT'
 
 
-class GenomicRegion(BaseModel):
-    chromosome: Chromosome = None
-    start: int = None
-    end: int = None
+class VariantTypeEnum(str, Enum):
+    snp = "SNP"
+    indel = "INDEL"
+    other = "OTHER"
 
 
-class Variant(BaseModel):
-    chromosome: Chromosome
-    pos: int
-    ref: constr(regex=r"^[ACGT]+$")
-    alt: constr(regex=r"^[ACGT]+$")
+class QuantMethodEnum(str, Enum):
+    gene_counts = "ge"
+    exon_counts = "exon"
+    microarray = "microarray"
+    transcript_usage = "tx"
+    txrevise = "txrev"
+    leafcutter = "leafcutter"
 
 
-class Params(BaseModel):
+"""
+Models
+"""
+
+class Chromosome(BaseModel):
+    chr: ChromosomeEnum = Field(None, alias='chromosome',
+                                description='GRCh38 chromosome name of the variant',
+                                example="19")
+
+    class Config:
+        allow_population_by_field_name = True
+
+
+class VariantIdentifer(BaseModel):
+    variant: str = Field(None, 
+                         description="The variant ID (CHR_BP_REF_ALT)",
+                         example="chr19_80901_G_T")
+    rsid: constr(regex=r"^rs\d+$") = Field(None,
+                                           description="The rsID, if given, for the variant",
+                                           example="rs879890648")
+
+
+class Variant(Chromosome):
+    position: PositiveInt = Field(None,
+                                  description="GRCh38 position of the variant",
+                                  example=80901)
+    ref: constr(regex=r"^[ACGT]+$",
+                strip_whitespace=True,
+                to_lower=True) = Field(None,
+                                       description="GRCh38 reference allele",
+                                       example="G")
+    alt: constr(regex=r"^[ACGT]+$",
+                strip_whitespace=True,
+                to_lower=True) = Field(None,
+                                       description="GRCh38 alt allele (effect allele)",
+                                       example="T")
+    type: VariantTypeEnum = Field(None,
+                                  description="SNP, INDEL or OTHER",
+                                  example="SNP")
+
+
+class GenomicRegion(Chromosome):
+    s: PositiveInt = Field(None, alias='position_start',
+                           description='Start genomic position')
+    e: PositiveInt = Field(None, alias='position_end',
+                           description='End genomic position')
+
+    @root_validator
+    def validate_region(cls, values):
+        chromosome, pos_start, pos_end = values.get('chr'), values.get('s'), values.get('e')
+        var_count = sum(bool(x) for x in [chromosome, pos_start, pos_end])
+        if var_count > 0 and var_count != 3:
+            raise ValueError("Chromosome, start and end position must all be provided together")
+        if pos_start and pos_start:
+            if pos_start > pos_end:
+                raise ValueError(("Start position must not be "
+                                 "greater than end position"))
+            requested_window = pos_end - pos_start
+            if requested_window > MAX_GENOMIC_WINDOW:
+                raise ValueError(("Requested region is larger than the "
+                                 f"maximum allowable window of {MAX_GENOMIC_WINDOW}"))
+        return values
+
+    class Config:
+        allow_population_by_field_name = True
+
+
+class GenomicContext(BaseModel):
+    molecular_trait_id: str = Field(None,
+                                    description='ID of the molecular trait',
+                                    example="ENSG00000282458")
+    gene_id: str = Field(None, 
+                         description='Ensembl gene ID',
+                         example="ENSG00000282458")
+
+
+
+class VariantAssociation(VariantIdentifer,
+                         Variant,
+                         GenomicContext):
+    ac: int = Field(None, 
+                    description='Allele count',
+                    example=2)
+    an: int = Field(None,
+                    description='Total number of allele',
+                    example=334)
+    beta: float = Field(None,
+                        description="Regression coefficient from the linear model",
+                        example=0.984304)
+    maf: float = Field(None,
+                       description="Minor allele frequency within the QTL mapping study",
+                       example=0.00598802)
+    median_tpm: float = Field(None,
+                              description="Expression value for the associated gene + qtl_group",
+                              example=1.75669)
+    pvalue: float = Field(None,
+                          description="P-value of association between the variant and the phenotype",
+                          example=0.171767)
+    r2: float = Field(None,
+                      description='Imputation quality score from the imputation software',
+                      example=None)
+    se: float = Field(None,
+                      description='Standard error',
+                      example=0.716219)
+    nlog10p: float = Field(None,
+                           description="Negative log10 p-value",
+                           example=0.7650602694601004)
+
+
+class QTLMetadata(BaseModel):
+    dataset_id: str = Field(None,
+                            description=('Dataset ID. A dataset represents '
+                                         'a study & QTL context for a single '
+                                         'quantification method'),
+                            example="QTD000001")
+    study_id: str = Field(None,
+                          description='Study ID',
+                          example="QTS000001")
+    study_label: str = Field(None,
+                             description='Study label',
+                             example="Alasoo_2018")
+    sample_group: str = Field(None,
+                              description='Controlled vocabulary for the QTL group',
+                              example="macrophage_naive") 
+    tissue_id: str = Field(None,
+                           description='Ontology term for the tissue/cell typer',
+                           example="CL_0000235")
+    tissue_label: str = Field(None,
+                              description='Controlled vocabulary for the tissue/cell type',
+                              example="macrophage")
+    condition_label: str = Field(None,
+                                 description='More verbose condition description',
+                                 example='naive')
+    sample_size: int = Field(None,
+                             description='Sample size',
+                             example=84)
+    quant_method: QuantMethodEnum = Field(None,
+                                          description='Quantification method',
+                                          example='ge')
+
+
+class RequestParams(GenomicRegion,
+                    VariantIdentifer,
+                    GenomicContext):
     start: int = 0
-    size: int = 20
-    pos: str = None
-    nlog10p: float = None
-    rsid: constr(regex=r"^rs.+$") = None
-    variant_id: str = None
-    molecular_trait_id: str = None
-    gene_id: str = None
-    variant: Variant = None
-    genomic_region: GenomicRegion = None
+    size: PositiveInt = 20
+    p: float = Field(None, alias='neglog10p_cutoff',
+                     description='P-value cutoff, in -Log10 format')
 
-    @validator('genomic_region', pre=True)
-    def _split_pos(pos: str):
-        if pos:
-            chromosome = pos.split(':')[0]
-            start, end = pos.split(':')[1].split('-')
-            return GenomicRegion(chromosome, start, end)
-
-    @validator('variant', pre=True)
-    def _split_variant_id(variant_id: str):
-        if variant_id:
-            chromosome, position, ref, alt = variant_id.split('_')
-            return Variant(chromosome, position, ref, alt)
-
-
-class VariantAssociation(BaseModel):
-    ac: int = None
-    alt: str = None
-    an: int = None
-    beta: float = None
-    chromosome: Chromosome = None
-    maf: float = None
-    median_tpm: float = None
-    position: int = None
-    pvalue: float = None
-    r2: float = None
-    ref: str = None
-    rsid: constr(regex=r"^rs.+$") = None
-    se: float = None
-    type: str = None
-    variant: Variant = None
-    nlog10p: float = None
-
-
-class SumStatsMetadata(BaseModel):
-    study_id: str = None
-    qtl_group: str = None
-    condition: str = None
-    condition_label: str = None
-    tissue_label: str = None
-    molecular_trait_id: str = None
-    gene_id: str = None
-    tissue: str = None
-    _links: dict = None
-
-
+    @root_validator
+    def xor_genomic_context_filters(cls, values):
+        variant, rsid, genomic_region = values.get('variant'), values.get('rsid'), values.get('chr')
+        if sum(bool(x) for x in [variant, rsid, genomic_region]) > 1:
+            raise ValueError("There can only be one genomic context "
+                             "filter from: 'variant', 'rsid' "
+                             "and ('chr', 'position_start', 'position_end')")
+        return values

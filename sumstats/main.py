@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse, ORJSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -29,6 +29,13 @@ app = FastAPI(title="eQTL Catalogue Summary Statistics API Documentation",
               openapi_tags=tags_metadata,
               description=description)
 
+
+@app.exception_handler(ValueError)
+async def value_error_exception_handler(request: Request, exc: ValueError):
+    return JSONResponse(
+        status_code=400,
+        content={"message": str(exc)},
+    )
 
 @app.exception_handler(APIException)
 async def handle_custom_api_exception(request: Request,
