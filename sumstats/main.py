@@ -1,10 +1,10 @@
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, ORJSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from sumstats.dependencies.error_classes import APIException
 import sumstats.api_v1.routers.routes as routes_v1
-import sumstats.api_v2.routers.routes as routes_v2
+import sumstats.api_v2.routes as routes_v2
 
 
 API_BASE = "/eqtl/api"
@@ -36,6 +36,7 @@ async def value_error_exception_handler(request: Request, exc: ValueError):
         status_code=400,
         content={"message": str(exc)},
     )
+
 
 @app.exception_handler(APIException)
 async def handle_custom_api_exception(request: Request,

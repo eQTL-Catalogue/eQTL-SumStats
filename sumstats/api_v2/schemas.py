@@ -1,6 +1,10 @@
 from enum import Enum
-from typing import Union
-from pydantic import BaseModel, constr, Field, PositiveInt, root_validator
+from pydantic import (BaseModel,
+                      constr,
+                      Field,
+                      PositiveInt,
+                      conint,
+                      root_validator)
 
 
 MAX_GENOMIC_WINDOW = 1_000_000
@@ -9,6 +13,7 @@ MAX_GENOMIC_WINDOW = 1_000_000
 """
 Enums
 """
+
 
 class ChromosomeEnum(str, Enum):
     chr1 = '1'
@@ -56,6 +61,7 @@ class QuantMethodEnum(str, Enum):
 """
 Models
 """
+
 
 class Chromosome(BaseModel):
     chr: ChromosomeEnum = Field(None, alias='chromosome',
@@ -129,7 +135,6 @@ class GenomicContext(BaseModel):
                          example="ENSG00000282458")
 
 
-
 class VariantAssociation(VariantIdentifer,
                          Variant,
                          GenomicContext):
@@ -192,13 +197,18 @@ class QTLMetadata(BaseModel):
     quant_method: QuantMethodEnum = Field(None,
                                           description='Quantification method',
                                           example='ge')
+    _links: dict = None
+
+
+class CommonParams(BaseModel):
+    start: int = 0
+    size: conint(gt=0, le=1000) = 20
 
 
 class RequestParams(GenomicRegion,
                     VariantIdentifer,
-                    GenomicContext):
-    start: int = 0
-    size: PositiveInt = 20
+                    GenomicContext,
+                    CommonParams):
     p: float = Field(None, alias='neglog10p_cutoff',
                      description='P-value cutoff, in -Log10 format')
 
