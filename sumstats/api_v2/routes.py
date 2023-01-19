@@ -1,9 +1,12 @@
 from typing import List
 from fastapi import APIRouter, Depends, Request
+
+from sumstats.api_v2.services.metadata import MetadataService
 from sumstats.api_v2.schemas import (CommonParams,
                                      RequestParams,
                                      VariantAssociation,
-                                     QTLMetadata)
+                                     QTLMetadata,
+                                     QTLMetadataFilterable)
 
 
 router = APIRouter(
@@ -13,10 +16,15 @@ router = APIRouter(
 
 @router.get("/datasets",
             response_model=List[QTLMetadata],
-            response_model_exclude={"_links"})
+            response_model_exclude={"_links"},
+            response_model_exclude_unset=True)
 @router.get("/datasets/", include_in_schema=False)
-async def get_datasets(params: CommonParams = Depends()):
-    return []
+async def get_datasets(filters: QTLMetadataFilterable = Depends(),
+                       common_params: CommonParams = Depends()):
+    metadata_list = MetadataService(filters,
+                                    size=common_params.size,
+                                    start=common_params.start).get_many()
+    return metadata_list
 
 
 @router.get("/datasets/{qtl_id}",

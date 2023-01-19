@@ -167,36 +167,39 @@ class VariantAssociation(VariantIdentifer,
                            example=0.7650602694601004)
 
 
-class QTLMetadata(BaseModel):
-    dataset_id: str = Field(None,
-                            description=('Dataset ID. A dataset represents '
-                                         'a study & QTL context for a single '
-                                         'quantification method'),
-                            example="QTD000001")
+class QTLMetadataFilterable(BaseModel):
     study_id: str = Field(None,
                           description='Study ID',
                           example="QTS000001")
-    study_label: str = Field(None,
-                             description='Study label',
-                             example="Alasoo_2018")
+    quant_method: QuantMethodEnum = Field(None,
+                                          description='Quantification method',
+                                          example='ge')
     sample_group: str = Field(None,
                               description='Controlled vocabulary for the QTL group',
-                              example="macrophage_naive") 
+                              example="macrophage_naive")
     tissue_id: str = Field(None,
                            description='Ontology term for the tissue/cell typer',
                            example="CL_0000235")
+    study_label: str = Field(None,
+                             description='Study label',
+                             example="Alasoo_2018")
     tissue_label: str = Field(None,
                               description='Controlled vocabulary for the tissue/cell type',
                               example="macrophage")
     condition_label: str = Field(None,
                                  description='More verbose condition description',
                                  example='naive')
+
+
+class QTLMetadata(QTLMetadataFilterable):
+    dataset_id: str = Field(None,
+                            description=('Dataset ID. A dataset represents '
+                                         'a study & QTL context for a single '
+                                         'quantification method'),
+                            example="QTD000001")
     sample_size: int = Field(None,
                              description='Sample size',
                              example=84)
-    quant_method: QuantMethodEnum = Field(None,
-                                          description='Quantification method',
-                                          example='ge')
     _links: dict = None
 
 
