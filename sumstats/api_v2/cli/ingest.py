@@ -10,7 +10,7 @@ def tsv_to_hdf5(tsv_path, hdf5_path, mode):
 
 
 def tsv_to_df_iter(tsv_path, **kwargs) -> (pd.DataFrame):
-    return pd.read_table(tsv_path, iterator=True, **kwargs)
+    return pd.read_table(tsv_path, sep="\t", iterator=True, **kwargs)
 
 
 def validate_df(df, schema) -> pd.DataFrame:
@@ -46,7 +46,9 @@ def qtl_metadata_tsv_to_hdf5(tsv_path, hdf5_label) -> None:
                              chunksize=1000000)
     qms = QTLMetadataService(hdf5_label)
     for df in df_iter:
+        print(df.head())
         valid_df = validate_df(df=df, schema=QTLMetadataPa)
+        print(valid_df.head())
         qms.create(data=valid_df, 
                    key="qtl_metadata",
                    append=True,

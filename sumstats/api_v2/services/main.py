@@ -8,6 +8,7 @@ import tables as tb
 
 from sumstats.api_v2.utils.helpers import mkdir
 
+
 class HDF5Interface:
     def __init__(self, hdf5: str, par_dir: str):
         self.hdf5 = hdf5
@@ -30,7 +31,7 @@ class HDF5Interface:
                 results_df = results_df.append(chunk)
                 if len(results_df) >= size:
                     break
-            data_dict = results_df[:size].to_dict()
+            data_dict = results_df[:size].to_dict('records')
             return data_dict
 
     def create(self,

@@ -20,5 +20,6 @@ class QTLMetadataService(HDF5Interface):
     def get_many(self, params: CommonParams,
                  filters: QTLMetadataFilterable):
         # construct select statement self.select()
-        return [{'study_id': 'hello'}, {'study_id': 'world'}]
+        return self.select()
+        #return [{'study_id': 'hello'}, {'study_id': 'world'}]
 

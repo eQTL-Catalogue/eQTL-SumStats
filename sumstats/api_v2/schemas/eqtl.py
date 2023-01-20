@@ -175,22 +175,34 @@ class QTLMetadataFilterable(BaseModel):
                           searchable=True)
     quant_method: QuantMethodEnum = Field(None,
                                           description='Quantification method',
-                                          example='ge')
+                                          example='ge',
+                                          ingest_label='quant_method',
+                                          searchable=True)
     sample_group: str = Field(None,
                               description='Controlled vocabulary for the QTL group',
-                              example="macrophage_naive")
+                              example="macrophage_naive",
+                              ingest_label='sample_group',
+                              searchable=True)
     tissue_id: str = Field(None,
                            description='Ontology term for the tissue/cell typer',
-                           example="CL_0000235")
+                           example="CL_0000235",
+                           ingest_label='tissue_id',
+                           searchable=True)
     study_label: str = Field(None,
                              description='Study label',
-                             example="Alasoo_2018")
+                             example="Alasoo_2018",
+                             ingest_label='study_label',
+                             searchable=True)
     tissue_label: str = Field(None,
                               description='Controlled vocabulary for the tissue/cell type',
-                              example="macrophage")
+                              example="macrophage",
+                              ingest_label='tissue_label',
+                              searchable=True)
     condition_label: str = Field(None,
                                  description='More verbose condition description',
-                                 example='naive')
+                                 example='naive',
+                                 ingest_label='condition_label',
+                                 searchable=True)
 
 
 class QTLMetadata(QTLMetadataFilterable):
@@ -198,10 +210,14 @@ class QTLMetadata(QTLMetadataFilterable):
                             description=('Dataset ID. A dataset represents '
                                          'a study & QTL context for a single '
                                          'quantification method'),
-                            example="QTD000001")
+                            example="QTD000001",
+                            ingest_label='dataset_id',
+                            searchable=True)
     sample_size: int = Field(None,
                              description='Sample size',
-                             example=84)
+                             example=84,
+                             ingest_label='sample_size',
+                             searchable=False)
     _links: dict = None
 
 
