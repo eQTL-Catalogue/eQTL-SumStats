@@ -6,10 +6,12 @@ import os
 import pandas as pd
 import tables as tb
 
+from sumstats.api_v2.utils.helpers import mkdir
 
 class HDF5Interface:
-    def __init__(self, hdf5: str):
+    def __init__(self, hdf5: str, par_dir: str):
         self.hdf5 = hdf5
+        self.par_dir = par_dir
 
     def select(self, condition: str = None, size: int = 20, start: int = 0):
         results_df = pd.DataFrame()
@@ -35,6 +37,7 @@ class HDF5Interface:
                data: pd.DataFrame,
                key: str,
                **kwargs) -> None:
+        mkdir(self.par_dir)
         with pd.HDFStore(self.hdf5) as store:
             data.to_hdf(store, key, format="table", **kwargs)
 

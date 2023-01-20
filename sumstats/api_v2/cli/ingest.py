@@ -1,4 +1,5 @@
 import pandas as pd
+
 from sumstats.api_v2.services.qtl_meta import QTLMetadataService
 from sumstats.api_v2.schemas.ingest import QTLMetadataPa
 from sumstats.api_v2.schemas.eqtl import QTLMetadata
@@ -39,11 +40,11 @@ def swap_keys_for_values(d: dict) -> dict:
     return dict((v,k) for k,v in d.items())
 
 
-def qtl_metadata_tsv_to_hdf5(tsv_path, hdf5_path):
+def qtl_metadata_tsv_to_hdf5(tsv_path, hdf5_label) -> None:
     df_iter = tsv_to_df_iter(tsv_path=tsv_path,
                              usecols=[*tsv_header_map(QTLMetadata)],
                              chunksize=1000000)
-    qms = QTLMetadataService()
+    qms = QTLMetadataService(hdf5_label)
     for df in df_iter:
         valid_df = validate_df(df=df, schema=QTLMetadataPa)
         qms.create(data=valid_df, 
