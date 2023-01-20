@@ -15,12 +15,16 @@ ingested data.
 import pandera as pa
 from pandera.engines.pandas_engine import PydanticModel
 
-from sumstats.api_v2.schemas.eqtl import QTLMetadata
+from sumstats.api_v2.schemas.eqtl import QTLMetadata, VariantAssociation
 
 
 class QTLMetadataPa(pa.SchemaModel):
-    """Pandera schema using the pydantic model."""
     class Config:
-        """Config with dataframe-level data type."""
         dtype = PydanticModel(QTLMetadata)
+        coerce = True
+
+
+class QTLSumstatsPa(pa.SchemaModel):
+    class Config:
+        dtype = PydanticModel(VariantAssociation)
         coerce = True

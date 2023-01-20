@@ -2,8 +2,9 @@ from typing import List
 from fastapi import APIRouter, Depends, Request
 
 from sumstats.api_v2.services.qtl_meta import QTLMetadataService
+from sumstats.api_v2.services.qtl_data import QTLDataService
 from sumstats.api_v2.schemas.eqtl import (CommonParams,
-                                          RequestParams,
+                                          RequestFilters,
                                           VariantAssociation,
                                           QTLMetadata,
                                           QTLMetadataFilterable)
@@ -41,5 +42,11 @@ async def get_dataset_metadata(qtl_id: str,
 @router.get("/datasets/{qtl_id}/associations",
             response_model=List[VariantAssociation])
 async def get_dataset_associations(qtl_id: str,
-                                   params: RequestParams = Depends()):
-    return []
+                                   common_params: CommonParams = Depends(),
+                                   filters: RequestFilters = Depends()):
+    start = common_params.start
+    size = common_params.size
+    sumstats_list = QTLDataService(hdf5_label=qtl_id).select(filters=filters,
+                                                             start=start,
+                                                             size=size)
+    return sumstats_list

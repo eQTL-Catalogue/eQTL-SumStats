@@ -17,6 +17,7 @@ class HDF5Interface:
 
     def select(self, filters: object = None, size: int = 20, start: int = 0):
         results_df = pd.DataFrame()
+        self._check_hdf5_exists()
         condition = self._filters_to_condition(filters=filters)
         with pd.HDFStore(self.hdf5, mode='r') as store:
             key = store.keys()[0]
@@ -58,7 +59,11 @@ class HDF5Interface:
                     self._create_cs_index(cs_index, key)
             except IndexError:
                 os.remove(self.hdf5)
-                
+
+    def _check_hdf5_exists(self):
+        if not os.path.exists(self.hdf5):
+            raise ValueError("Can't find any data for the requested resource")
+
     def _filters_to_condition(self, filters) -> str:
         lt_filters = properties_from_model(filters, 'lt_filter')
         gt_filters = properties_from_model(filters, 'lt_filter')

@@ -1,6 +1,7 @@
 import argparse
 
-from sumstats.api_v2.cli.ingest import qtl_metadata_tsv_to_hdf5
+from sumstats.api_v2.cli.ingest import (qtl_metadata_tsv_to_hdf5,
+                                        qtl_sumstats_tsv_to_hdf5)
 
 
 def get_args():
@@ -22,11 +23,10 @@ def get_args():
 def main():
     args = get_args()
     if args.type == 'data':
-        pass
+        qtl_sumstats_tsv_to_hdf5(tsv_path=args.t, hdf5_label=args.hdf)
     if args.type == 'metadata':
         qtl_metadata_tsv_to_hdf5(tsv_path=args.t, hdf5_label=args.hdf)
+
  
-
-
 if __name__ == "__main__":
     main()
