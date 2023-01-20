@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import APIRouter, Depends, Request
 
-from sumstats.api_v2.services.metadata import MetadataService
+from sumstats.api_v2.services.qtl_meta import QTLMetadataService
 from sumstats.api_v2.schemas import (CommonParams,
                                      RequestParams,
                                      VariantAssociation,
@@ -21,9 +21,8 @@ router = APIRouter(
 @router.get("/datasets/", include_in_schema=False)
 async def get_datasets(filters: QTLMetadataFilterable = Depends(),
                        common_params: CommonParams = Depends()):
-    metadata_list = MetadataService(filters,
-                                    size=common_params.size,
-                                    start=common_params.start).get_many()
+    metadata_list = QTLMetadataService().get_many(filters=filters,
+                                                  params=common_params)
     return metadata_list
 
 
