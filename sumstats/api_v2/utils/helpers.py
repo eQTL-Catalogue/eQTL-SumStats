@@ -34,3 +34,11 @@ def _construct_path(par_dir, label):
 
 def mkdir(dir):
     pathlib.Path(dir).mkdir(parents=True, exist_ok=True)
+
+
+def properties_from_model(model, key) -> dict:
+    props = {}
+    for field_name, field in model.schema()["properties"].items():
+        if key in field:
+            props[field_name] = field.get(key)
+    return props

@@ -3,6 +3,7 @@ import pandas as pd
 from sumstats.api_v2.services.qtl_meta import QTLMetadataService
 from sumstats.api_v2.schemas.ingest import QTLMetadataPa
 from sumstats.api_v2.schemas.eqtl import QTLMetadata
+from sumstats.api_v2.utils.helpers import properties_from_model
 
 
 def tsv_to_hdf5(tsv_path, hdf5_path, mode):
@@ -15,14 +16,6 @@ def tsv_to_df_iter(tsv_path, **kwargs) -> (pd.DataFrame):
 
 def validate_df(df, schema) -> pd.DataFrame:
     return schema(df)
-
-
-def properties_from_model(model, key) -> dict:
-    props = {}
-    for field_name, field in model.schema()["properties"].items():
-        if key in field:
-            props[field_name] = field.get(key)
-    return props
 
 
 def tsv_header_map(model) -> dict:

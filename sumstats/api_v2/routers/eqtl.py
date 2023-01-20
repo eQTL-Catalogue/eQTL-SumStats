@@ -21,8 +21,11 @@ router = APIRouter(
 @router.get("/datasets/", include_in_schema=False)
 async def get_datasets(filters: QTLMetadataFilterable = Depends(),
                        common_params: CommonParams = Depends()):
-    metadata_list = QTLMetadataService().get_many(filters=filters,
-                                                  params=common_params)
+    start = common_params.start
+    size = common_params.size
+    metadata_list = QTLMetadataService().select(filters=filters,
+                                                start=start,
+                                                size=size)
     return metadata_list
 
 

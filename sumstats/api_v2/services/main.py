@@ -6,24 +6,28 @@ import os
 import pandas as pd
 import tables as tb
 
-from sumstats.api_v2.utils.helpers import mkdir
+from sumstats.api_v2.utils.helpers import (mkdir,
+                                           properties_from_model)
 
 
 class HDF5Interface:
-    def __init__(self, hdf5: str, par_dir: str):
-        self.hdf5 = hdf5
-        self.par_dir = par_dir
+    def __init__(self):
+        self.hdf5 = None
+        self.par_dir = None
 
-    def select(self, condition: str = None, size: int = 20, start: int = 0):
+    def select(self, filters: object = None, size: int = 20, start: int = 0):
         results_df = pd.DataFrame()
+        condition = self._filters_to_condition(filters=filters)
         with pd.HDFStore(self.hdf5, mode='r') as store:
             key = store.keys()[0]
             if condition:
+                print(condition)
                 chunks = store.select(key,
                                       chunksize=size,
                                       start=start,
                                       where=condition)
             else:
+                print('no condition')
                 chunks = store.select(key,
                                       chunksize=size,
                                       start=start)
@@ -32,6 +36,7 @@ class HDF5Interface:
                 if len(results_df) >= size:
                     break
             data_dict = results_df[:size].to_dict('records')
+            print(data_dict)
             return data_dict
 
     def create(self,
@@ -41,7 +46,7 @@ class HDF5Interface:
         mkdir(self.par_dir)
         with pd.HDFStore(self.hdf5) as store:
             data.to_hdf(store, key, format="table", **kwargs)
-
+            
     def reindex(self, index_fields: list, cs_index: str = None):
         """
         index_fields = list of fields to enable searching on
@@ -55,7 +60,21 @@ class HDF5Interface:
                     self._create_cs_index(cs_index, key)
             except IndexError:
                 os.remove(self.hdf5)
-
+                
+    def _filters_to_condition(self, filters) -> str:
+        lt_filters = properties_from_model(filters, 'lt_filter')
+        gt_filters = properties_from_model(filters, 'lt_filter')
+        conditions = []
+        for key, value in filters.dict(exclude_none=True).items():
+            if key in lt_filters:
+                conditions.append(f"{key} <= '{value}'")
+            elif key in gt_filters:
+                conditions.append(f"{key} >= '{value}'")
+            else:
+                conditions.append(f"{key} == '{value}'")
+        statement = " & ".join(conditions) if len(conditions) > 0 else None
+        return statement
+    
     def _create_index(self,
                       field: str,
                       key: str,

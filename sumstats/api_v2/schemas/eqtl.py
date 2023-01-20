@@ -102,9 +102,11 @@ class Variant(Chromosome):
 
 class GenomicRegion(Chromosome):
     s: PositiveInt = Field(None, alias='position_start',
-                           description='Start genomic position')
+                           description='Start genomic position',
+                           gt_filter=True)
     e: PositiveInt = Field(None, alias='position_end',
-                           description='End genomic position')
+                           description='End genomic position',
+                           lt_filter=True)
 
     @root_validator
     def validate_region(cls, values):
@@ -230,8 +232,10 @@ class RequestParams(GenomicRegion,
                     VariantIdentifer,
                     GenomicContext,
                     CommonParams):
-    p: float = Field(None, alias='neglog10p_cutoff',
-                     description='P-value cutoff, in -Log10 format')
+    p: float = Field(None, 
+                     alias='neglog10p_cutoff',
+                     description='P-value cutoff, in -Log10 format',
+                     lt_filter=True)
 
     @root_validator
     def xor_genomic_context_filters(cls, values):
