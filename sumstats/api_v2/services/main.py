@@ -21,13 +21,11 @@ class HDF5Interface:
         with pd.HDFStore(self.hdf5, mode='r') as store:
             key = store.keys()[0]
             if condition:
-                print(condition)
                 chunks = store.select(key,
                                       chunksize=size,
                                       start=start,
                                       where=condition)
             else:
-                print('no condition')
                 chunks = store.select(key,
                                       chunksize=size,
                                       start=start)
@@ -36,7 +34,7 @@ class HDF5Interface:
                 if len(results_df) >= size:
                     break
             data_dict = results_df[:size].to_dict('records')
-            print(data_dict)
+            #TODO: utils.service_result and process - if empty
             return data_dict
 
     def create(self,

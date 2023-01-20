@@ -33,7 +33,9 @@ async def get_datasets(filters: QTLMetadataFilterable = Depends(),
             response_model=QTLMetadata)
 async def get_dataset_metadata(qtl_id: str,
                                request: Request):
-    return {}
+    filters = QTLMetadata(dataset_id=qtl_id)
+    metadata = QTLMetadataService().select(filters=filters)[0]
+    return metadata
 
 
 @router.get("/datasets/{qtl_id}/associations",
