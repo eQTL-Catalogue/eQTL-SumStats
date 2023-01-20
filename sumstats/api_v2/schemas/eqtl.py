@@ -170,7 +170,9 @@ class VariantAssociation(VariantIdentifer,
 class QTLMetadataFilterable(BaseModel):
     study_id: str = Field(None,
                           description='Study ID',
-                          example="QTS000001")
+                          example="QTS000001",
+                          ingest_label="study_id",
+                          searchable=True)
     quant_method: QuantMethodEnum = Field(None,
                                           description='Quantification method',
                                           example='ge')

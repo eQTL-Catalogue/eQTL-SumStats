@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from sumstats.dependencies.error_classes import APIException
 import sumstats.api_v1.routers.routes as routes_v1
-import sumstats.api_v2.routes as routes_v2
+import sumstats.api_v2.routers.eqtl as routes_v2
 
 
 API_BASE = "/eqtl/api"

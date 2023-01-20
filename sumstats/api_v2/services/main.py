@@ -24,7 +24,7 @@ class HDF5Interface:
                 chunks = store.select(key,
                                       chunksize=size,
                                       start=start)
-            for i, chunk in enumerate(chunks):
+            for _, chunk in enumerate(chunks):
                 results_df = results_df.append(chunk)
                 if len(results_df) >= size:
                     break
@@ -34,10 +34,9 @@ class HDF5Interface:
     def create(self,
                data: pd.DataFrame,
                key: str,
-               mode: str,
                **kwargs) -> None:
         with pd.HDFStore(self.hdf5) as store:
-            data.to_hdf(store, key, mode, **kwargs)
+            data.to_hdf(store, key, format="table", **kwargs)
 
     def reindex(self, index_fields: list, cs_index: str = None):
         """

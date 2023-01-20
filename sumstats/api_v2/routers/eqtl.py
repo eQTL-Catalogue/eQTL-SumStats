@@ -2,11 +2,11 @@ from typing import List
 from fastapi import APIRouter, Depends, Request
 
 from sumstats.api_v2.services.qtl_meta import QTLMetadataService
-from sumstats.api_v2.schemas import (CommonParams,
-                                     RequestParams,
-                                     VariantAssociation,
-                                     QTLMetadata,
-                                     QTLMetadataFilterable)
+from sumstats.api_v2.schemas.eqtl import (CommonParams,
+                                          RequestParams,
+                                          VariantAssociation,
+                                          QTLMetadata,
+                                          QTLMetadataFilterable)
 
 
 router = APIRouter(

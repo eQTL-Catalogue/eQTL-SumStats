@@ -2,10 +2,12 @@
 Metadata interface
 """
 
+import pandas as pd
+
 from sumstats.api_v2.config import HDF5_QTL_METADATA_LABEL
 from sumstats.api_v2.services.main import HDF5Interface
 from sumstats.api_v2.utils.helpers import get_hdf5_path
-from sumstats.api_v2.schemas import (QTLMetadataFilterable,
+from sumstats.api_v2.schemas.eqtl import (QTLMetadataFilterable,
                                      CommonParams)
 
 
@@ -16,4 +18,5 @@ class QTLMetadataService(HDF5Interface):
 
     def get_many(self, params: CommonParams,
                  filters: QTLMetadataFilterable):
+        # construct select statement self.select()
         return [{'study_id': 'hello'}, {'study_id': 'world'}]
