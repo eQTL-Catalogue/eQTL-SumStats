@@ -8,7 +8,8 @@ import pathlib
 from sumstats.api_v2.config import (HDF5_ROOT_DIR,
                                     HDF5_DATA_DIR,
                                     HDF5_METADATA_DIR,
-                                    HDF5_EXT)
+                                    HDF5_EXT,
+                                    PA_DTYPES)
 
 
 def get_hdf5_path(label: str, type=None):
@@ -42,3 +43,8 @@ def properties_from_model(model, key) -> dict:
         if key in field:
             props[field_name] = field.get(key)
     return props
+
+
+def pandas_dtype_from_model(model) -> dict:
+    props = properties_from_model(model, key='pa_dtype')
+    return {k: PA_DTYPES.get(v, v) for k, v in props.items()}

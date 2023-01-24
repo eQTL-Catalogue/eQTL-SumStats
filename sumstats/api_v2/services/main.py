@@ -15,7 +15,7 @@ class HDF5Interface:
         self.hdf5 = None
         self.par_dir = None
 
-    def select(self, filters: object = None, size: int = 20, start: int = 0):
+    def select(self, filters: object = None, many = True, size: int = 20, start: int = 0):
         results_df = pd.DataFrame()
         self._check_hdf5_exists()
         condition = self._filters_to_condition(filters=filters)
@@ -35,8 +35,14 @@ class HDF5Interface:
                 if len(results_df) >= size:
                     break
             data_dict = results_df[:size].to_dict('records')
+            if many:
+                return data_dict
+            else:
+                return data_dict[0] if len(data_dict) > 0 else {}
             #TODO: utils.service_result and process - if empty
-            return data_dict
+        
+    def select_many(self):
+        pass
 
     def create(self,
                data: pd.DataFrame,

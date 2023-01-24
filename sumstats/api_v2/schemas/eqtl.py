@@ -70,7 +70,7 @@ class Chromosome(BaseModel):
                                 ingest_label='chromosome',
                                 searchable=True,
                                 min_size=2,
-                                dtype=str)
+                                pa_dtype='str')
 
     class Config:
         allow_population_by_field_name = True
@@ -83,14 +83,14 @@ class VariantIdentifer(BaseModel):
                          ingest_label='variant',
                          searchable=True,
                          min_size=100,
-                         dtype=str)
+                         pa_dtype='str')
     rsid: constr(regex=r"^rs\d+$") = Field(None,
                                            description="The rsID, if given, for the variant",
                                            example="rs879890648",
                                            ingest_label='rsid',
                                            searchable=True,
                                            min_size=24,
-                                           dtype=str)
+                                           pa_dtype='str')
 
 
 class Variant(Chromosome):
@@ -99,7 +99,7 @@ class Variant(Chromosome):
                                   example=80901,
                                   ingest_label='position',
                                   searchable=True,
-                                  dtype=int)
+                                  pa_dtype='int')
     ref: constr(regex=r"^[ACGT]+$",
                 strip_whitespace=True,
                 to_lower=True) = Field(None,
@@ -108,7 +108,7 @@ class Variant(Chromosome):
                                        ingest_label='ref',
                                        searchable=False,
                                        min_size=100,
-                                       dtype=str)
+                                       pa_dtype='str')
     alt: constr(regex=r"^[ACGT]+$",
                 strip_whitespace=True,
                 to_lower=True) = Field(None,
@@ -117,14 +117,14 @@ class Variant(Chromosome):
                                        ingest_label='alt',
                                        searchable=False,
                                        min_size=100,
-                                       dtype=str)
+                                       pa_dtype='str')
     type: VariantTypeEnum = Field(None,
-                                  description="SNP, INDEL or OTHER",
+                                  description="Variant",
                                   example="SNP",
                                   ingest_label='type',
                                   searchable=False,
                                   min_size=5,
-                                  dtype=str)
+                                  pa_dtype='str')
 
 
 class GenomicRegion(Chromosome):
@@ -162,14 +162,14 @@ class GenomicContext(BaseModel):
                                     ingest_label='molecular_trait_id',
                                     searchable=True,
                                     min_size=100,
-                                    dtype=str)
+                                    pa_dtype='str')
     gene_id: str = Field(None,
                          description='Ensembl gene ID',
                          example="ENSG00000282458",
                          ingest_label='gene_id',
                          searchable=True,
                          min_size=100,
-                         dtype=str)
+                         pa_dtype='str')
 
 
 class VariantAssociation(VariantIdentifer,
@@ -180,56 +180,56 @@ class VariantAssociation(VariantIdentifer,
                     example=2,
                     ingest_label='ac',
                     searchable=False,
-                    dtype=int)
+                    pa_dtype='int')
     an: int = Field(None,
                     description='Total number of allele',
                     example=334,
                     ingest_label='an',
                     searchable=False,
-                    dtype=int)
+                    pa_dtype='int')
     beta: float = Field(None,
                         description="Regression coefficient from the linear model",
                         example=0.984304,
                         ingest_label='beta',
                         searchable=False,
-                        dtype=float)
+                        pa_dtype='float')
     maf: float = Field(None,
                        description="Minor allele frequency within the QTL mapping study",
                        example=0.00598802,
                        ingest_label='maf',
                        searchable=False,
-                       dtype=float)
+                       pa_dtype='float')
     median_tpm: float = Field(None,
                               description="Expression value for the associated gene + qtl_group",
                               example=1.75669,
                               ingest_label='median_tpm',
                               searchable=False,
-                              dtype=float)
+                              pa_dtype='float')
     pvalue: float = Field(None,
                           description="P-value of association between the variant and the phenotype",
                           example=0.171767,
                           ingest_label='pvalue',
                           searchable=True,
                           lt_filter=True,
-                          dtype=float)
+                          pa_dtype='float')
     r2: float = Field(None,
                       description='Imputation quality score from the imputation software',
                       example=None,
                       ingest_label='r2',
                       searchable=False,
-                      dtype=float)
+                      pa_dtype='float')
     se: float = Field(None,
                       description='Standard error',
                       example=0.716219,
                       ingest_label='se',
                       searchable=False,
-                      dtype=float)
+                      pa_dtype='float')
     nlog10p: float = Field(None,
                            description="Negative log10 p-value",
                            example=0.7650602694601004,
                            searchable=True,
                            gt_filter=True,
-                           dtype=float)
+                           pa_dtype='float')
 
 
 class QTLMetadataFilterable(BaseModel):
@@ -238,43 +238,43 @@ class QTLMetadataFilterable(BaseModel):
                           example="QTS000001",
                           ingest_label="study_id",
                           searchable=True,
-                          dtype=str)
+                          pa_dtype='str')
     quant_method: QuantMethodEnum = Field(None,
                                           description='Quantification method',
                                           example='ge',
                                           ingest_label='quant_method',
                                           searchable=True,
-                                          dtype=str)
+                                          pa_dtype='str')
     sample_group: str = Field(None,
                               description='Controlled vocabulary for the QTL group',
                               example="macrophage_naive",
                               ingest_label='sample_group',
                               searchable=True,
-                              dtype=str)
+                              pa_dtype='str')
     tissue_id: str = Field(None,
                            description='Ontology term for the tissue/cell typer',
                            example="CL_0000235",
                            ingest_label='tissue_id',
                            searchable=True,
-                           dtype=str)
+                           pa_dtype='str')
     study_label: str = Field(None,
                              description='Study label',
                              example="Alasoo_2018",
                              ingest_label='study_label',
                              searchable=True,
-                             dtype=str)
+                             pa_dtype='str')
     tissue_label: str = Field(None,
                               description='Controlled vocabulary for the tissue/cell type',
                               example="macrophage",
                               ingest_label='tissue_label',
                               searchable=True,
-                              dtype=str)
+                              pa_dtype='str')
     condition_label: str = Field(None,
                                  description='More verbose condition description',
                                  example='naive',
                                  ingest_label='condition_label',
                                  searchable=True,
-                                 dtype=str)
+                                 pa_dtype='str')
 
 
 class QTLMetadata(QTLMetadataFilterable):
@@ -285,13 +285,13 @@ class QTLMetadata(QTLMetadataFilterable):
                             example="QTD000001",
                             ingest_label='dataset_id',
                             searchable=True,
-                            dtype=str)
+                            pa_dtype='str')
     sample_size: int = Field(None,
                              description='Sample size',
                              example=84,
                              ingest_label='sample_size',
                              searchable=False,
-                             dtype=str)
+                             pa_dtype='str')
     _links: dict = None
 
 

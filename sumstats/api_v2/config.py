@@ -22,3 +22,8 @@ HDF5_DATA_DIR = _get_env_var("HDF5_DATA_DIR", "data")
 HDF5_METADATA_DIR = _get_env_var("HDF5_METADATA_DIR", "metadata")
 HDF5_QTL_METADATA_LABEL = _get_env_var("HDF5_QTL_METADATA_LABEL", "qtl_metadata")
 HDF5_EXT = _get_env_var("HDF5_EXT", ".h5")
+
+
+PA_DTYPES = {'str': str,
+             'int': 'int64',
+             'float': float}

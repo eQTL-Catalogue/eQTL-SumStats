@@ -35,7 +35,7 @@ async def get_datasets(filters: QTLMetadataFilterable = Depends(),
 async def get_dataset_metadata(qtl_id: str,
                                request: Request):
     filters = QTLMetadata(dataset_id=qtl_id)
-    metadata = QTLMetadataService().select(filters=filters)[0]
+    metadata = QTLMetadataService().select(filters=filters, many=False)
     return metadata
 
 

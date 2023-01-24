@@ -2,9 +2,9 @@ import pandas as pd
 
 from sumstats.api_v2.services.qtl_meta import QTLMetadataService
 from sumstats.api_v2.services.qtl_data import QTLDataService
-from sumstats.api_v2.schemas.ingest import QTLMetadataPa, QTLSumstatsPa
 from sumstats.api_v2.schemas.eqtl import QTLMetadata, VariantAssociation
-from sumstats.api_v2.utils.helpers import properties_from_model
+from sumstats.api_v2.utils.helpers import (properties_from_model,
+                                           pandas_dtype_from_model)
 
 
 
@@ -25,7 +25,7 @@ def tsv_to_hdf5(tsv_path: str,
                              usecols=[*tsv_header_map(model)],
                              chunksize=500000,
                              converters={},
-                             dtype=dtypes(model),
+                             dtype=dtype(model),
                              float_precision='high')
     print('start service')
     hdf_interface = service(hdf5_label)
@@ -41,9 +41,9 @@ def tsv_to_hdf5(tsv_path: str,
                              min_itemsize=field_size(model),
                              index=False)
         
-    def placeholder_if_allele_string_too_long(df, field):
-        mask = df[field].str.len() <= MAX_STRING_LEN
-        df[field].where(mask, "LONG_STRING", inplace=True)
+def placeholder_if_allele_string_too_long(df, field):
+    mask = df[field].str.len() <= MAX_STRING_LEN
+    df[field].where(mask, "LONG_STRING", inplace=True)
 
 
 def tsv_to_df_iter(tsv_path, **kwargs) -> (pd.DataFrame):
@@ -65,15 +65,16 @@ def searchable_fields(model) -> dict:
     return properties_from_model(model, "searchable")
 
 
-def dtypes(model) -> dict:
-    return properties_from_model(model, "dtype")
-
-
 def field_size(model) -> dict:
     return properties_from_model(model, "min_size")
 
 
-def converters(field_size: dict) ->:
+def dtype(model) -> dict:
+    return pandas_dtype_from_model(model)
+
+
+def converters(field_size: dict) -> dict:
+    pass
     # replace value with converter 
 
 
@@ -85,8 +86,7 @@ def qtl_metadata_tsv_to_hdf5(tsv_path, hdf5_label) -> None:
     tsv_to_hdf5(tsv_path=tsv_path,
                 hdf5_label=hdf5_label,
                 service=QTLMetadataService,
-                model=QTLMetadata,
-                pa_schema=QTLMetadataPa)
+               model=QTLMetadata)
 
 
 def qtl_sumstats_tsv_to_hdf5(tsv_path, hdf5_label) -> None:
@@ -94,6 +94,5 @@ def qtl_sumstats_tsv_to_hdf5(tsv_path, hdf5_label) -> None:
     tsv_to_hdf5(tsv_path=tsv_path,
                 hdf5_label=hdf5_label,
                 service=QTLDataService,
-                model=VariantAssociation,
-                pa_schema=QTLSumstatsPa)
+                model=VariantAssociation)
     #TODO: reindex
