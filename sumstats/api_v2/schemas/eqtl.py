@@ -66,18 +66,18 @@ Models
 class Chromosome(BaseModel):
     chr: ChromosomeEnum = Field(None, alias='chromosome',
                                 description='GRCh38 chromosome name of the variant',
-                                example="19",
-                                ingest_label='chromosome',
-                                searchable=True,
-                                min_size=2,
-                                pa_dtype='str')
-
+                                      example="19",
+                                      ingest_label='chromosome',
+                                      searchable=True,
+                                      min_size=2,
+                                      pa_dtype='str')
+    
     class Config:
         allow_population_by_field_name = True
 
 
 class VariantIdentifer(BaseModel):
-    variant: str = Field(None, 
+    variant: str = Field(None,
                          description="The variant ID (CHR_BP_REF_ALT)",
                          example="chr19_80901_G_T",
                          ingest_label='variant',
@@ -99,24 +99,23 @@ class Variant(Chromosome):
                                   example=80901,
                                   ingest_label='position',
                                   searchable=True,
+                                  cs_index=True,
                                   pa_dtype='int')
-    ref: constr(regex=r"^[ACGT]+$",
-                strip_whitespace=True,
-                to_lower=True) = Field(None,
+    ref: constr(regex=r'^[ACGT]+$',
+                strip_whitespace=True) = Field(None,
                                        description="GRCh38 reference allele",
                                        example="G",
                                        ingest_label='ref',
                                        searchable=False,
-                                       min_size=100,
+                                       min_size=255,
                                        pa_dtype='str')
-    alt: constr(regex=r"^[ACGT]+$",
-                strip_whitespace=True,
-                to_lower=True) = Field(None,
+    alt: constr(regex=r'^[ACGT]+$',
+                strip_whitespace=True) = Field(None,
                                        description="GRCh38 alt allele (effect allele)",
                                        example="T",
                                        ingest_label='alt',
                                        searchable=False,
-                                       min_size=100,
+                                       min_size=255,
                                        pa_dtype='str')
     type: VariantTypeEnum = Field(None,
                                   description="Variant",
@@ -128,16 +127,18 @@ class Variant(Chromosome):
 
 
 class GenomicRegion(Chromosome):
-    s: PositiveInt = Field(None, alias='position_start',
+    position_start: PositiveInt = Field(None,
                            description='Start genomic position',
-                           gt_filter=True)
-    e: PositiveInt = Field(None, alias='position_end',
+                           gt_filter=True,
+                           filter_on='position')
+    position_end: PositiveInt = Field(None,
                            description='End genomic position',
-                           lt_filter=True)
+                           lt_filter=True,
+                           filter_on='position')
 
     @root_validator
     def validate_region(cls, values):
-        chromosome, pos_start, pos_end = values.get('chr'), values.get('s'), values.get('e')
+        chromosome, pos_start, pos_end = values.get('chr'), values.get('position_start'), values.get('position_end')
         var_count = sum(bool(x) for x in [chromosome, pos_start, pos_end])
         if var_count > 0 and var_count != 3:
             raise ValueError("Chromosome, start and end position must all be provided together")
@@ -157,24 +158,40 @@ class GenomicRegion(Chromosome):
 
 class GenomicContext(BaseModel):
     molecular_trait_id: str = Field(None,
-                                    description='ID of the molecular trait',
+                                    description='ID of the molecular trait used for QTL mapping',
                                     example="ENSG00000282458",
                                     ingest_label='molecular_trait_id',
                                     searchable=True,
                                     min_size=100,
                                     pa_dtype='str')
     gene_id: str = Field(None,
-                         description='Ensembl gene ID',
+                         description='Ensembl gene ID of the molecular trait',
                          example="ENSG00000282458",
                          ingest_label='gene_id',
                          searchable=True,
-                         min_size=100,
+                         min_size=15,
                          pa_dtype='str')
+
+class PValue(BaseModel):
+    nlog10p: float = Field(None,
+                           description="Negative log10 p-value",
+                           example=0.7650602694601004,
+                           searchable=False,
+                           gt_filter=True,
+                           pa_dtype='float')
+    pvalue: float = Field(None,
+                          description="P-value of association between the variant and the phenotype",
+                          example=0.171767,
+                          ingest_label='pvalue',
+                          searchable=True,
+                          lt_filter=True,
+                          pa_dtype='float')
 
 
 class VariantAssociation(VariantIdentifer,
                          Variant,
-                         GenomicContext):
+                         GenomicContext,
+                         PValue):
     ac: int = Field(None,
                     description='Allele count',
                     example=2,
@@ -205,13 +222,6 @@ class VariantAssociation(VariantIdentifer,
                               ingest_label='median_tpm',
                               searchable=False,
                               pa_dtype='float')
-    pvalue: float = Field(None,
-                          description="P-value of association between the variant and the phenotype",
-                          example=0.171767,
-                          ingest_label='pvalue',
-                          searchable=True,
-                          lt_filter=True,
-                          pa_dtype='float')
     r2: float = Field(None,
                       description='Imputation quality score from the imputation software',
                       example=None,
@@ -224,12 +234,6 @@ class VariantAssociation(VariantIdentifer,
                       ingest_label='se',
                       searchable=False,
                       pa_dtype='float')
-    nlog10p: float = Field(None,
-                           description="Negative log10 p-value",
-                           example=0.7650602694601004,
-                           searchable=True,
-                           gt_filter=True,
-                           pa_dtype='float')
 
 
 class QTLMetadataFilterable(BaseModel):
@@ -252,7 +256,7 @@ class QTLMetadataFilterable(BaseModel):
                               searchable=True,
                               pa_dtype='str')
     tissue_id: str = Field(None,
-                           description='Ontology term for the tissue/cell typer',
+                           description='Ontology term for the tissue/cell type',
                            example="CL_0000235",
                            ingest_label='tissue_id',
                            searchable=True,
@@ -302,11 +306,8 @@ class CommonParams(BaseModel):
 
 class RequestFilters(GenomicRegion,
                      VariantIdentifer,
-                     GenomicContext):
-    p: float = Field(None,
-                     alias='neglog10p_cutoff',
-                     description='P-value cutoff, in -Log10 format',
-                     lt_filter=True)
+                     GenomicContext,
+                     PValue):
 
     @root_validator
     def xor_genomic_context_filters(cls, values):

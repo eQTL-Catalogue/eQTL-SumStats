@@ -40,7 +40,7 @@ class HDF5Interface:
             else:
                 return data_dict[0] if len(data_dict) > 0 else {}
             #TODO: utils.service_result and process - if empty
-        
+
     def select_many(self):
         pass
 
@@ -51,7 +51,7 @@ class HDF5Interface:
         mkdir(self.par_dir)
         with pd.HDFStore(self.hdf5) as store:
             data.to_hdf(store, key, format="table", **kwargs)
-            
+
     def reindex(self, index_fields: list, cs_index: str = None):
         """
         index_fields = list of fields to enable searching on
@@ -60,7 +60,7 @@ class HDF5Interface:
         with pd.HDFStore(self.hdf5) as store:
             try:
                 key = store.keys()[0]
-                [self._create_index(i, key) for i in index_fields]
+                [self._create_index(i, key) for i in index_fields if i != cs_index]
                 if cs_index:
                     self._create_cs_index(cs_index, key)
             except IndexError:
@@ -82,6 +82,7 @@ class HDF5Interface:
             else:
                 conditions.append(f"{key} == '{value}'")
         statement = " & ".join(conditions) if len(conditions) > 0 else None
+        print(statement)
         return statement
     
     def _create_index(self,
@@ -95,7 +96,7 @@ class HDF5Interface:
             col.create_index(optlevel=optlevel, kind=kind)
 
     def _create_cs_index(self, field: str, key: str) -> None:
-        with tb.open_file(self.h5file, "a") as hdf:
+        with tb.open_file(self.hdf5, "a") as hdf:
             col = hdf.root[key].table.cols._f_col(field)
             col.remove_index()
             col.create_csindex()

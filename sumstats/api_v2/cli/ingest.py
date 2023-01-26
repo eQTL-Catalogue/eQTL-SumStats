@@ -7,31 +7,26 @@ from sumstats.api_v2.utils.helpers import (properties_from_model,
                                            pandas_dtype_from_model)
 
 
+MAX_STRING_LEN = 255
+LONG_STRING_PLACEHOLDER = "LONG_STRING"
 
-MAX_STRING_LEN = 100
 
 def tsv_to_hdf5(tsv_path: str,
                 hdf5_label: str,
                 service: object,
-                model: object,
-                pa_schema: object) -> None:
+                model: object) -> None:
     """
     key: hdf5 group key
     model: pydantic schema/model
-    pa_schema: pandera schema
     """
-    print('read_tsv')
     df_iter = tsv_to_df_iter(tsv_path=tsv_path,
                              usecols=[*tsv_header_map(model)],
-                             chunksize=500000,
+                             chunksize=1000000,
                              converters={},
                              dtype=dtype(model),
                              float_precision='high')
-    print('start service')
     hdf_interface = service(hdf5_label)
     for df in df_iter:
-        #valid_df = validate_df(df=df, schema=pa_schema)
-        print('writing to hdf')
         hdf_interface.create(data=df,
                              key=hdf5_label,
                              complib='blosc',
@@ -40,10 +35,9 @@ def tsv_to_hdf5(tsv_path: str,
                              data_columns=[*searchable_fields(model)],
                              min_itemsize=field_size(model),
                              index=False)
-        
-def placeholder_if_allele_string_too_long(df, field):
-    mask = df[field].str.len() <= MAX_STRING_LEN
-    df[field].where(mask, "LONG_STRING", inplace=True)
+    hdf_interface.reindex(index_fields=[*searchable_fields(model)],
+                          cs_index=cs_index(model))
+
 
 
 def tsv_to_df_iter(tsv_path, **kwargs) -> (pd.DataFrame):
@@ -62,7 +56,17 @@ def tsv_header_map(model) -> dict:
 
 
 def searchable_fields(model) -> dict:
-    return properties_from_model(model, "searchable")
+    searchable_dict = properties_from_model(model, "searchable")
+    return {k: v for k, v in searchable_dict.items() if v is True}
+
+
+def cs_index(model) -> str:
+    """
+    The Column Sorted (main) index field.
+    There can only be one.
+    """
+    cs_index_dict = properties_from_model(model, "cs_index")
+    return [k for k in cs_index_dict][0]
 
 
 def field_size(model) -> dict:
@@ -74,25 +78,34 @@ def dtype(model) -> dict:
 
 
 def converters(field_size: dict) -> dict:
-    pass
-    # replace value with converter 
+    return {k: replace_string_if_too_long(v) for k, v in field_size.items()}
+
+
+def replace_string_if_too_long(x: str) -> str:
+    return LONG_STRING_PLACEHOLDER if len(x) > MAX_STRING_LEN else x
 
 
 def swap_keys_for_values(d: dict) -> dict:
-    return dict((v, k) for k, v in d.items())
+    return {v: k for k, v in d.items()}
 
 
 def qtl_metadata_tsv_to_hdf5(tsv_path, hdf5_label) -> None:
     tsv_to_hdf5(tsv_path=tsv_path,
                 hdf5_label=hdf5_label,
                 service=QTLMetadataService,
-               model=QTLMetadata)
+                model=QTLMetadata)
 
 
 def qtl_sumstats_tsv_to_hdf5(tsv_path, hdf5_label) -> None:
-    print('tsv 2 hdf')
+    """
+    TODO: Data pre-split by chrom then store:
+    data/
+      QTD0001/
+         1.h5
+         2.h5
+         ...
+    """
     tsv_to_hdf5(tsv_path=tsv_path,
                 hdf5_label=hdf5_label,
                 service=QTLDataService,
                 model=VariantAssociation)
-    #TODO: reindex

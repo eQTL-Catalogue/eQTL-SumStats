@@ -4,6 +4,7 @@ General helper functions
 
 
 import os
+import numpy as np
 import pathlib
 from sumstats.api_v2.config import (HDF5_ROOT_DIR,
                                     HDF5_DATA_DIR,
@@ -48,3 +49,11 @@ def properties_from_model(model, key) -> dict:
 def pandas_dtype_from_model(model) -> dict:
     props = properties_from_model(model, key='pa_dtype')
     return {k: PA_DTYPES.get(v, v) for k, v in props.items()}
+
+
+def pval_to_neg_log_10_pval(value: float) -> float:
+    return -np.log10(value)
+
+
+def neg_log_10_pval_to_pval(value: float) -> float:
+    return 10 ** -value
