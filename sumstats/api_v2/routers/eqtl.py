@@ -51,7 +51,7 @@ async def get_dataset_associations(dataset_id: DatasetID = Depends(),
     size = common_params.size
     hdf5_label = dataset_id.dataset_id
     filters = RequestFilters.parse_obj(vars(req_filters))
-    sumstats_list = QTLDataService(hdf5_label=hdf5_label).select(filters=filters,
-                                                                 start=start,
-                                                                 size=size)
+    sumstats_list = QTLDataService(hdf5_label=hdf5_label).query(filters=filters,
+                                                                start=start,
+                                                                size=size)
     return sumstats_list

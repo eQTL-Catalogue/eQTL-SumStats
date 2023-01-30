@@ -15,12 +15,12 @@ class HDF5Interface:
         self.hdf5 = None
         self.par_dir = None
 
-    def select(self, filters: object = None, many = True, size: int = 20, start: int = 0):
+    def select(self, key: str = None, filters: object = None, many = True, size: int = 20, start: int = 0):
         results_df = pd.DataFrame()
         self._check_hdf5_exists()
         condition = self._filters_to_condition(filters=filters)
         with pd.HDFStore(self.hdf5, mode='r') as store:
-            key = store.keys()[0]
+            key = store.keys()[0] if key is None else key
             if condition:
                 chunks = store.select(key,
                                       chunksize=size,
@@ -72,17 +72,18 @@ class HDF5Interface:
 
     def _filters_to_condition(self, filters) -> str:
         lt_filters = properties_from_model(filters, 'lt_filter')
-        gt_filters = properties_from_model(filters, 'lt_filter')
+        gt_filters = properties_from_model(filters, 'gt_filter')
+        filter_on = properties_from_model(filters, 'filter_on')
         conditions = []
         for key, value in filters.dict(exclude_none=True).items():
+            filter_field = filter_on[key] if key in filter_on else key
             if key in lt_filters:
-                conditions.append(f"{key} <= '{value}'")
+                conditions.append(f"{filter_field} <= '{value}'")
             elif key in gt_filters:
-                conditions.append(f"{key} >= '{value}'")
+                conditions.append(f"{filter_field} >= '{value}'")
             else:
-                conditions.append(f"{key} == '{value}'")
+                conditions.append(f"{filter_field} == '{value}'")
         statement = " & ".join(conditions) if len(conditions) > 0 else None
-        print(statement)
         return statement
     
     def _create_index(self,

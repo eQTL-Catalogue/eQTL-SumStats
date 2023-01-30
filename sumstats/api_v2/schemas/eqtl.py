@@ -64,16 +64,26 @@ Models
 
 
 class Chromosome(BaseModel):
-    chr: ChromosomeEnum = Field(None, alias='chromosome',
+    chromosome: ChromosomeEnum = Field(None,
                                 description='GRCh38 chromosome name of the variant',
-                                      example="19",
-                                      ingest_label='chromosome',
-                                      searchable=True,
-                                      min_size=2,
-                                      pa_dtype='str')
+                                example="19",
+                                ingest_label='chromosome',
+                                searchable=True,
+                                min_size=2,
+                                pa_dtype='str')
     
     class Config:
         allow_population_by_field_name = True
+
+
+class GenomicLocation(Chromosome):
+    position: PositiveInt = Field(None,
+                                  description="GRCh38 position of the variant",
+                                  example=80901,
+                                  ingest_label='position',
+                                  searchable=True,
+                                  cs_index=True,
+                                  pa_dtype='int')
 
 
 class VariantIdentifer(BaseModel):
@@ -84,39 +94,30 @@ class VariantIdentifer(BaseModel):
                          searchable=True,
                          min_size=100,
                          pa_dtype='str')
-    rsid: constr(regex=r"^rs\d+$") = Field(None,
-                                           description="The rsID, if given, for the variant",
-                                           example="rs879890648",
-                                           ingest_label='rsid',
-                                           searchable=True,
-                                           min_size=24,
-                                           pa_dtype='str')
+    rsid: str = Field(None,
+                      description="The rsID, if given, for the variant",
+                      example="rs879890648",
+                      ingest_label='rsid',
+                      searchable=True,
+                      min_size=24,
+                      pa_dtype='str')
 
 
-class Variant(Chromosome):
-    position: PositiveInt = Field(None,
-                                  description="GRCh38 position of the variant",
-                                  example=80901,
-                                  ingest_label='position',
-                                  searchable=True,
-                                  cs_index=True,
-                                  pa_dtype='int')
-    ref: constr(regex=r'^[ACGT]+$',
-                strip_whitespace=True) = Field(None,
-                                       description="GRCh38 reference allele",
-                                       example="G",
-                                       ingest_label='ref',
-                                       searchable=False,
-                                       min_size=255,
-                                       pa_dtype='str')
-    alt: constr(regex=r'^[ACGT]+$',
-                strip_whitespace=True) = Field(None,
-                                       description="GRCh38 alt allele (effect allele)",
-                                       example="T",
-                                       ingest_label='alt',
-                                       searchable=False,
-                                       min_size=255,
-                                       pa_dtype='str')
+class Variant(GenomicLocation):
+    ref: str = Field(None,
+                     description="GRCh38 reference allele",
+                     example="G",
+                     ingest_label='ref',
+                     searchable=False,
+                     min_size=255,
+                     pa_dtype='str')
+    alt: str = Field(None,
+                     description="GRCh38 alt allele (effect allele)",
+                     example="T",
+                     ingest_label='alt',
+                     searchable=False,
+                     min_size=255,
+                     pa_dtype='str')
     type: VariantTypeEnum = Field(None,
                                   description="Variant",
                                   example="SNP",
@@ -128,17 +129,17 @@ class Variant(Chromosome):
 
 class GenomicRegion(Chromosome):
     position_start: PositiveInt = Field(None,
-                           description='Start genomic position',
-                           gt_filter=True,
-                           filter_on='position')
+                                        description='Start genomic position',
+                                        gt_filter=True,
+                                        filter_on='position')
     position_end: PositiveInt = Field(None,
-                           description='End genomic position',
-                           lt_filter=True,
-                           filter_on='position')
+                                      description='End genomic position',
+                                      lt_filter=True,
+                                      filter_on='position')
 
     @root_validator
     def validate_region(cls, values):
-        chromosome, pos_start, pos_end = values.get('chr'), values.get('position_start'), values.get('position_end')
+        chromosome, pos_start, pos_end = values.get('chromosome'), values.get('position_start'), values.get('position_end')
         var_count = sum(bool(x) for x in [chromosome, pos_start, pos_end])
         if var_count > 0 and var_count != 3:
             raise ValueError("Chromosome, start and end position must all be provided together")
@@ -171,6 +172,11 @@ class GenomicContext(BaseModel):
                          searchable=True,
                          min_size=15,
                          pa_dtype='str')
+
+
+class GenomicContextIngest(GenomicLocation, GenomicContext):
+    pass
+
 
 class PValue(BaseModel):
     nlog10p: float = Field(None,
@@ -310,10 +316,18 @@ class RequestFilters(GenomicRegion,
                      PValue):
 
     @root_validator
-    def xor_genomic_context_filters(cls, values):
-        variant, rsid, genomic_region = values.get('variant'), values.get('rsid'), values.get('chr')
+    def xor_filter_types(cls, values):
+        variant, rsid, genomic_region = values.get('variant'), values.get('rsid'), values.get('chromosome')
         if sum(bool(x) for x in [variant, rsid, genomic_region]) > 1:
-            raise ValueError("There can only be one genomic context "
-                             "filter from: 'variant', 'rsid' "
+            raise ValueError("There can only be one of the following filter: "
+                             "'variant', 'rsid' "
                              "and ('chr', 'position_start', 'position_end')")
+        return values
+    
+    @root_validator
+    def xor_genomic_context(cls, values):
+        gene_id, molecular_trait_id = values.get('gene_id'), values.get('molecular_trait_id')
+        if sum(bool(x) for x in [gene_id, molecular_trait_id]) > 1:
+            raise ValueError("There can only be one genomic context "
+                             "filter from: 'gene_id' and 'molecular_trait_id'")
         return values

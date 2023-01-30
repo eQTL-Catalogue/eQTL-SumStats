@@ -28,7 +28,7 @@ class DatasetID:
                  dataset_id: str = Path(description=('Dataset ID. A dataset represents '
                                                      'a study & QTL context for a single '
                                                      'quantification method'),
-                                        example="QTD000001",
+                                        example="QTD000370",
                                         regex="^QTD\d+$")
                  ):
         self.dataset_id = dataset_id
@@ -37,8 +37,7 @@ class DatasetID:
 class MetadataFilters:
     def __init__(self,
                  study_id: Union[str, None] = Query(default=None,
-                                                    description='Study ID', 
-                                                    example="QTS000001",
+                                                    description='Study ID, e.g. QTS000001', 
                                                     regex="^QTS\d+$"),
                  quant_method: Union[QuantMethodEnum, None] = Query(default=None,
                                                                     description='Quantification method',
@@ -71,26 +70,20 @@ class MetadataFilters:
 class SumStatsFilters:
     def __init__(self,
                  pos: Union[str, None] = Query(default=None,
-                                               description="Genomic region to filter",
-                                               example="19:80000-90000",
+                                               description="Genomic region to filter, e.g 19:80000-90000",
                                                regex="^.{1,2}:\d+-\d+$"),
                  variant: Union[str, None] = Query(default=None,
-                                                   description="The variant ID (CHR_BP_REF_ALT)",
-                                                   example="chr19_80901_G_T",
+                                                   description="The variant ID (CHR_BP_REF_ALT), e.g. chr19_80901_G_T",
                                                    ),
                  rsid: Union[str, None] = Query(default=None,
-                                                description="The rsID, if given, for the variant",
-                                                example="rs879890648",
+                                                description="The rsID, if given, for the variant, e.g. rs879890648",
                                                 regex=r"^rs\d+$"),
                  molecular_trait_id: Union[str, None] = Query(default=None,
-                                                              description='ID of the molecular trait used for QTL mapping',
-                                                              example="ENSG00000282458"),
+                                                              description='ID of the molecular trait used for QTL mapping, e.g. ENSG00000282458'),
                  gene_id: Union[str, None] = Query(default=None,
-                                                   description='Ensembl gene ID of the molecular trait',
-                                                   example="ENSG00000282458"),
+                                                   description='Ensembl gene ID of the molecular trait, e.g. ENSG00000282458'),
                  nlog10p: Union[float, None] = Query(default=None,
-                                                     description='P-value cutoff, in -Log10 format',
-                                                     example=10)
+                                                     description='P-value cutoff, in -Log10 format, e.g. 10.0')
                  ):
         self.pos = pos
         self.variant = variant
@@ -98,7 +91,7 @@ class SumStatsFilters:
         self.molecular_trait_id = molecular_trait_id
         self.gene_id = gene_id
         self.nlog10p = nlog10p
-        self.chr = None
+        self.chromosome = None
         self.position_start = None
         self.position_end = None
         self.pvalue = None
@@ -106,11 +99,13 @@ class SumStatsFilters:
             self._split_pos_field()
         if self.nlog10p:
             self._nlog10p_to_p_float()
-            
+
+
     def _split_pos_field(self) -> None:
-        self.chr, bp = self.pos.split(":")
+        self.chromosome, bp = self.pos.split(":")
         self.position_start, self.position_end = bp.split("-")
-        
+
+
     def _nlog10p_to_p_float(self) -> None:
         self.pvalue = neg_log_10_pval_to_pval(self.nlog10p)
         self.nlog10p = None
