@@ -135,7 +135,7 @@ def qtl_sumstats_tsv_to_hdf5(tsv_path, hdf5_label) -> None:
         t2h.df_to_hdf5(df=df)
     trait_and_gene_to_hdf5(tsv_path=tsv_path,
                            hdf5_label=hdf5_label)
-    #TODO: rsid load
+    #TODO: rsid load (store as int w.o the rs prefix and make that the cs index)
 
 
 def trait_and_gene_to_hdf5(tsv_path, hdf5_label) -> None:

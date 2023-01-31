@@ -9,7 +9,7 @@ from sumstats.api_v2.utils.helpers import get_hdf5_path, get_hdf5_dir
 class QTLDataService(HDF5Interface):
     
     BP_DISTANCE = 1_000_000  # distance from genetic feature
-    
+
     def __init__(self, hdf5_label: str):
         self.hdf5 = get_hdf5_path(type="data",
                                   label=hdf5_label)
@@ -62,6 +62,7 @@ class QTLDataService(HDF5Interface):
             filters.chromosome = chromosome
             filters.position_start = position - self.BP_DISTANCE if position > self.BP_DISTANCE else 0
             filters.position_end = position + self.BP_DISTANCE
+            print(filters)
         return self.select(filters=filters,
                            key="sumstats",
                            start=start,

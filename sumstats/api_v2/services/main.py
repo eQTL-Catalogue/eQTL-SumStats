@@ -16,8 +16,8 @@ class HDF5Interface:
         self.par_dir = None
 
     def select(self, key: str = None, filters: object = None, many = True, size: int = 20, start: int = 0):
-        results_df = pd.DataFrame()
         self._check_hdf5_exists()
+        results_df = pd.DataFrame()
         condition = self._filters_to_condition(filters=filters)
         with pd.HDFStore(self.hdf5, mode='r') as store:
             key = store.keys()[0] if key is None else key
@@ -32,14 +32,14 @@ class HDF5Interface:
                                       start=start)
             for _, chunk in enumerate(chunks):
                 results_df = results_df.append(chunk)
-                if len(results_df) >= size:
-                    break
+                break
             data_dict = results_df[:size].to_dict('records')
             if many:
                 return data_dict
             else:
                 return data_dict[0] if len(data_dict) > 0 else {}
             #TODO: utils.service_result and process - if empty
+
 
     def select_many(self):
         pass
@@ -71,6 +71,7 @@ class HDF5Interface:
             raise ValueError("Can't find any data for the requested resource")
 
     def _filters_to_condition(self, filters) -> str:
+        print(filters)
         lt_filters = properties_from_model(filters, 'lt_filter')
         gt_filters = properties_from_model(filters, 'gt_filter')
         filter_on = properties_from_model(filters, 'filter_on')
@@ -78,12 +79,13 @@ class HDF5Interface:
         for key, value in filters.dict(exclude_none=True).items():
             filter_field = filter_on[key] if key in filter_on else key
             if key in lt_filters:
-                conditions.append(f"{filter_field} <= '{value}'")
+                conditions.append(f"{filter_field} <= {value}")
             elif key in gt_filters:
-                conditions.append(f"{filter_field} >= '{value}'")
+                conditions.append(f"{filter_field} >= {value}")
             else:
                 conditions.append(f"{filter_field} == '{value}'")
         statement = " & ".join(conditions) if len(conditions) > 0 else None
+        print(f"query: {statement}")
         return statement
     
     def _create_index(self,

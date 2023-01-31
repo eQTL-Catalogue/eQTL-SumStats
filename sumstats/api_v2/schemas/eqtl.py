@@ -63,20 +63,7 @@ Models
 """
 
 
-class Chromosome(BaseModel):
-    chromosome: ChromosomeEnum = Field(None,
-                                description='GRCh38 chromosome name of the variant',
-                                example="19",
-                                ingest_label='chromosome',
-                                searchable=True,
-                                min_size=2,
-                                pa_dtype='str')
-    
-    class Config:
-        allow_population_by_field_name = True
-
-
-class GenomicLocation(Chromosome):
+class GenomicLocation(BaseModel):
     position: PositiveInt = Field(None,
                                   description="GRCh38 position of the variant",
                                   example=80901,
@@ -84,6 +71,13 @@ class GenomicLocation(Chromosome):
                                   searchable=True,
                                   cs_index=True,
                                   pa_dtype='int')
+    chromosome: ChromosomeEnum = Field(None,
+                                description='GRCh38 chromosome name of the variant',
+                                example="19",
+                                ingest_label='chromosome',
+                                searchable=True,
+                                min_size=2,
+                                pa_dtype='str')
 
 
 class VariantIdentifer(BaseModel):
@@ -127,7 +121,7 @@ class Variant(GenomicLocation):
                                   pa_dtype='str')
 
 
-class GenomicRegion(Chromosome):
+class GenomicRegion(BaseModel):
     position_start: PositiveInt = Field(None,
                                         description='Start genomic position',
                                         gt_filter=True,
@@ -136,6 +130,13 @@ class GenomicRegion(Chromosome):
                                       description='End genomic position',
                                       lt_filter=True,
                                       filter_on='position')
+    chromosome: ChromosomeEnum = Field(None,
+                                description='GRCh38 chromosome name of the variant',
+                                example="19",
+                                ingest_label='chromosome',
+                                searchable=True,
+                                min_size=2,
+                                pa_dtype='str')
 
     @root_validator
     def validate_region(cls, values):
@@ -310,10 +311,14 @@ class CommonParams(BaseModel):
     size: conint(gt=0, le=1000) = 20
 
 
-class RequestFilters(GenomicRegion,
-                     VariantIdentifer,
+class RequestFilters(PValue,
                      GenomicContext,
-                     PValue):
+                     VariantIdentifer,
+                     GenomicRegion):
+    """
+    The order of the inherited models is important because
+    this is the order that the filters are applied.
+    """
 
     @root_validator
     def xor_filter_types(cls, values):
