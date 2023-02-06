@@ -19,11 +19,10 @@ ENV EQSS_CONFIG "/application/config/properties.json"
 ENV GACC_LOGS "logs/gaccess.log"
 ENV GERR_LOGS "logs/gerror.log"
 ENV GUNI_LOGS "logs/glogger.log"
-
 ENV USER docker
-
 ENV UID 1000
 ENV GID 1000
+ENV HDF5_ROOT_DIR ""
 
 RUN addgroup --gid "$GID" "$USER" \
   && adduser \
