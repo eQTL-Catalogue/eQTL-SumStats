@@ -1,10 +1,16 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, ORJSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+import logging
 
 from sumstats.dependencies.error_classes import APIException
 import sumstats.api_v1.routers.routes as routes_v1
+import sumstats.api_v2.routers.eqtl as routes_v2
 
+
+logging.config.fileConfig("sumstats/log_conf.ini",
+                          disable_existing_loggers=False)
+logger = logging.getLogger(__name__)
 
 API_BASE = "/eqtl/api"
 
@@ -26,7 +32,16 @@ tags_metadata = [
 
 app = FastAPI(title="eQTL Catalogue Summary Statistics API Documentation",
               openapi_tags=tags_metadata,
-              description=description)
+              description=description,
+              docs_url="/eqtl/api/docs", redoc_url=None)
+
+
+@app.exception_handler(ValueError)
+async def value_error_exception_handler(request: Request, exc: ValueError):
+    return JSONResponse(
+        status_code=400,
+        content={"message": str(exc)},
+    )
 
 
 @app.exception_handler(APIException)
@@ -53,3 +68,6 @@ app.include_router(routes_v1.router,
                    deprecated=True,
                    tags=["eQTL API v1"])
 # v2 API
+app.include_router(routes_v2.router,
+                   prefix=f"{API_BASE}/v2",
+                   tags=["eQTL API v2"])
