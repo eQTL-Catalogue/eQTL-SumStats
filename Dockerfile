@@ -22,7 +22,7 @@ ENV GUNI_LOGS "logs/glogger.log"
 ENV USER docker
 ENV UID 1000
 ENV GID 1000
-ENV HDF5_ROOT_DIR ""
+ENV HDF5_ROOT_DIR "/files/output/"
 
 RUN addgroup --gid "$GID" "$USER" \
   && adduser \
