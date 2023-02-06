@@ -17,6 +17,8 @@ spec:
     value: {{.Values.image.gid}}
   - name: USER
     value: {{.Values.image.user}}
+  - name: HDF5_ROOT_DIR
+    value: {{.Values.image.dataMountPath}}
   template:
     metadata:
       labels:
