@@ -1,11 +1,15 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, ORJSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+import logging
 
 from sumstats.dependencies.error_classes import APIException
 import sumstats.api_v1.routers.routes as routes_v1
 import sumstats.api_v2.routers.eqtl as routes_v2
 
+
+logging.config.fileConfig("sumstats/log_conf.ini", disable_existing_loggers=False)
+logger = logging.getLogger(__name__)
 
 API_BASE = "/eqtl/api"
 

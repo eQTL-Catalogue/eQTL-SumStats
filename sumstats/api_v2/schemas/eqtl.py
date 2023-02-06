@@ -1,10 +1,10 @@
 from enum import Enum
 from pydantic import (BaseModel,
-                      constr,
                       Field,
                       PositiveInt,
                       conint,
                       root_validator)
+
 
 
 MAX_GENOMIC_WINDOW = 1_000_000
@@ -177,6 +177,30 @@ class GenomicContext(BaseModel):
 
 class GenomicContextIngest(GenomicLocation, GenomicContext):
     pass
+
+
+class RsIdMapper(GenomicLocation):
+    rsid: str = Field(None,
+                      description="The rsID, if given, for the variant",
+                      example="rs879890648",
+                      ingest_label='rsid',
+                      searchable=True,
+                      cs_index=True,
+                      min_size=24,
+                      pa_dtype='str')
+    position: PositiveInt = Field(None,
+                                  description="GRCh38 position of the variant",
+                                  example=80901,
+                                  ingest_label='position',
+                                  searchable=False,
+                                  pa_dtype='int')
+    chromosome: ChromosomeEnum = Field(None,
+                                description='GRCh38 chromosome name of the variant',
+                                example="19",
+                                ingest_label='chromosome',
+                                searchable=False,
+                                min_size=2,
+                                pa_dtype='str')
 
 
 class PValue(BaseModel):

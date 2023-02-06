@@ -5,7 +5,8 @@ from sumstats.api_v2.services.qtl_data import QTLDataService
 from sumstats.api_v2.schemas.eqtl import (QTLMetadata,
                                           VariantAssociation,
                                           GenomicContext,
-                                          GenomicContextIngest)
+                                          GenomicContextIngest,
+                                          RsIdMapper)
 from sumstats.api_v2.utils.helpers import (properties_from_model,
                                            pandas_dtype_from_model)
 
@@ -41,14 +42,15 @@ class TSV2HDF5:
     def df_to_hdf5(self, df: pd.DataFrame, **kwargs):
         self.hdf_interface.create(data=df,
                                   key=self.key,
-                                  complib='blosc',
+                                  complib='lzo',
                                   complevel=9,
                                   append=True,
                                   data_columns=[*self._searchable_fields()],
                                   min_itemsize=self._field_size(),
                                   index=False)
         self.hdf_interface.reindex(index_fields=[*self._searchable_fields()],
-                                   cs_index=self._cs_index())
+                                   cs_index=self._cs_index(),
+                                   key=self.key)
 
     def replace_value_if_too_long(self, df: pd.DataFrame) -> pd.DataFrame:
         for field, len_limit in self._field_size().items():
@@ -123,6 +125,7 @@ def qtl_sumstats_tsv_to_hdf5(tsv_path, hdf5_label) -> None:
 
          ...
     """
+    print('loading sumstats')
     t2h = TSV2HDF5(tsv_path=tsv_path,
                    hdf5_label=hdf5_label,
                    key="sumstats",
@@ -133,12 +136,15 @@ def qtl_sumstats_tsv_to_hdf5(tsv_path, hdf5_label) -> None:
     for df in df_iter:
         t2h.replace_value_if_too_long(df=df)
         t2h.df_to_hdf5(df=df)
+    print('sumstats loaded')
     trait_and_gene_to_hdf5(tsv_path=tsv_path,
                            hdf5_label=hdf5_label)
-    #TODO: rsid load (store as int w.o the rs prefix and make that the cs index)
+    rsid_map_to_hdf5(tsv_path=tsv_path,
+                     hdf5_label=hdf5_label)
 
 
 def trait_and_gene_to_hdf5(tsv_path, hdf5_label) -> None:
+    print('loading gc')
     t2h = TSV2HDF5(tsv_path=tsv_path,
                    hdf5_label=hdf5_label,
                    key="genomic_context",
@@ -150,3 +156,21 @@ def trait_and_gene_to_hdf5(tsv_path, hdf5_label) -> None:
     df.drop_duplicates(subset=[*genomic_context_fields_to_group_on])
     t2h.replace_value_if_too_long(df=df)
     t2h.df_to_hdf5(df=df)
+    print('loaded gc')
+
+
+def rsid_map_to_hdf5(tsv_path, hdf5_label) -> None:
+    print('loading rs')
+    t2h = TSV2HDF5(tsv_path=tsv_path,
+                   hdf5_label=hdf5_label,
+                   key="rsid",
+                   usecols=[*tsv_header_map(RsIdMapper)],
+                   service=QTLDataService,
+                   model=RsIdMapper)
+    df = t2h.tsv_to_df()
+    df['rsid'] = df['rsid'].str.replace('rs', '', regex=False)
+    df = df.dropna(subset=['rsid']).drop_duplicates(subset=['rsid'])
+    df['rsid'] = df['rsid'].astype(int)
+    t2h.df_to_hdf5(df=df)
+    print('loaded rs')
+

@@ -74,7 +74,7 @@ class SumStatsFilters:
                                                regex="^.{1,2}:\d+-\d+$"),
                  variant: Union[str, None] = Query(default=None,
                                                    description="The variant ID (CHR_BP_REF_ALT), e.g. chr19_80901_G_T",
-                                                   ),
+                                                   regex=r"^chr\d\d?_\d+_[ACTG]+_[ACTG]+$"),
                  rsid: Union[str, None] = Query(default=None,
                                                 description="The rsID, if given, for the variant, e.g. rs879890648",
                                                 regex=r"^rs\d+$"),
