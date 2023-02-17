@@ -11,7 +11,7 @@ setup(
               'config',
               'sumstats.dependencies'],
     entry_points={
-        "console_scripts": ['eqtl-load = sumstats.api_v2.cli.main:main']
+        "console_scripts": ['tsv2hdf = sumstats.api_v2.cli.main:main']
     },
     url='https://github.com/EBISPOT/SumStats',
     license='',
