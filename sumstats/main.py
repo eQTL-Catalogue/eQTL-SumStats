@@ -33,7 +33,9 @@ tags_metadata = [
 app = FastAPI(title="eQTL Catalogue Summary Statistics API Documentation",
               openapi_tags=tags_metadata,
               description=description,
-              docs_url="/eqtl/api/docs", redoc_url=None)
+              docs_url=f"{API_BASE}/docs",
+              redoc_url=None,
+              openapi_url=f"{API_BASE}/openapi.json")
 
 
 @app.exception_handler(ValueError)
