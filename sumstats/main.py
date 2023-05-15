@@ -61,4 +61,5 @@ app.include_router(routes_v1.router,
 # v2 API
 app.include_router(routes_v2.router,
                    prefix=f"{API_BASE}/v2",
+                   default_response_class=ORJSONResponse,
                    tags=["eQTL API v2"])

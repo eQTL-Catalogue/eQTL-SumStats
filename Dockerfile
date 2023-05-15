@@ -3,13 +3,14 @@ FROM hdfgroup/hdf5lib:1.10.6
 
 COPY requirements.txt /application/
 WORKDIR /application
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt --ignore-installed six
 
 COPY setup.py .
 COPY config config
 COPY sumstats sumstats
 
-#RUN pip install . --ignore-installed six
+RUN pip install . --ignore-installed six
 RUN mkdir logs
 
 # Expose ports

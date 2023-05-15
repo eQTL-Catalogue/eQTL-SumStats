@@ -29,7 +29,7 @@ h11==0.14.0
 httplib2==0.20.4
 idna==3.3
 imagesize==1.1.0
-importlib-metadata==0.19
+importlib-metadata
 isodate==0.6.1
 itsdangerous==1.1.0
 Jinja2==2.10.1
@@ -54,7 +54,7 @@ py==1.8.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycparser==2.21
-pydantic==1.9.2
+pydantic>=1.9.2
 Pygments==2.4.2
 PyJWT==2.4.0
 pyparsing==2.4.2

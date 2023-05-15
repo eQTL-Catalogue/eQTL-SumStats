@@ -168,9 +168,13 @@ def rsid_map_to_hdf5(tsv_path, hdf5_label) -> None:
                    service=QTLDataService,
                    model=RsIdMapper)
     df = t2h.tsv_to_df()
+    print("Removing rs prefix")
     df['rsid'] = df['rsid'].str.replace('rs', '', regex=False)
+    print("Dropping rsid duplicates")
     df = df.dropna(subset=['rsid']).drop_duplicates(subset=['rsid'])
-    df['rsid'] = df['rsid'].astype(int)
+    print("Converting rsids to int")
+    df['rsid'] = df['rsid'].astype("int64")
+    print("Writing to file")
     t2h.df_to_hdf5(df=df)
     print('loaded rs')
 

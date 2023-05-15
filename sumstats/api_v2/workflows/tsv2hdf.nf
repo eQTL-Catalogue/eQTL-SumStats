@@ -16,7 +16,7 @@ process tsv_to_hdf5 {
   containerOptions "--bind $params.tsv_dir --bind $params.hdf5_dir"
   publishDir "$params.hdf5_dir", mode: 'copy'
 
-  memory { 8.GB * task.attempt }
+  memory { 20.GB * task.attempt }
   maxRetries 3
   errorStrategy { task.exitStatus == 130 ? 'retry' : 'terminate' }
 

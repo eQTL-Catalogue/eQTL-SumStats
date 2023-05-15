@@ -6,7 +6,6 @@ from pydantic import (BaseModel,
                       root_validator)
 
 
-
 MAX_GENOMIC_WINDOW = 1_000_000
 
 
