@@ -55,6 +55,7 @@ class QuantMethodEnum(str, Enum):
     transcript_usage = "tx"
     txrevise = "txrev"
     leafcutter = "leafcutter"
+    aptamer = "aptamer"
 
 
 """
