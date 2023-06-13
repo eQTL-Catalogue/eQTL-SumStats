@@ -2,18 +2,16 @@ from distutils.core import setup
 
 setup(
     name='eqtl-sumstats',
-    version='0.1.0',
-    packages=['sumstats', 'sumstats.utils', 'sumstats.server', 'sumstats.study', 'sumstats.study.search', 'sumstats.study.search.access', 'sumstats.trait', 'sumstats.trait.search',
-              'sumstats.trait.search.access', 'sumstats.chr', 'sumstats.chr.search', 'sumstats.chr.search.access', 'config', 'sumstats.errors'],
+    version='2.0.0',
+    packages=['sumstats.api_v2',
+              'sumstats.api_v2.cli',
+              'sumstats.api_v2.services',
+              'sumstats.api_v2.schemas',
+              'sumstats.api_v2.utils',
+              'config',
+              'sumstats.dependencies'],
     entry_points={
-        "console_scripts": ['eqtl-load = sumstats.load:main',
-                            'eqtl-search = sumstats.controller:main',
-                            'eqtl-explore = sumstats.explorer:main',
-                            'eqtl-rebuild-snps = sumstats.utils.vcf_to_sqlite:main',
-                            'eqtl-prep-file = sumstats.utils.split_by_chrom:main',
-                            'eqtl-reindex = sumstats.reindex:main',
-                            'eqtl-delete = sumstats.deleter:main',
-                            'eqtl-consolidate = sumstats.utils.consolidate_hdf:main']
+        "console_scripts": ['tsv2hdf = sumstats.api_v2.cli.main:main']
     },
     url='https://github.com/EBISPOT/SumStats',
     license='',

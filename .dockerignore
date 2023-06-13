@@ -17,6 +17,12 @@ env.*
 *.tar
 *.gz
 *.tar.gz
+*.tbi
+*.png*
+
+# hidden files
+.*
+
 # Python specific files
 .cache
 __pycache__

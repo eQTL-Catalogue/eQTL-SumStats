@@ -17,6 +17,8 @@ spec:
     value: {{.Values.image.gid}}
   - name: USER
     value: {{.Values.image.user}}
+  - name: HDF5_ROOT_DIR
+    value: {{.Values.image.dataMountPath}}
   template:
     metadata:
       labels:
@@ -25,7 +27,7 @@ spec:
       containers:
       - name: {{.Values.service.name}}
         image: "{{.Values.image.repository}}:{{.Values.image.tag}}"
-        command: {{.Values.service.gunicornCmd}}
+        command: {{.Values.service.uvicornCmd}}
         imagePullPolicy: {{.Values.image.pullPolicy}}
         resources:
           requests:
