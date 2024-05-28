@@ -16,7 +16,7 @@ Click==7.0
 coverage==4.5.4
 cryptography==37.0.4
 Cython==0.29.32
-dnspython==1.16.0
+dnspython==2.6.1
 docutils==0.15.2
 eventlet==0.25.1
 fastapi==0.83.0
