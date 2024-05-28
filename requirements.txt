@@ -27,7 +27,7 @@ fsspec==2022.5.0
 greenlet==2.0.1
 h11==0.14.0
 httplib2==0.20.4
-idna==3.3
+idna==3.7
 imagesize==1.1.0
 importlib-metadata
 isodate==0.6.1
