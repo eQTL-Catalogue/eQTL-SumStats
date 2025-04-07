@@ -19,9 +19,12 @@ htmlcov
 *.h5
 
 # tsv and txt files
-*.txt 
+*.txt
 *.csv
 *.xml
 
-# the files folder 
+# the files folder
 files
+
+venv/
+.env
