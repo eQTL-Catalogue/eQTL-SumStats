@@ -1,0 +1,225 @@
+annotated-types
+# anyio
+blinker
+# blosc
+# certifi
+# charset-normalizer
+# click
+# dnspython
+# fastapi
+# Flask
+# idna
+# itsdangerous
+# Jinja
+# MarkupSafe
+motor
+# msgpack
+ndindex
+# numexpr
+# numpy
+# packaging
+# pandas
+platformdirs
+py-cpuinfo
+pydantic
+pydantic-settings
+pydantic_core
+pymongo
+# python-dateutilpost
+python-dotenv
+# pytz
+requests
+# simplejson
+# six
+# sniffio
+# starlette
+# tables
+# typing-inspection
+# typing_extensions
+tzdata
+# urllib
+# uvicorn
+# Werkzeug
+alabaster
+anyio
+asgiref
+async-timeout
+atomicwrites
+attrs
+azure-core
+Babel
+botocore
+cachetools
+certifi
+cffi
+chardet
+charset-normalizer
+Click
+coverage
+cryptography
+Cython
+dnspython
+docutils
+eventlet
+fastapi
+Flask
+Flask-Cors
+frozenlist
+fsspec
+greenlet
+h11
+httplib2
+idna
+imagesize
+importlib-metadata
+isodate
+itsdangerous
+Jinja2
+jmespath
+MarkupSafe
+monotonic
+more-itertools
+msgpack
+msrest
+msrestazure
+multidict
+numexpr
+numpy
+oauthlib
+orjson
+packaging
+pandas
+Paste
+pluggy
+protobuf
+py
+pyasn1
+pyasn1-modules
+pycparser
+# pydantic
+Pygments
+PyJWT
+pyparsing
+pytest
+pytest-cov
+python-dateutil
+pytz
+# requests
+rsa
+s3fs
+simplejson
+sniffio
+snowballstemmer
+Sphinx
+sphinx-rtd-theme
+sphinxcontrib-applehelp
+sphinxcontrib-devhelp
+sphinxcontrib-htmlhelp
+sphinxcontrib-httpdomain
+sphinxcontrib-jsmath
+sphinxcontrib-qthelp
+sphinxcontrib-serializinghtml
+starlette
+tables
+typing_extensions
+uritemplate
+urllib3
+uvicorn
+wcwidth
+Werkzeug
+wrapt
+yarl
+zipp
+setuptools
+types-setuptools
+
+# alabaster
+# anyio
+# asgiref
+# async-timeout
+# atomicwrites
+# attrs
+# azure-core
+# Babel
+# botocore
+# cachetools
+# certifi
+# cffi
+# chardet
+# charset-normalizer
+# Click
+# coverage
+# cryptography
+# Cython
+# dnspython
+# docutils
+# eventlet
+# fastapi
+# Flask
+# Flask-Cors
+# frozenlist
+# fsspec
+# greenlet
+# h
+# httplib
+# idna
+# imagesize
+# importlib-metadata
+# isodate
+# itsdangerous
+# Jinja
+# jmespath
+# MarkupSafe
+# monotonic
+# more-itertools
+# msgpack
+# msrest
+# msrestazure
+# multidict
+# numexpr
+# numpy
+# oauthlib
+# orjson
+# packaging
+# pandas
+# Paste
+# pluggy
+# protobuf
+# py
+# pyasn
+# pyasn-modules
+# pycparser
+# pydantic
+# Pygments
+# PyJWT
+# pyparsing
+# pytest
+# pytest-cov
+# python-dateutil
+# pytz
+# requests
+# rsa
+# sfs
+# simplejson
+# sniffio
+# snowballstemmer
+# Sphinx
+# sphinx-rtd-theme
+# sphinxcontrib-applehelp
+# sphinxcontrib-devhelp
+# sphinxcontrib-htmlhelp
+# sphinxcontrib-httpdomain
+# sphinxcontrib-jsmath
+# sphinxcontrib-qthelp
+# sphinxcontrib-serializinghtml
+# starlette
+# tables
+# typing_extensions
+# uritemplate
+# urllib
+# uvicorn
+# wcwidth
+# Werkzeug
+# wrapt
+# yarl
+# zipp
