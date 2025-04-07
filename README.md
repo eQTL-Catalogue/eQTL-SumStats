@@ -2,25 +2,53 @@
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/01c24035b9634ad1aaa7f66598be2483)](https://www.codacy.com/app/spot-ebi/SumStats?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=EBISPOT/SumStats&amp;utm_campaign=Badge_Grade) [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/01c24035b9634ad1aaa7f66598be2483)](https://www.codacy.com/app/spot-ebi/SumStats?utm_source=github.com&utm_medium=referral&utm_content=EBISPOT/SumStats&utm_campaign=Badge_Coverage)
 
-EQTL Summary statistics with HDF5
+EQTL Summary statistics with HDF5 and MongoDB
 
-The concept is to leverage the fast query times and multidimensional indexing capabilities of HDF5 to enable fast, useful querying of very large summary statistics datasets. There are loading scripts to convert TSV summary statistics to HDF5 using [PyTables](https://www.pytables.org/). A Python fast-api app to serves the data via a REST API. This is conterised and deployed to the cloud using Kubernetes.
+The concept is to leverage the fast query times and multidimensional indexing capabilities of HDF5 and MongoDB to enable fast, useful querying of very large summary statistics datasets. There are loading scripts to convert TSV summary statistics to HDF5 using [PyTables](https://www.pytables.org/). A Python FastAPI app serves the data via a REST API. This is containerized and deployed to the cloud using Kubernetes.
 
-This REST API is for facilitating  a filtered request of eQTL association data.
+This REST API facilitates filtered requests of eQTL association data from the [eQTL Catalogue](https://www.ebi.ac.uk/eqtl).
+
+## API v3 (Latest)
+
+API v3 provides improved access to studies and datasets with enhanced search capabilities across the entire eQTL Catalogue. Key features include:
+
+- **Studies API**: Browse and search study information
+  - List all studies: `/eqtl/api/v3/studies`
+  - Get study details: `/eqtl/api/v3/studies/{study_id}`
+  - Search within a study: `/eqtl/api/v3/studies/{study_id}/search`
+
+- **Datasets API**: Access and search dataset information
+  - List all datasets: `/eqtl/api/v3/datasets`
+  - Get dataset details: `/eqtl/api/v3/datasets/{dataset_id}`
+  - Search within a dataset: `/eqtl/api/v3/datasets/{dataset_id}/search`
+
+- **Search API**: Global search functionality
+  - Search across all studies: `/eqtl/api/v3/search`
+  - Chunked search for large result sets: `/eqtl/api/v3/search_chunked`
+
+### Search Filters
+V3 endpoints support the following search filters:
+- `gene_id`: Filter by Ensembl gene identifier (e.g., ENSG00000139618)
+- `rsid`: Filter by RS ID of the variant (e.g., rs1234567)
+- `variant`: Filter by variant in format chr_pos_ref_alt (e.g., 1_12345_A_G)
+- `molecular_trait_id`: Filter by molecular trait identifier
+- `chromosome`: Filter by chromosome (e.g., 1, 2, 3, ..., X, Y)
+- `study_id`: Filter by study identifier
+- `dataset_id`: Filter by dataset identifier
 
 ## API v2
 
 Each study in the catalogue is split by QTL context and these splits are
-assigned their own dataset IDs (QTD#). Datasets can be browsed at the `/datasets` 
-endpoint. 
+assigned their own dataset IDs (QTD#). Datasets can be browsed at the `/datasets`
+endpoint.
 
-To retrieve the summary statistics for a dataset, use the 
-`/datasets/<DATASETID>/associations` endpoint and apply 
-any required filters. 
+To retrieve the summary statistics for a dataset, use the
+`/datasets/<DATASETID>/associations` endpoint and apply
+any required filters.
 
 ## API v1
 
-This will be deprecated and is maintained only for existing integrations. 
+This will be deprecated and is maintained only for existing integrations.
 
 
 # Installation
@@ -31,19 +59,19 @@ Requires the HDF5 library. Easiest way to manage this is to use the docker image
 ## The web app
 `docker run -v <path to API_v2>:/files/output -p 8000:8000 -e HDF5_ROOT_DIR:/files/output ebispot/eqtl-sumstats-api:local uvicorn sumstats.main:app --host 0.0.0.0`
 
-Visit Swagger docs are here: http://127.0.0.1:8000/eqtl/api/docs
+Visit Swagger docs here: http://127.0.0.1:8000/eqtl/api/docs
 
 
 ## Data loading
 
-Data loading means converting tsv data to HDF5.
+Data loading means converting TSV data to HDF5 for API v2 or importing into MongoDB for API v3.
 
-### Convert sumstats TSVs to HDF5
+### For API v2: Convert sumstats TSVs to HDF5
 
 Requires nextflow and docker installation, or singularity if run `-with-singularity` instead of `-with-docker`
-The TSVs are in a single dir (--tsv_dir). 
+The TSVs are in a single dir (--tsv_dir).
 The HDF5 will be written to --hdf5_dir.
-```
+```bash
 nextflow run sumstats/api_v2/workflows/tsv2hdf.nf --tsv_dir ./tsv/ --hdf5_dir ./hdf5/ -with-docker docker://ebispot/eqtl-sumstats-api:local
 ```
 
@@ -69,6 +97,23 @@ It will not run for the metadata. To run for the metadata do the following:
 tsv2hdf -t $tsv_file -hdf qtl_metadata -type metadata
 ```
 
-## Project structure
-There are two versions of the API, v1, and v2. The code is seperated here [sumstats](sumstats), so that when the v1 api is ready to be removed, [sumstats/api_v1](sumstats/api_v1/) can simply be deleted. The [sumstats/main.py](sumstats/main.py) which is where the fast-api app is run, will also need to be updated if v1 is removed.
+### For API v3: Import data into MongoDB
 
+API v3 uses MongoDB for faster search and more flexible data querying. We have a separate ETL pipeline that consumes FTP sources and loads data into MongoDB. Provide your MongoDB URL in an `.env` file at [sumstats/api_v3/core](sumstats/api_v3/core).
+
+```
+MONGO_URI=<MONGO_URI>
+DB_NAME=<DB_NAME>
+HOST=<HOST>
+PORT=<PORT>
+DEBUG=true
+```
+
+## Project structure
+There are three versions of the API: v1, v2, and v3. The code is separated in the [sumstats](sumstats) directory:
+
+- [sumstats/api_v1](sumstats/api_v1/): Legacy API (deprecated)
+- [sumstats/api_v2](sumstats/api_v2/): Current production API using HDF5
+- [sumstats/api_v3](sumstats/api_v3/): New API with improved search capabilities using MongoDB
+
+The [sumstats/main.py](sumstats/main.py) file is where the FastAPI app is configured, including all three API versions. Note that it needs to be updated if v1 and v2 are removed.
