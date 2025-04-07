@@ -1,0 +1,67 @@
+from typing import List, Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from motor.motor_asyncio import AsyncIOMotorClient
+
+from sumstats.api_v3.db.client import get_mongo_client
+from sumstats.api_v3.db.repositories.search import search_in_study
+from sumstats.api_v3.db.repositories.studies import (
+    get_single_study,
+    list_studies,
+)
+from sumstats.api_v3.models.schemas import (
+    AssociationModel,
+    SearchFilters,
+    StudyModel,
+)
+from sumstats.config import API_BASE
+
+router = APIRouter(
+    prefix=f"{API_BASE}/v3/studies", tags=["eQTL API v3 Studies"]
+)
+
+
+@router.get("", response_model=List[StudyModel])
+async def get_studies_route(
+    client: AsyncIOMotorClient = Depends(get_mongo_client),
+):
+    """
+    Type 1: Search by study (list all).
+    """
+    return await list_studies(client)
+
+
+@router.get("/{study_id}", response_model=StudyModel)
+async def get_study_route(
+    study_id: str, client: AsyncIOMotorClient = Depends(get_mongo_client)
+):
+    """
+    Type 1: Fetch single study details.
+    """
+    study = await get_single_study(client, study_id)
+    if not study:
+        raise HTTPException(status_code=404, detail="Study not found.")
+    return study
+
+
+@router.get("/{study_id}/search", response_model=List[AssociationModel])
+async def search_within_study_route(
+    study_id: str,
+    gene_id: Optional[str] = Query(None),
+    rsid: Optional[str] = Query(None),
+    variant: Optional[str] = Query(None),
+    molecular_trait_id: Optional[str] = Query(None),
+    chromosome: Optional[str] = Query(None),
+    client: AsyncIOMotorClient = Depends(get_mongo_client),
+):
+    """
+    Type 2: Search within a specific study by gene_id, rsid, or variant.
+    """
+    filters = SearchFilters(
+        gene_id=gene_id,
+        rsid=rsid,
+        variant=variant,
+        molecular_trait_id=molecular_trait_id,
+        chromosome=chromosome,
+    )
+    return await search_in_study(client, study_id, filters)
