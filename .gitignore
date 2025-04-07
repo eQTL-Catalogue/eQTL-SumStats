@@ -26,5 +26,8 @@ htmlcov
 # the files folder
 files
 
+# virtual env files
 venv/
+.env/
+env/
 .env
