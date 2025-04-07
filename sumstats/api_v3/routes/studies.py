@@ -16,27 +16,27 @@ from sumstats.api_v3.models.schemas import (
 )
 from sumstats.config import API_BASE
 
-router = APIRouter(
-    prefix=f"{API_BASE}/v3/studies", tags=["eQTL API v3 Studies"]
-)
+router = APIRouter(prefix=f"{API_BASE}/v3/studies", tags=["eQTL API v3"])
 
 
-@router.get("", response_model=List[StudyModel])
+@router.get("", summary="Get Studies", response_model=List[StudyModel])
 async def get_studies_route(
     client: AsyncIOMotorClient = Depends(get_mongo_client),
 ):
     """
-    Type 1: Search by study (list all).
+    List all studies.
     """
     return await list_studies(client)
 
 
-@router.get("/{study_id}", response_model=StudyModel)
+@router.get(
+    "/{study_id}", summary="Get Study Metadata", response_model=StudyModel
+)
 async def get_study_route(
     study_id: str, client: AsyncIOMotorClient = Depends(get_mongo_client)
 ):
     """
-    Type 1: Fetch single study details.
+    Fetch single study details.
     """
     study = await get_single_study(client, study_id)
     if not study:
@@ -44,7 +44,11 @@ async def get_study_route(
     return study
 
 
-@router.get("/{study_id}/search", response_model=List[AssociationModel])
+@router.get(
+    "/{study_id}/search",
+    summary="Search Within A Study",
+    response_model=List[AssociationModel],
+)
 async def search_within_study_route(
     study_id: str,
     gene_id: Optional[str] = Query(None),
@@ -55,7 +59,7 @@ async def search_within_study_route(
     client: AsyncIOMotorClient = Depends(get_mongo_client),
 ):
     """
-    Type 2: Search within a specific study by gene_id, rsid, or variant.
+    Search within a specific study by search filters.
     """
     filters = SearchFilters(
         gene_id=gene_id,
