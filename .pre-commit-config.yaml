@@ -16,6 +16,14 @@ repos:
         types: [python]
         files: ^.*\.py$
 
+-   repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+    -   id: isort
+        types: [python]
+        files: ^.*\.py$
+        args: ["--profile", "black", "--line-length", "79"]
+
 -   repo: https://github.com/psf/black
     rev: 23.11.0
     hooks:
@@ -23,13 +31,6 @@ repos:
         types: [python]
         files: ^.*\.py$
         args: [--line-length=79]
-
--   repo: https://github.com/pycqa/isort
-    rev: 5.12.0
-    hooks:
-    -   id: isort
-        types: [python]
-        files: ^.*\.py$
 
 -   repo: https://github.com/pycqa/flake8
     rev: 6.1.0
