@@ -16,6 +16,12 @@ image:
   gid: 1000
   user: virtual_user
 
+# Environment variables section
+env: {}
+  # MONGO_URI: "mongodb://localhost:27017"
+  # DB_NAME: "eqtl_db"
+  # ENVIRONMENT: "development"
+
 volume:
   log:
     ClaimName: eqtl-api-logs
@@ -23,7 +29,7 @@ volume:
     ClaimName: eqtl-data
     nfsServer: "<host name or IP>"
     path: "/path/to/files/"
-  
+
     #    VolumeName: eqtl-data
     #    type: persistentVolumeClaim
     #    storageClassName: standard
@@ -53,13 +59,13 @@ staticService:
   name: api-docs
   path: /api-docs
   type: NodePort
-  port: 80  
+  port: 80
   image:
     repository: ebispot/eqtl-sumstats-docs
     tag: latest
     pullPolicy: Always
     containerPort: 80
-    
+
 
 ingress:
   enabled: false
@@ -89,4 +95,3 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
-
