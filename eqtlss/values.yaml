@@ -2,8 +2,8 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-
-replicaCount: 3
+# Reduced number of replicas to decrease overall resource usage
+replicaCount: 2
 
 image:
   repository: ebispot/eqtl-sumstats-api
@@ -51,8 +51,8 @@ service:
   type: NodePort
   port: 8000
   path: /eqtl/api(/|$)(.*)
-  gunicornCmd: '["gunicorn", "-b", "0.0.0.0:8000", "sumstats.server.app:app","--log-level=debug","--access-logfile=logs/ss_access.log","--error-logfile=logs/ss_error.log", "--workers=4"]'
-  uvicornCmd: '["uvicorn", "sumstats.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2", "--limit-concurrency", "20", "--log-level=debug"]'
+  gunicornCmd: '["gunicorn", "-b", "0.0.0.0:8000", "sumstats.server.app:app", "--log-level=debug", "--access-logfile=logs/ss_access.log", "--error-logfile=logs/ss_error.log", "--workers=2", "--threads=2"]'
+  uvicornCmd: '["uvicorn", "sumstats.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--limit-concurrency", "4", "--log-level=debug"]'
 
 staticService:
   replicaCount: 1
@@ -65,7 +65,6 @@ staticService:
     tag: latest
     pullPolicy: Always
     containerPort: 80
-
 
 ingress:
   enabled: false
@@ -84,11 +83,11 @@ k8Namespace: eqtl
 
 resources:
   limits:
-    cpu: 500m
-    memory: 512Mi
+    cpu: 1000m
+    memory: 2Gi
   requests:
-    cpu: 100m
-    memory: 256Mi
+    cpu: 500m
+    memory: 2Gi
 
 nodeSelector: {}
 

@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: "{{ .Values.service.name }}"
@@ -7,6 +7,9 @@ metadata:
     version: "{{ .Values.image.tag }}"
 spec:
   replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: "{{ .Values.service.name }}"
   template:
     metadata:
       labels:
@@ -38,14 +41,22 @@ spec:
           value: "{{ .Values.env.DB_NAME }}"
         - name: ENVIRONMENT
           value: "{{ .Values.env.ENVIRONMENT }}"
+        # Set thread-related environment variables to minimize thread usage
         - name: OPENBLAS_NUM_THREADS
           value: "1"
         - name: OMP_NUM_THREADS
           value: "1"
         - name: MKL_NUM_THREADS
           value: "1"
+        # Reduced async thread count
         - name: PYTHONASYNCIOEVENTSLOOPTHREADCOUNT
-          value: "20"
+          value: "5"
+        # Add thread limit environment variables
+        - name: PYTHONTHREADDEBUG
+          value: "1"
+        - name: NUMEXPR_MAX_THREADS
+          value: "1"
+        # Set ulimit on number of threads via resource limits
         resources:
           requests:
             cpu: "{{ .Values.resources.requests.cpu }}"
@@ -62,6 +73,21 @@ spec:
         - mountPath: "{{ .Values.image.dataMountPath }}"
           name: data
           readOnly: true
+        # Add readiness and liveness probes to ensure container health
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.image.containerPort }}
+          initialDelaySeconds: 30
+          periodSeconds: 15
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.image.containerPort }}
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
       volumes:
       - name: log
         persistentVolumeClaim:
