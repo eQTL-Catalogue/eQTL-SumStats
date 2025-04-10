@@ -7,19 +7,22 @@ metadata:
     version: "{{ .Values.image.tag }}"
 spec:
   replicas: {{ .Values.replicaCount }}
-  securityContext:
-    runAsUser: {{ .Values.image.uid }}
-    runAsGroup: {{ .Values.image.gid }}
   template:
     metadata:
       labels:
         app: "{{ .Values.service.name }}"
     spec:
+      securityContext:
+        fsGroup: {{ .Values.image.gid }}
       containers:
       - name: "{{ .Values.service.name }}"
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         command: {{ .Values.service.uvicornCmd }}
         imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+        securityContext:
+          runAsUser: {{ .Values.image.uid }}
+          runAsGroup: {{ .Values.image.gid }}
+          allowPrivilegeEscalation: false
         env:
         - name: UID
           value: "{{ .Values.image.uid }}"
@@ -35,6 +38,12 @@ spec:
           value: "{{ .Values.env.DB_NAME }}"
         - name: ENVIRONMENT
           value: "{{ .Values.env.ENVIRONMENT }}"
+        - name: OPENBLAS_NUM_THREADS
+          value: "1"
+        - name: OMP_NUM_THREADS
+          value: "1"
+        - name: MKL_NUM_THREADS
+          value: "1"
         resources:
           requests:
             cpu: "{{ .Values.resources.requests.cpu }}"
