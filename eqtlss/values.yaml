@@ -51,8 +51,8 @@ service:
   type: NodePort
   port: 8000
   path: /eqtl/api(/|$)(.*)
-  gunicornCmd: '["gunicorn", "-b", "0.0.0.0:8000", "sumstats.server.app:app", "--log-level=debug", "--access-logfile=logs/ss_access.log", "--error-logfile=logs/ss_error.log", "--workers=2", "--threads=2"]'
-  uvicornCmd: '["uvicorn", "sumstats.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--limit-concurrency", "4", "--log-level=debug"]'
+  gunicornCmd: '["gunicorn", "-b", "0.0.0.0:8000", "sumstats.server.app:app", "--log-level=debug", "--access-logfile=logs/ss_access.log", "--error-logfile=logs/ss_error.log", "--workers=4"]'
+  uvicornCmd: '["uvicorn", "sumstats.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2", "--limit-concurrency", "20", "--log-level=debug"]'
 
 staticService:
   replicaCount: 1
@@ -83,11 +83,11 @@ k8Namespace: eqtl
 
 resources:
   limits:
-    cpu: 1000m
-    memory: 2Gi
-  requests:
     cpu: 500m
-    memory: 2Gi
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
 
 nodeSelector: {}
 

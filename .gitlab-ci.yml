@@ -113,7 +113,7 @@ deploy_staging:
     - echo ${FALLBACK_KUBECONF} | base64 -d > /root/.kube/config
     - helm init --stable-repo-url https://charts.helm.sh/stable
     - helm delete --purge eqtl-sumstats-dev || true
-    - helm install --name eqtl-sumstats-dev --set k8Namespace=dev-gwas,service.name=eqtl-rest-api-dev,staticService.name=eqtl-api-docs-dev,staticService.path=/api-docs,image.repository=$CI_REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.uid=$UID,image.gid=$GID,staticService.image.repository=$CI_REGISTRY_DOCS_IMAGE,staticService.image.tag=$CI_COMMIT_SHA,volume.data.nfsServer=$NFS_SERVER,volume.data.path=$NFS_PATH_DEV,replicaCount=1,env.MONGO_URI=$MONGO_URI,env.DB_NAME=$DB_NAME,env.ENVIRONMENT=staging ./eqtlss/ --wait --timeout 1800
+    - helm install --name eqtl-sumstats-dev --set k8Namespace=dev-gwas,service.name=eqtl-rest-api-dev,staticService.name=eqtl-api-docs-dev,staticService.path=/api-docs,image.repository=$CI_REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.uid=$UID,image.gid=$GID,staticService.image.repository=$CI_REGISTRY_DOCS_IMAGE,staticService.image.tag=$CI_COMMIT_SHA,volume.data.nfsServer=$NFS_SERVER,volume.data.path=$NFS_PATH_DEV,replicaCount=1,env.MONGO_URI=$MONGO_URI,env.DB_NAME=$DB_NAME,env.ENVIRONMENT=staging ./eqtlss/ --wait --timeout 600
   environment:
     name: dev
   when: manual
