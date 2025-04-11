@@ -39,10 +39,9 @@ service:
   type: NodePort
   port: 8000
   path: /eqtl/api(/|$)(.*)
-  # Simplified Uvicorn command with bare minimum settings
-  uvicornCmd: '["uvicorn", "sumstats.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--limit-concurrency", "1", "--timeout-keep-alive", "120", "--log-level=info"]'
+  uvicornCmd: '["uvicorn", "sumstats.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--limit-concurrency", "3", "--timeout-keep-alive", "300", "--log-level=info"]'
   # Keep Gunicorn command for future reference
-  gunicornCmd: '["gunicorn", "sumstats.main:app", "--bind", "0.0.0.0:8000", "--workers", "1", "--threads", "2", "--worker-class=sync", "--log-level=debug", "--timeout", "120"]'
+  gunicornCmd: '["gunicorn", "sumstats.main:app", "--bind", "0.0.0.0:8000", "--workers", "1", "--threads", "4", "--worker-class=sync", "--log-level=debug", "--timeout", "300"]'
 
 staticService:
   replicaCount: 1
@@ -59,8 +58,6 @@ staticService:
 ingress:
   enabled: false
   annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
   hosts:
     - host: chart-example.local
       paths: /eqtl/api(/|$)
@@ -68,7 +65,7 @@ ingress:
 
 k8Namespace: eqtl
 
-# Increased memory resources to accommodate thread overhead
+# Adjusted resources to accommodate threading needs
 resources:
   limits:
     cpu: "1"

@@ -19,11 +19,10 @@ spec:
       securityContext:
         fsGroup: {{ .Values.image.gid }}
       # Set termination grace period to allow for clean shutdown
-      terminationGracePeriodSeconds: 60
+      terminationGracePeriodSeconds: 120
       containers:
       - name: "{{ .Values.service.name }}"
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        # Use the simple Uvicorn command with minimal threading
         command: {{ .Values.service.uvicornCmd }}
         imagePullPolicy: "{{ .Values.image.pullPolicy }}"
         # Container level security context
@@ -32,7 +31,6 @@ spec:
           runAsGroup: {{ .Values.image.gid }}
           allowPrivilegeEscalation: false
         env:
-        # User and filesystem environment variables
         - name: UID
           value: "{{ .Values.image.uid }}"
         - name: GID
@@ -41,16 +39,13 @@ spec:
           value: "{{ .Values.image.user }}"
         - name: HDF5_ROOT_DIR
           value: "{{ .Values.image.dataMountPath }}"
-
-        # Application configuration
         - name: MONGO_URI
           value: "{{ .Values.env.MONGO_URI }}"
         - name: DB_NAME
           value: "{{ .Values.env.DB_NAME }}"
         - name: ENVIRONMENT
           value: "{{ .Values.env.ENVIRONMENT }}"
-
-        # Thread limitation variables - force single-threading for numeric libraries
+        # Thread limitation variables - but allow enough for basic operation
         - name: OPENBLAS_NUM_THREADS
           value: "1"
         - name: OMP_NUM_THREADS
@@ -58,13 +53,9 @@ spec:
         - name: MKL_NUM_THREADS
           value: "1"
         - name: NUMEXPR_MAX_THREADS
-          value: "1"
-
-        # Python threading settings
+          value: "2"
         - name: PYTHONTHREADDEBUG
           value: "1"
-
-        # Resources with memory and CPU limits
         resources:
           requests:
             cpu: "{{ .Values.resources.requests.cpu }}"
@@ -72,34 +63,16 @@ spec:
           limits:
             cpu: "{{ .Values.resources.limits.cpu }}"
             memory: "{{ .Values.resources.limits.memory }}"
-
         ports:
         - name: http
           containerPort: {{ .Values.image.containerPort }}
           protocol: TCP
-
         volumeMounts:
         - mountPath: "{{ .Values.image.logMountPath }}"
           name: log
         - mountPath: "{{ .Values.image.dataMountPath }}"
           name: data
           readOnly: true
-
-
-      # Configure pod disruption budget
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                  - "{{ .Values.service.name }}"
-              topologyKey: "kubernetes.io/hostname"
-
       volumes:
       - name: log
         persistentVolumeClaim:
