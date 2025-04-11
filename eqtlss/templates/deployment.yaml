@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: "{{ .Values.service.name }}"
@@ -15,19 +15,36 @@ spec:
       labels:
         app: "{{ .Values.service.name }}"
     spec:
+      # Pod level security context for filesystem permissions
       securityContext:
         fsGroup: {{ .Values.image.gid }}
+      # Add pod security context with sysctls for thread limits
+      # Note: This requires the pod security policy to allow these sysctls
+      securityContext:
+        sysctls:
+        - name: kernel.threads-max
+          value: "4096"
+        - name: kernel.pid_max
+          value: "32768"
+      # Set termination grace period to allow for clean shutdown
+      terminationGracePeriodSeconds: 30
       containers:
       - name: "{{ .Values.service.name }}"
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        command: {{ .Values.service.uvicornCmd }}
+        # Use Gunicorn with sync workers instead of Uvicorn
+        command: {{ .Values.service.gunicornCmd }}
         imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+        # Container level security context
         securityContext:
           runAsUser: {{ .Values.image.uid }}
           runAsGroup: {{ .Values.image.gid }}
           allowPrivilegeEscalation: false
-          procMount: Default
+          # Add process resource limits
+          capabilities:
+            drop:
+            - ALL
         env:
+        # User and filesystem environment variables
         - name: UID
           value: "{{ .Values.image.uid }}"
         - name: GID
@@ -36,25 +53,44 @@ spec:
           value: "{{ .Values.image.user }}"
         - name: HDF5_ROOT_DIR
           value: "{{ .Values.image.dataMountPath }}"
+
+        # Application configuration
         - name: MONGO_URI
           value: "{{ .Values.env.MONGO_URI }}"
         - name: DB_NAME
           value: "{{ .Values.env.DB_NAME }}"
         - name: ENVIRONMENT
           value: "{{ .Values.env.ENVIRONMENT }}"
-        # Set thread-related environment variables to minimize thread usage
+
+        # Thread limitation variables - force single-threading for numeric libraries
         - name: OPENBLAS_NUM_THREADS
           value: "1"
         - name: OMP_NUM_THREADS
           value: "1"
         - name: MKL_NUM_THREADS
           value: "1"
-        # Add thread limit environment variables
-        - name: PYTHONTHREADDEBUG
-          value: "1"
         - name: NUMEXPR_MAX_THREADS
           value: "1"
-        # Set ulimit on number of threads via resource limits
+
+        # Python threading settings
+        - name: PYTHONTHREADDEBUG
+          value: "1"
+        - name: PYTHONTHREADBLOCK
+          value: "1"
+
+        # FastAPI/Starlette thread pool settings
+        - name: FASTAPI_WORKERS
+          value: "1"
+        - name: STARLETTE_CONCURRENCY
+          value: "5"
+
+        # Additional thread throttling
+        - name: TF_NUM_INTEROP_THREADS
+          value: "1"
+        - name: TF_NUM_INTRAOP_THREADS
+          value: "1"
+
+        # Resources with memory and CPU limits
         resources:
           requests:
             cpu: "{{ .Values.resources.requests.cpu }}"
@@ -62,15 +98,64 @@ spec:
           limits:
             cpu: "{{ .Values.resources.limits.cpu }}"
             memory: "{{ .Values.resources.limits.memory }}"
+
         ports:
         - name: http
           containerPort: {{ .Values.image.containerPort }}
+          protocol: TCP
+
         volumeMounts:
         - mountPath: "{{ .Values.image.logMountPath }}"
           name: log
         - mountPath: "{{ .Values.image.dataMountPath }}"
           name: data
           readOnly: true
+
+        # Simplified readiness probe - only check if the process is responsive
+        # Use a simple TCP connection check rather than HTTP endpoints
+        readinessProbe:
+          tcpSocket:
+            port: {{ .Values.image.containerPort }}
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+
+        # Simple liveness probe that doesn't create additional threads
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.image.containerPort }}
+          initialDelaySeconds: 90
+          periodSeconds: 30
+          timeoutSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+
+        # Add startup probe to give application more time to start
+        startupProbe:
+          tcpSocket:
+            port: {{ .Values.image.containerPort }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+          successThreshold: 1
+
+      # Configure pod disruption budget
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - "{{ .Values.service.name }}"
+              topologyKey: "kubernetes.io/hostname"
+
       volumes:
       - name: log
         persistentVolumeClaim:

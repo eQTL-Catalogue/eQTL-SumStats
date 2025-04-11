@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 # Reduced number of replicas to decrease overall resource usage
-replicaCount: 2
+replicaCount: 1
 
 image:
   repository: ebispot/eqtl-sumstats-api
@@ -30,18 +30,6 @@ volume:
     nfsServer: "<host name or IP>"
     path: "/path/to/files/"
 
-    #    VolumeName: eqtl-data
-    #    type: persistentVolumeClaim
-    #    storageClassName: standard
-    #    accessModes:
-    #      - ReadOnlyMany
-    #    hostPath:
-
-#    nfs:
-#      server: <server ip or fqdn>
-#      path: /path/to/ur/mount
-
-
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
@@ -51,8 +39,10 @@ service:
   type: NodePort
   port: 8000
   path: /eqtl/api(/|$)(.*)
-  gunicornCmd: '["gunicorn", "-b", "0.0.0.0:8000", "sumstats.server.app:app", "--log-level=debug", "--access-logfile=logs/ss_access.log", "--error-logfile=logs/ss_error.log", "--workers=4"]'
-  uvicornCmd: '["uvicorn", "sumstats.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--limit-concurrency", "20", "--log-level=debug"]'
+  # Using Gunicorn with sync workers for better thread control
+  gunicornCmd: '["gunicorn", "sumstats.main:app", "--bind", "0.0.0.0:8000", "--workers", "1", "--threads", "10", "--worker-class=sync", "--log-level=debug", "--timeout", "120", "--graceful-timeout", "60"]'
+  # Keep uvicornCmd for reference, but we'll use gunicornCmd instead
+  uvicornCmd: '["uvicorn", "sumstats.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--limit-concurrency", "5", "--no-use-colors", "--log-level=debug"]'
 
 staticService:
   replicaCount: 1
@@ -75,19 +65,18 @@ ingress:
     - host: chart-example.local
       paths: /eqtl/api(/|$)
       tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
 
 k8Namespace: eqtl
 
+# Increased memory resources to accommodate thread overhead
 resources:
   limits:
     cpu: "1"
-    memory: "1Gi"
+    memory: "2Gi"
   requests:
     cpu: 100m
-    memory: 256Mi
+    memory: 512Mi
+
 nodeSelector: {}
 
 tolerations: []
