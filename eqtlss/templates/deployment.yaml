@@ -18,31 +18,19 @@ spec:
       # Pod level security context for filesystem permissions
       securityContext:
         fsGroup: {{ .Values.image.gid }}
-      # Add pod security context with sysctls for thread limits
-      # Note: This requires the pod security policy to allow these sysctls
-      securityContext:
-        sysctls:
-        - name: kernel.threads-max
-          value: "4096"
-        - name: kernel.pid_max
-          value: "32768"
       # Set termination grace period to allow for clean shutdown
-      terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: 60
       containers:
       - name: "{{ .Values.service.name }}"
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        # Use Gunicorn with sync workers instead of Uvicorn
-        command: {{ .Values.service.gunicornCmd }}
+        # Use the simple Uvicorn command with minimal threading
+        command: {{ .Values.service.uvicornCmd }}
         imagePullPolicy: "{{ .Values.image.pullPolicy }}"
         # Container level security context
         securityContext:
           runAsUser: {{ .Values.image.uid }}
           runAsGroup: {{ .Values.image.gid }}
           allowPrivilegeEscalation: false
-          # Add process resource limits
-          capabilities:
-            drop:
-            - ALL
         env:
         # User and filesystem environment variables
         - name: UID
@@ -75,20 +63,6 @@ spec:
         # Python threading settings
         - name: PYTHONTHREADDEBUG
           value: "1"
-        - name: PYTHONTHREADBLOCK
-          value: "1"
-
-        # FastAPI/Starlette thread pool settings
-        - name: FASTAPI_WORKERS
-          value: "1"
-        - name: STARLETTE_CONCURRENCY
-          value: "5"
-
-        # Additional thread throttling
-        - name: TF_NUM_INTEROP_THREADS
-          value: "1"
-        - name: TF_NUM_INTRAOP_THREADS
-          value: "1"
 
         # Resources with memory and CPU limits
         resources:
@@ -111,36 +85,6 @@ spec:
           name: data
           readOnly: true
 
-        # Simplified readiness probe - only check if the process is responsive
-        # Use a simple TCP connection check rather than HTTP endpoints
-        readinessProbe:
-          tcpSocket:
-            port: {{ .Values.image.containerPort }}
-          initialDelaySeconds: 60
-          periodSeconds: 15
-          timeoutSeconds: 5
-          successThreshold: 1
-          failureThreshold: 3
-
-        # Simple liveness probe that doesn't create additional threads
-        livenessProbe:
-          tcpSocket:
-            port: {{ .Values.image.containerPort }}
-          initialDelaySeconds: 90
-          periodSeconds: 30
-          timeoutSeconds: 10
-          successThreshold: 1
-          failureThreshold: 3
-
-        # Add startup probe to give application more time to start
-        startupProbe:
-          tcpSocket:
-            port: {{ .Values.image.containerPort }}
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 30
-          successThreshold: 1
 
       # Configure pod disruption budget
       affinity:
