@@ -26,6 +26,7 @@ spec:
           runAsUser: {{ .Values.image.uid }}
           runAsGroup: {{ .Values.image.gid }}
           allowPrivilegeEscalation: false
+          procMount: Default
         env:
         - name: UID
           value: "{{ .Values.image.uid }}"
