@@ -2,7 +2,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# Reduced number of replicas to decrease overall resource usage
 replicaCount: 1
 
 image:
@@ -18,9 +17,7 @@ image:
 
 # Environment variables section
 env: {}
-  # MONGO_URI: "mongodb://localhost:27017"
-  # DB_NAME: "eqtl_db"
-  # ENVIRONMENT: "development"
+  # These will be set at deployment time from GitLab variables
 
 volume:
   log:
@@ -39,9 +36,9 @@ service:
   type: NodePort
   port: 8000
   path: /eqtl/api(/|$)(.*)
-  uvicornCmd: '["uvicorn", "sumstats.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--limit-concurrency", "3", "--timeout-keep-alive", "300", "--log-level=info"]'
-  # Keep Gunicorn command for future reference
-  gunicornCmd: '["gunicorn", "sumstats.main:app", "--bind", "0.0.0.0:8000", "--workers", "1", "--threads", "4", "--worker-class=sync", "--log-level=debug", "--timeout", "300"]'
+  uvicornCmd: '["uvicorn", "sumstats.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--limit-concurrency", "3"]'
+  gunicornCmd: '["gunicorn", "--bind", "0.0.0.0:8000", "--worker-class=sync", "--workers=1", "--threads=2", "--max-requests=1000", "--max-requests-jitter=50", "--log-level=info", "--timeout=120", "--graceful-timeout=30", "--preload", "--access-logfile=-", "--error-logfile=-", "sumstats.main:app"]'
+
 
 staticService:
   replicaCount: 1

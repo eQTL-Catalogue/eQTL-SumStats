@@ -23,7 +23,7 @@ spec:
       containers:
       - name: "{{ .Values.service.name }}"
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        command: {{ .Values.service.uvicornCmd }}
+        command: {{ .Values.service.gunicornCmd }}
         imagePullPolicy: "{{ .Values.image.pullPolicy }}"
         # Container level security context
         securityContext:
@@ -46,7 +46,6 @@ spec:
           value: "{{ .Values.env.DB_NAME }}"
         - name: ENVIRONMENT
           value: "{{ .Values.env.ENVIRONMENT }}"
-        # Thread limitation variables - but allow enough for basic operation
         - name: OPENBLAS_NUM_THREADS
           value: "1"
         - name: OMP_NUM_THREADS
@@ -54,9 +53,16 @@ spec:
         - name: MKL_NUM_THREADS
           value: "1"
         - name: NUMEXPR_MAX_THREADS
-          value: "2"
+          value: "1"
+
+        - name: PYTHONASYNCIO_DEBUG
+          value: "1"
         - name: PYTHONTHREADDEBUG
           value: "1"
+
+        - name: FASTAPI_THREADPOOL_USE_CONTEXTVAR
+          value: "1"
+
         resources:
           requests:
             cpu: "{{ .Values.resources.requests.cpu }}"
