@@ -71,21 +71,6 @@ spec:
         - mountPath: "{{ .Values.image.dataMountPath }}"
           name: data
           readOnly: true
-        # Add readiness and liveness probes to ensure container health
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: {{ .Values.image.containerPort }}
-          initialDelaySeconds: 60
-          periodSeconds: 15
-          timeoutSeconds: 5
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: {{ .Values.image.containerPort }}
-          initialDelaySeconds: 90
-          periodSeconds: 30
-          timeoutSeconds: 10
       volumes:
       - name: log
         persistentVolumeClaim:
