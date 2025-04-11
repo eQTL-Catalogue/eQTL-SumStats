@@ -48,9 +48,6 @@ spec:
           value: "1"
         - name: MKL_NUM_THREADS
           value: "1"
-        # Reduced async thread count
-        - name: PYTHONASYNCIOEVENTSLOOPTHREADCOUNT
-          value: "5"
         # Add thread limit environment variables
         - name: PYTHONTHREADDEBUG
           value: "1"
