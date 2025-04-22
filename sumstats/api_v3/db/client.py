@@ -16,5 +16,9 @@ def get_mongo_client() -> AsyncIOMotorClient:
     """
     global _mongo_client
     if _mongo_client is None:
+        print(">>>>>>>>>>>>>>>>")
+        print(settings.mongo_uri)
+        print(settings.db_name)
+        print("<<<<<<<<<<<<<<<<")
         _mongo_client = AsyncIOMotorClient(settings.mongo_uri)
     return _mongo_client
