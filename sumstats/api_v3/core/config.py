@@ -1,9 +1,17 @@
-# For Pydantic v2
-from dotenv import load_dotenv
+import os
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Load environment variables from .env file
-load_dotenv()
+# Only try to load .env file in development environments
+try:
+    from dotenv import load_dotenv
+
+    # Only load .env if it exists
+    if os.path.exists(".env"):
+        load_dotenv()
+except ImportError:
+    # If dotenv isn't installed, continue without it
+    pass
 
 
 class Settings(BaseSettings):
@@ -34,11 +42,23 @@ class Settings(BaseSettings):
 
     # In Pydantic v2, model_config replaces the inner Config class
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=".env" if os.path.exists(".env") else None,
         env_prefix="",
         case_sensitive=False,
         env_file_encoding="utf-8",
     )
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Print configuration on startup
+        print(
+            f"""MongoDB URI: {
+                'configured'
+                if self.mongo_uri != 'mongodb://localhost:27017'
+                else 'using default'
+                }"""
+        )
+        print(f"Database Name: {self.db_name}")
 
 
 # Create a global settings instance

@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{.Values.service.name}}
   namespace: {{.Values.k8Namespace}}
-  lables:
+  labels:
     version: {{.Values.image.tag}}
 spec:
   replicas: {{.Values.replicaCount}}
@@ -15,43 +15,45 @@ spec:
     value: {{.Values.image.uid}}
   - name: GID
     value: {{.Values.image.gid}}
-  - name: USER
-    value: {{.Values.image.user}}
-  - name: HDF5_ROOT_DIR
-    value: {{.Values.image.dataMountPath}}
+
   template:
     metadata:
       labels:
         app: {{.Values.service.name}}
     spec:
       containers:
-      - name: {{.Values.service.name}}
-        image: "{{.Values.image.repository}}:{{.Values.image.tag}}"
-        command: {{.Values.service.uvicornCmd}}
-        imagePullPolicy: {{.Values.image.pullPolicy}}
-        resources:
-          requests:
-            cpu: {{.Values.resources.requests.cpu}}
-            memory: {{.Values.resources.requests.memory}}
-        ports:
-        - name: http
-          containerPort: {{.Values.image.containerPort}}
-        volumeMounts:
-        - mountPath: {{.Values.image.logMountPath}}
-          name: log
-        - mountPath: {{.Values.image.dataMountPath}}
-          name: data
-          readOnly: true
+        - name: {{.Values.service.name}}
+          image: "{{.Values.image.repository}}:{{.Values.image.tag}}"
+          command: {{.Values.service.uvicornCmd}}
+          imagePullPolicy: {{.Values.image.pullPolicy}}
+          env:
+            - name: USER
+              value: {{.Values.image.user}}
+            - name: HDF5_ROOT_DIR
+              value: {{.Values.image.dataMountPath}}
+            - name: MONGO_URI
+              value: "{{ .Values.mongodb.uri }}"
+            - name: DB_NAME
+              value: {{ .Values.mongodb.dbName }}
+          resources:
+            requests:
+              cpu: {{.Values.resources.requests.cpu}}
+              memory: {{.Values.resources.requests.memory}}
+          ports:
+            - name: http
+              containerPort: {{.Values.image.containerPort}}
+          volumeMounts:
+            - mountPath: {{.Values.image.logMountPath}}
+              name: log
+            - mountPath: {{.Values.image.dataMountPath}}
+              name: data
+              readOnly: true
       volumes:
-      - name: log
-        persistentVolumeClaim:
-          claimName: {{ .Values.volume.log.ClaimName }}
-      - name: data
-        nfs:
-          server: {{ .Values.volume.data.nfsServer }}
-          path: {{ .Values.volume.data.path }}
-          readOnly: true
-### running locally
-#        hostPath:
-#          path: {{ .Values.volume.data.path }}
-
+        - name: log
+          persistentVolumeClaim:
+            claimName: {{ .Values.volume.log.ClaimName }}
+        - name: data
+          nfs:
+            server: {{ .Values.volume.data.nfsServer }}
+            path: {{ .Values.volume.data.path }}
+            readOnly: true
