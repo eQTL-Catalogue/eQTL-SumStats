@@ -159,11 +159,11 @@ class GenomicRegion(BaseModel):
     )
 
     @model_validator(mode="after")
-    def validate_region(cls, values):
+    def validate_region(self):
         chromosome, pos_start, pos_end = (
-            values.get("chromosome"),
-            values.get("position_start"),
-            values.get("position_end"),
+            self.chromosome,
+            self.position_start,
+            self.position_end,
         )
 
         var_count = sum(bool(x) for x in [chromosome, pos_start, pos_end])
@@ -186,7 +186,7 @@ class GenomicRegion(BaseModel):
                         f"maximum allowable window of {MAX_GENOMIC_WINDOW}"
                     )
                 )
-        return values
+        return self
 
     model_config = {
         "allow_population_by_field_name": True,
@@ -434,11 +434,11 @@ class RequestFilters(PValue, GenomicContext, VariantIdentifer, GenomicRegion):
     """
 
     @model_validator(mode="after")
-    def xor_filter_types(cls, values):
+    def xor_filter_types(self):
         variant, rsid, genomic_region = (
-            values.get("variant"),
-            values.get("rsid"),
-            values.get("chromosome"),
+            self.variant,
+            self.rsid,
+            self.chromosome,
         )
         if sum(bool(x) for x in [variant, rsid, genomic_region]) > 1:
             raise ValueError(
@@ -446,19 +446,17 @@ class RequestFilters(PValue, GenomicContext, VariantIdentifer, GenomicRegion):
                 "'variant', 'rsid' "
                 "and ('chr', 'position_start', 'position_end')"
             )
-        return values
+        return self
 
     @model_validator(mode="after")
-    def xor_genomic_context(cls, values):
-        gene_id, molecular_trait_id = values.get("gene_id"), values.get(
-            "molecular_trait_id"
-        )
+    def xor_genomic_context(self):
+        gene_id, molecular_trait_id = self.gene_id, self.molecular_trait_id
         if sum(bool(x) for x in [gene_id, molecular_trait_id]) > 1:
             raise ValueError(
                 "There can only be one genomic context "
                 "filter from: 'gene_id' and 'molecular_trait_id'"
             )
-        return values
+        return self
 
     model_config = {
         "extra": "ignore",
