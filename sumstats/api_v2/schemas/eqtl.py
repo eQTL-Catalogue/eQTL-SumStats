@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel, Field, PositiveInt, conint, root_validator
 
@@ -323,62 +324,69 @@ class VariantAssociation(VariantIdentifer, Variant, GenomicContext, PValue):
 
 
 class QTLMetadataFilterable(BaseModel):
-    study_id: str = Field(
-        None,
+    study_id: Optional[str] = Field(
+        default=None,
         description="Study ID",
         example="QTS000001",
         ingest_label="study_id",
         searchable=True,
         pa_dtype="str",
     )
-    quant_method: QuantMethodEnum = Field(
-        None,
+    quant_method: Optional[QuantMethodEnum] = Field(
+        default=None,
         description="Quantification method",
         example="ge",
         ingest_label="quant_method",
         searchable=True,
         pa_dtype="str",
     )
-    sample_group: str = Field(
-        None,
+    sample_group: Optional[str] = Field(
+        default=None,
         description="Controlled vocabulary for the QTL group",
         example="macrophage_naive",
         ingest_label="sample_group",
         searchable=True,
         pa_dtype="str",
     )
-    tissue_id: str = Field(
-        None,
+    tissue_id: Optional[str] = Field(
+        default=None,
         description="Ontology term for the tissue/cell type",
         example="CL_0000235",
         ingest_label="tissue_id",
         searchable=True,
         pa_dtype="str",
     )
-    study_label: str = Field(
-        None,
+    study_label: Optional[str] = Field(
+        default=None,
         description="Study label",
         example="Alasoo_2018",
         ingest_label="study_label",
         searchable=True,
         pa_dtype="str",
     )
-    tissue_label: str = Field(
-        None,
+    tissue_label: Optional[str] = Field(
+        default=None,
         description="Controlled vocabulary for the tissue/cell type",
         example="macrophage",
         ingest_label="tissue_label",
         searchable=True,
         pa_dtype="str",
     )
-    condition_label: str = Field(
-        None,
+    condition_label: Optional[str] = Field(
+        default=None,
         description="More verbose condition description",
         example="naive",
         ingest_label="condition_label",
         searchable=True,
         pa_dtype="str",
     )
+
+    # Pydantic V2 configuration
+    model_config = {
+        "extra": "ignore",
+        "from_attributes": True,
+        "use_enum_values": True,
+    }
 
 
 class QTLMetadata(QTLMetadataFilterable):
