@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, Field, PositiveInt, conint, root_validator
+from pydantic import BaseModel, Field, PositiveInt, conint, model_validator
 
 MAX_GENOMIC_WINDOW = 1_000_000
 
@@ -61,8 +61,8 @@ Models
 
 
 class GenomicLocation(BaseModel):
-    position: PositiveInt = Field(
-        None,
+    position: Optional[PositiveInt] = Field(
+        default=None,
         description="GRCh38 position of the variant",
         example=80901,
         ingest_label="position",
@@ -70,8 +70,8 @@ class GenomicLocation(BaseModel):
         cs_index=True,
         pa_dtype="int",
     )
-    chromosome: ChromosomeEnum = Field(
-        None,
+    chromosome: Optional[ChromosomeEnum] = Field(
+        default=None,
         description="GRCh38 chromosome name of the variant",
         example="19",
         ingest_label="chromosome",
@@ -79,11 +79,12 @@ class GenomicLocation(BaseModel):
         min_size=2,
         pa_dtype="str",
     )
+    model_config = {"use_enum_values": True, "extra": "ignore"}
 
 
 class VariantIdentifer(BaseModel):
-    variant: str = Field(
-        None,
+    variant: Optional[str] = Field(
+        default=None,
         description="The variant ID (CHR_BP_REF_ALT)",
         example="chr19_80901_G_T",
         ingest_label="variant",
@@ -91,8 +92,8 @@ class VariantIdentifer(BaseModel):
         min_size=100,
         pa_dtype="str",
     )
-    rsid: str = Field(
-        None,
+    rsid: Optional[str] = Field(
+        default=None,
         description="The rsID, if given, for the variant",
         example="rs879890648",
         ingest_label="rsid",
@@ -100,11 +101,12 @@ class VariantIdentifer(BaseModel):
         min_size=24,
         pa_dtype="str",
     )
+    model_config = {"extra": "ignore"}
 
 
 class Variant(GenomicLocation):
-    ref: str = Field(
-        None,
+    ref: Optional[str] = Field(
+        default=None,
         description="GRCh38 reference allele",
         example="G",
         ingest_label="ref",
@@ -112,8 +114,8 @@ class Variant(GenomicLocation):
         min_size=255,
         pa_dtype="str",
     )
-    alt: str = Field(
-        None,
+    alt: Optional[str] = Field(
+        default=None,
         description="GRCh38 alt allele (effect allele)",
         example="T",
         ingest_label="alt",
@@ -121,8 +123,8 @@ class Variant(GenomicLocation):
         min_size=255,
         pa_dtype="str",
     )
-    type: VariantTypeEnum = Field(
-        None,
+    type: Optional[VariantTypeEnum] = Field(
+        default=None,
         description="Variant",
         example="SNP",
         ingest_label="type",
@@ -130,23 +132,24 @@ class Variant(GenomicLocation):
         min_size=5,
         pa_dtype="str",
     )
+    model_config = {"use_enum_values": True, "extra": "ignore"}
 
 
 class GenomicRegion(BaseModel):
-    position_start: PositiveInt = Field(
-        None,
+    position_start: Optional[PositiveInt] = Field(
+        default=None,
         description="Start genomic position",
         gt_filter=True,
         filter_on="position",
     )
-    position_end: PositiveInt = Field(
-        None,
+    position_end: Optional[PositiveInt] = Field(
+        default=None,
         description="End genomic position",
         lt_filter=True,
         filter_on="position",
     )
-    chromosome: ChromosomeEnum = Field(
-        None,
+    chromosome: Optional[ChromosomeEnum] = Field(
+        default=None,
         description="GRCh38 chromosome name of the variant",
         example="19",
         ingest_label="chromosome",
@@ -155,14 +158,16 @@ class GenomicRegion(BaseModel):
         pa_dtype="str",
     )
 
-    @root_validator(skip_on_failure=True)
+    @model_validator(mode="after")
     def validate_region(cls, values):
         chromosome, pos_start, pos_end = (
             values.get("chromosome"),
             values.get("position_start"),
             values.get("position_end"),
         )
+
         var_count = sum(bool(x) for x in [chromosome, pos_start, pos_end])
+
         if var_count > 0 and var_count != 3:
             raise ValueError(
                 """Chromosome, start and end position
@@ -183,13 +188,16 @@ class GenomicRegion(BaseModel):
                 )
         return values
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = {
+        "allow_population_by_field_name": True,
+        "use_enum_values": True,
+        "extra": "ignore",
+    }
 
 
 class GenomicContext(BaseModel):
-    molecular_trait_id: str = Field(
-        None,
+    molecular_trait_id: Optional[str] = Field(
+        default=None,
         description="ID of the molecular trait used for QTL mapping",
         example="ENSG00000282458",
         ingest_label="molecular_trait_id",
@@ -197,8 +205,8 @@ class GenomicContext(BaseModel):
         min_size=100,
         pa_dtype="str",
     )
-    gene_id: str = Field(
-        None,
+    gene_id: Optional[str] = Field(
+        default=None,
         description="Ensembl gene ID of the molecular trait",
         example="ENSG00000282458",
         ingest_label="gene_id",
@@ -206,6 +214,7 @@ class GenomicContext(BaseModel):
         min_size=15,
         pa_dtype="str",
     )
+    model_config = {"extra": "ignore"}
 
 
 class GenomicContextIngest(GenomicLocation, GenomicContext):
@@ -243,16 +252,16 @@ class RsIdMapper(GenomicLocation):
 
 
 class PValue(BaseModel):
-    nlog10p: float = Field(
-        None,
+    nlog10p: Optional[float] = Field(
+        default=None,
         description="Negative log10 p-value",
         example=0.7650602694601004,
         searchable=False,
         gt_filter=True,
         pa_dtype="float",
     )
-    pvalue: float = Field(
-        None,
+    pvalue: Optional[float] = Field(
+        default=None,
         description="""
             P-value of association between
             the variant and the phenotype""",
@@ -265,56 +274,56 @@ class PValue(BaseModel):
 
 
 class VariantAssociation(VariantIdentifer, Variant, GenomicContext, PValue):
-    ac: int = Field(
-        None,
+    ac: Optional[int] = Field(
+        default=None,
         description="Allele count",
         example=2,
         ingest_label="ac",
         searchable=False,
         pa_dtype="int",
     )
-    an: int = Field(
-        None,
+    an: Optional[int] = Field(
+        default=None,
         description="Total number of allele",
         example=334,
         ingest_label="an",
         searchable=False,
         pa_dtype="int",
     )
-    beta: float = Field(
-        None,
+    beta: Optional[float] = Field(
+        default=None,
         description="Regression coefficient from the linear model",
         example=0.984304,
         ingest_label="beta",
         searchable=False,
         pa_dtype="float",
     )
-    maf: float = Field(
-        None,
+    maf: Optional[float] = Field(
+        default=None,
         description="Minor allele frequency within the QTL mapping study",
         example=0.00598802,
         ingest_label="maf",
         searchable=False,
         pa_dtype="float",
     )
-    median_tpm: float = Field(
-        None,
+    median_tpm: Optional[float] = Field(
+        default=None,
         description="Expression value for the associated gene + qtl_group",
         example=1.75669,
         ingest_label="median_tpm",
         searchable=False,
         pa_dtype="float",
     )
-    r2: float = Field(
-        None,
+    r2: Optional[float] = Field(
+        default=None,
         description="Imputation quality score from the imputation software",
         example=None,
         ingest_label="r2",
         searchable=False,
         pa_dtype="float",
     )
-    se: float = Field(
-        None,
+    se: Optional[float] = Field(
+        default=None,
         description="Standard error",
         example=0.716219,
         ingest_label="se",
@@ -424,7 +433,7 @@ class RequestFilters(PValue, GenomicContext, VariantIdentifer, GenomicRegion):
     this is the order that the filters are applied.
     """
 
-    @root_validator(skip_on_failure=True)
+    @model_validator(mode="after")
     def xor_filter_types(cls, values):
         variant, rsid, genomic_region = (
             values.get("variant"),
@@ -439,7 +448,7 @@ class RequestFilters(PValue, GenomicContext, VariantIdentifer, GenomicRegion):
             )
         return values
 
-    @root_validator(skip_on_failure=True)
+    @model_validator(mode="after")
     def xor_genomic_context(cls, values):
         gene_id, molecular_trait_id = values.get("gene_id"), values.get(
             "molecular_trait_id"
@@ -450,3 +459,9 @@ class RequestFilters(PValue, GenomicContext, VariantIdentifer, GenomicRegion):
                 "filter from: 'gene_id' and 'molecular_trait_id'"
             )
         return values
+
+    model_config = {
+        "extra": "ignore",
+        "from_attributes": True,
+        "use_enum_values": True,
+    }
