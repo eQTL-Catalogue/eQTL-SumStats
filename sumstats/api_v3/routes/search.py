@@ -12,10 +12,14 @@ from sumstats.api_v3.db.repositories.search import (
 from sumstats.api_v3.models.schemas import AssociationModel, SearchFilters
 from sumstats.config import API_BASE
 
-router = APIRouter(prefix=f"{API_BASE}/v3", tags=["eQTL API v3 Search"])
+router = APIRouter(prefix=f"{API_BASE}/v3", tags=["eQTL API v3"])
 
 
-@router.get("/search", response_model=List[AssociationModel])
+@router.get(
+    "/search",
+    response_model=List[AssociationModel],
+    summary="Search across collections",
+)
 async def search_all_studies_route(
     gene_id: Optional[str] = Query(None),
     rsid: Optional[str] = Query(None),
