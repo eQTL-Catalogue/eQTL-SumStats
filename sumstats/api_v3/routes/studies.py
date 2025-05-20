@@ -56,6 +56,8 @@ async def search_within_study_route(
     variant: Optional[str] = Query(None),
     molecular_trait_id: Optional[str] = Query(None),
     chromosome: Optional[str] = Query(None),
+    start: int = Query(0, ge=0, description="Pagination start index"),
+    size: int = Query(20, gt=0, description="Number of records to return"),
     client: AsyncIOMotorClient = Depends(get_mongo_client),
 ):
     """
@@ -68,4 +70,4 @@ async def search_within_study_route(
         molecular_trait_id=molecular_trait_id,
         chromosome=chromosome,
     )
-    return await search_in_study(client, study_id, filters)
+    return await search_in_study(client, study_id, filters, start, size)

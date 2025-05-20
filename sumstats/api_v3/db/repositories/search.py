@@ -9,7 +9,11 @@ from sumstats.api_v3.models.schemas import AssociationModel, SearchFilters
 
 
 async def search_in_study(
-    client: AsyncIOMotorClient, study_id: str, filters: SearchFilters
+    client: AsyncIOMotorClient,
+    study_id: str,
+    filters: SearchFilters,
+    start: int,
+    size: int,
 ) -> List[AssociationModel]:
     """
     Searches documents in collection 'study_{study_id}' using filters.
@@ -27,7 +31,12 @@ async def search_in_study(
         query["chromosome"] = filters.chromosome
 
     collection_name = f"study_{study_id}"
-    cursor = client[settings.db_name][collection_name].find(query)
+    cursor = (
+        client[settings.db_name][collection_name]
+        .find(query)
+        .skip(start)
+        .limit(size)
+    )
     results = []
     async for doc in cursor:
         results.append(AssociationModel(**doc))
