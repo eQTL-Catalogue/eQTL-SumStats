@@ -44,7 +44,11 @@ async def search_in_study(
 
 
 async def search_in_dataset(
-    client: AsyncIOMotorClient, dataset_id: str, filters: SearchFilters
+    client: AsyncIOMotorClient,
+    dataset_id: str,
+    filters: SearchFilters,
+    start: int,
+    size: int,
 ) -> List[AssociationModel]:
     """
     Finds the study_id for the given dataset from 'pipeline_status',
@@ -72,7 +76,12 @@ async def search_in_dataset(
     if filters.chromosome:
         query["chromosome"] = filters.chromosome
 
-    cursor = client[settings.db_name][collection_name].find(query)
+    cursor = (
+        client[settings.db_name][collection_name]
+        .find(query)
+        .skip(start)
+        .limit(size)
+    )
     results = []
     async for record in cursor:
         results.append(AssociationModel(**record))
