@@ -150,86 +150,86 @@ async def search_all_studies(
     return results
 
 
-async def search_chunked(
-    client: AsyncIOMotorClient, filters: SearchFilters, start: int, size: int
-) -> List[AssociationModel]:
-    """
-    Chunk-based approach:
-    1) We get the sorted list of study IDs.
-    2) For each 'study_{id}' collection, we do:
-       - Count how many docs match the query.
-       - If 'start' >= that count, decrement 'start' by count and move on.
-       - Otherwise, query the partial chunk we need from this collection
-         (skip=start, limit=(size - collected_so_far)).
-       - Decrement 'size' by the number of docs fetched from that collection.
-       - Reset 'start' to 0 (we've already accounted for skipping).
-       - Move on to the next collection if we still need more docs.
-    3) Return once we've collected 'size' docs or exhausted all collections.
-    """
-    # 1) gather the query
-    query = {}
-    if filters.gene_id:
-        query["gene_id"] = filters.gene_id
-    if filters.rsid:
-        query["rsid"] = filters.rsid
-    if filters.variant:
-        query["variant"] = filters.variant
-    if filters.molecular_trait_id:
-        query["molecular_trait_id"] = filters.molecular_trait_id
-    if filters.chromosome:
-        query["chromosome"] = filters.chromosome
+# async def search_chunked(
+#     client: AsyncIOMotorClient, filters: SearchFilters, start: int, size: int
+# ) -> List[AssociationModel]:
+#     """
+#     Chunk-based approach:
+#     1) We get the sorted list of study IDs.
+#     2) For each 'study_{id}' collection, we do:
+#        - Count how many docs match the query.
+#        - If 'start' >= that count, decrement 'start' by count and move on.
+#        - Otherwise, query the partial chunk we need from this collection
+#          (skip=start, limit=(size - collected_so_far)).
+#        - Decrement 'size' by the number of docs fetched from that collection.
+#        - Reset 'start' to 0 (we've already accounted for skipping).
+#        - Move on to the next collection if we still need more docs.
+#     3) Return once we've collected 'size' docs or exhausted all collections.
+#     """
+#     # 1) gather the query
+#     query = {}
+#     if filters.gene_id:
+#         query["gene_id"] = filters.gene_id
+#     if filters.rsid:
+#         query["rsid"] = filters.rsid
+#     if filters.variant:
+#         query["variant"] = filters.variant
+#     if filters.molecular_trait_id:
+#         query["molecular_trait_id"] = filters.molecular_trait_id
+#     if filters.chromosome:
+#         query["chromosome"] = filters.chromosome
 
-    # 2) get all studies to know which collections to read from
-    #    optionally sort them by study_id or by date
-    studies = await list_studies(client)
-    studies_sorted = sorted(studies, key=lambda s: s.study_id)
+#     # 2) get all studies to know which collections to read from
+#     #    optionally sort them by study_id or by date
+#     studies = await list_studies(client)
+#     studies_sorted = sorted(studies, key=lambda s: s.study_id)
 
-    final_results: List[AssociationModel] = []
-    skip_remaining = start
-    size_remaining = size
+#     final_results: List[AssociationModel] = []
+#     skip_remaining = start
+#     size_remaining = size
 
-    # 3) loop over each study
-    logging.info("Iterating study collections...")
-    for st in studies_sorted:
-        logging.info(f"study_{st.study_id}")
-        if size_remaining <= 0:
-            break  # we've collected enough
+#     # 3) loop over each study
+#     logging.info("Iterating study collections...")
+#     for st in studies_sorted:
+#         logging.info(f"study_{st.study_id}")
+#         if size_remaining <= 0:
+#             break  # we've collected enough
 
-        coll_name = f"study_{st.study_id}"
-        coll = client[settings.db_name][coll_name]
+#         coll_name = f"study_{st.study_id}"
+#         coll = client[settings.db_name][coll_name]
 
-        # count how many docs match
-        logging.info("Counting match...")
-        match_count = await coll.count_documents(query)
-        logging.info("Counting match...DONE.")
+#         # count how many docs match
+#         logging.info("Counting match...")
+#         match_count = await coll.count_documents(query)
+#         logging.info("Counting match...DONE.")
 
-        if skip_remaining >= match_count:
-            # skip all in this collection, continue to next
-            skip_remaining -= match_count
-            continue
+#         if skip_remaining >= match_count:
+#             # skip all in this collection, continue to next
+#             skip_remaining -= match_count
+#             continue
 
-        # partial docs in this collection
-        # skip only the leftover skip_remaining if any
-        partial_skip = skip_remaining
-        partial_limit = size_remaining
+#         # partial docs in this collection
+#         # skip only the leftover skip_remaining if any
+#         partial_skip = skip_remaining
+#         partial_limit = size_remaining
 
-        # we've accounted for skip
-        skip_remaining = 0
+#         # we've accounted for skip
+#         skip_remaining = 0
 
-        # 4) fetch docs
-        logging.info("Fetching docs...")
-        cursor = coll.find(query).skip(partial_skip).limit(partial_limit)
-        async for doc in cursor:
-            final_results.append(AssociationModel(**doc))
-        logging.info("Fetching docs...DONE.")
+#         # 4) fetch docs
+#         logging.info("Fetching docs...")
+#         cursor = coll.find(query).skip(partial_skip).limit(partial_limit)
+#         async for doc in cursor:
+#             final_results.append(AssociationModel(**doc))
+#         logging.info("Fetching docs...DONE.")
 
-        # now we've filled part or all of size_remaining
-        fetched_count = len(final_results) - (size - size_remaining)
-        size_remaining -= fetched_count
+#         # now we've filled part or all of size_remaining
+#         fetched_count = len(final_results) - (size - size_remaining)
+#         size_remaining -= fetched_count
 
-        if size_remaining <= 0:
-            break
+#         if size_remaining <= 0:
+#             break
 
-    logging.info("Iterating study collections...DONE.")
+#     logging.info("Iterating study collections...DONE.")
 
-    return final_results
+#     return final_results

@@ -24,7 +24,7 @@ API v3 provides improved access to studies and datasets with enhanced search cap
 
 - **Search API**: Global search functionality
   - Search across all studies: `/eqtl/api/v3/search`
-  - Chunked search for large result sets: `/eqtl/api/v3/search_chunked`
+  <!-- - Chunked search for large result sets: `/eqtl/api/v3/search_chunked` -->
 
 ### Search Filters
 V3 endpoints support the following search filters:
