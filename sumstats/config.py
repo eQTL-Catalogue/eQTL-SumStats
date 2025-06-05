@@ -17,7 +17,7 @@ eQTL association data.
 API v3 provides improved access to studies and datasets with enhanced search
 capabilities. Use the `/studies` endpoints to browse and search studies, and
 the `/datasets` endpoints to access and search specific datasets. The global
-`/search` endpoints allow querying across all available data.
+`/associations` endpoints allow querying across all available data.
 
 ### Search Filters
 The following search filters are available for v3 endpoints:

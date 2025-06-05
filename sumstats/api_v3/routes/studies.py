@@ -45,8 +45,8 @@ async def get_study_route(
 
 
 @router.get(
-    "/{study_id}/search",
-    summary="Search Within A Study",
+    "/{study_id}/associations",
+    summary="Search Associations Within A Study",
     response_model=List[AssociationModel],
 )
 async def search_within_study_route(
@@ -61,7 +61,7 @@ async def search_within_study_route(
     client: AsyncIOMotorClient = Depends(get_mongo_client),
 ):
     """
-    Search within a specific study by search filters.
+    Search associations within a specific study by search filters.
     """
     filters = SearchFilters(
         gene_id=gene_id,

@@ -15,9 +15,9 @@ router = APIRouter(prefix=f"{API_BASE}/v3", tags=["eQTL API v3"])
 
 
 @router.get(
-    "/search",
+    "/associations",
     response_model=List[AssociationModel],
-    summary="Search across collections",
+    summary="Search associations across collections",
 )
 async def search_all_studies_route(
     gene_id: Optional[str] = Query(None),
@@ -30,7 +30,7 @@ async def search_all_studies_route(
     client: AsyncIOMotorClient = Depends(get_mongo_client),
 ):
     """
-    Type 3: Search across all studies by gene_id, rsid, or variant.
+    Search associations across all studies by gene_id, rsid, or variant.
     """
     filters = SearchFilters(
         gene_id=gene_id,
@@ -62,7 +62,7 @@ async def search_all_studies_route(
 #     client: AsyncIOMotorClient = Depends(get_mongo_client),
 # ):
 #     """
-#     Similar to /search but uses a chunk-based approach to
+#     Similar to /associations but uses a chunk-based approach to
 #     avoid unioning every collection up front.
 #     We iterate through each study_{study_id} collection in turn,
 #     skipping documents until we've satisfied 'start', then collecting

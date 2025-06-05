@@ -47,8 +47,8 @@ async def get_dataset_route(
 
 
 @router.get(
-    "/{dataset_id}/search",
-    summary="Search Within A Dataset",
+    "/{dataset_id}/associations",
+    summary="Search Associations Within A Dataset",
     response_model=List[AssociationModel],
 )
 async def search_within_dataset_route(
@@ -63,7 +63,7 @@ async def search_within_dataset_route(
     client: AsyncIOMotorClient = Depends(get_mongo_client),
 ):
     """
-    Search within a specific dataset by search filters.
+    Search associations within a specific dataset by search filters.
     """
     filters = SearchFilters(
         gene_id=gene_id,

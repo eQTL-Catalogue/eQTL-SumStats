@@ -15,15 +15,15 @@ API v3 provides improved access to studies and datasets with enhanced search cap
 - **Studies API**: Browse and search study information
   - List all studies: `/eqtl/api/v3/studies`
   - Get study details: `/eqtl/api/v3/studies/{study_id}`
-  - Search within a study: `/eqtl/api/v3/studies/{study_id}/search`
+  - Search associations within a study: `/eqtl/api/v3/studies/{study_id}/associations`
 
 - **Datasets API**: Access and search dataset information
   - List all datasets: `/eqtl/api/v3/datasets`
   - Get dataset details: `/eqtl/api/v3/datasets/{dataset_id}`
-  - Search within a dataset: `/eqtl/api/v3/datasets/{dataset_id}/search`
+  - Search associations within a dataset: `/eqtl/api/v3/datasets/{dataset_id}/associations`
 
 - **Search API**: Global search functionality
-  - Search across all studies: `/eqtl/api/v3/search`
+  - Search associations across all studies: `/eqtl/api/v3/associations`
   <!-- - Chunked search for large result sets: `/eqtl/api/v3/search_chunked` -->
 
 ### Search Filters
