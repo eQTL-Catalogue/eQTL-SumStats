@@ -1,11 +1,11 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class StudyModel(BaseModel):
     study_id: str
-    status: Optional[str] = None
+    status: Optional[str] = Field(None, exclude=True)
 
 
 class FileStatusModel(BaseModel):
@@ -13,13 +13,13 @@ class FileStatusModel(BaseModel):
     file_name: str
     study_id: str
     date: Optional[str] = None
-    status: Optional[str] = None
+    status: Optional[str] = Field(None, exclude=True)
 
 
 class DatasetModel(BaseModel):
     dataset_id: str
     study_id: str
-    status: Optional[str] = None
+    status: Optional[str] = Field(None, exclude=True)
 
 
 class AssociationModel(BaseModel):
