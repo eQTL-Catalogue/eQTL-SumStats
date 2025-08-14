@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name="eqtl-sumstats",
-    version="3.0.0",
+    version="3.0.1",
     packages=[
         "sumstats.api_v3",
         "sumstats.api_v3.core",
